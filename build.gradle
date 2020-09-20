@@ -1,0 +1,42 @@
+buildscript {
+    repositories {
+        jcenter()
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.github.jengelman.gradle.plugins:shadow:4.0.4'
+    }
+}
+
+apply plugin: 'java'
+apply plugin: 'com.github.johnrengelman.shadow'
+
+group project.group
+version project.version
+archivesBaseName = "geckolib-core"
+
+repositories {
+    mavenCentral()
+    maven { url 'https://repo.repsy.io/mvn/fadookie/particleman' }
+}
+
+dependencies {
+    compile 'com.eliotlash.molang:molang:SNAPSHOT.8'
+    compile 'com.eliotlash.mclib:mclib:SNAPSHOT.8'
+}
+
+shadowJar {
+    dependencies {
+        include(dependency('com.eliotlash.molang:molang:.*'))
+        include(dependency('com.eliotlash.mclib:mclib:.*'))
+    }
+    relocate 'com.eliotlash', 'software.bernie.com.eliotlash'
+    classifier ''
+}
+
+
+java {
+    withSourcesJar()
+}
+
+jar.finalizedBy(shadowJar)
