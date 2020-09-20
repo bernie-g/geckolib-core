@@ -1,19 +1,10 @@
-buildscript {
-    repositories {
-        jcenter()
-        mavenCentral()
-    }
-    dependencies {
-        classpath 'com.github.jengelman.gradle.plugins:shadow:4.0.4'
-    }
-}
-
 apply plugin: 'java'
-apply plugin: 'com.github.johnrengelman.shadow'
+apply plugin: 'maven-publish'
 
 group project.group
-version project.version
-archivesBaseName = "geckolib-core"
+def snapshotVersion = System.getenv("GITHUB_RUN_NUMBER")
+version = snapshotVersion == null ? project.version : "SNAPSHOT-" + snapshotVersion
+archivesBaseName = project.archivesBaseName
 
 repositories {
     mavenCentral()
@@ -25,18 +16,33 @@ dependencies {
     compile 'com.eliotlash.mclib:mclib:SNAPSHOT.8'
 }
 
-shadowJar {
-    dependencies {
-        include(dependency('com.eliotlash.molang:molang:.*'))
-        include(dependency('com.eliotlash.mclib:mclib:.*'))
-    }
-    relocate 'com.eliotlash', 'software.bernie.com.eliotlash'
-    classifier ''
-}
-
-
 java {
     withSourcesJar()
 }
 
-jar.finalizedBy(shadowJar)
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            artifact jar
+            artifactId = project.archivesBaseName
+        }
+    }
+    repositories {
+        maven {
+            url "file:///${project.projectDir}/mcmodsrepo"
+        }
+    }
+}
+publishing {
+    repositories {
+        maven {
+            url repsyUrl
+            credentials {
+                def envUsername = System.getenv("repsyUsername")
+                def envPassword = System.getenv("repsyPassword")
+                username = envUsername == null ? repsyUsername : envUsername
+                password = envPassword == null ? repsyPassword : envPassword
+            }
+        }
+    }
+}
