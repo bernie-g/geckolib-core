@@ -5,17 +5,20 @@
 
 package software.bernie.geckolib.core.manager;
 
+import software.bernie.geckolib.core.controller.AnimationController;
 import software.bernie.geckolib.core.controller.BaseAnimationController;
-import software.bernie.geckolib.core.snapshot.BoneSnapshotCollection;
+import software.bernie.geckolib.core.processor.IBone;
+import software.bernie.geckolib.core.snapshot.BoneSnapshot;
 
 import java.util.HashMap;
 
 /**
  * Each entity should have exactly <b>ONE</b> EntityAnimationManager and can add as many animation controllers to the collection as desired.
  */
-public class AnimationManager extends HashMap<String, BaseAnimationController>
+public class AnimationManager
 {
-	private BoneSnapshotCollection boneSnapshotCollection;
+	private HashMap<IBone, BoneSnapshot> boneSnapshotCollection = new HashMap<>();
+	private HashMap<String, BaseAnimationController> animationControllers = new HashMap<>();
 	public float tick;
 	public boolean isFirstTick = true;
 	private double speedModifier = 1;
@@ -28,7 +31,7 @@ public class AnimationManager extends HashMap<String, BaseAnimationController>
 	public AnimationManager()
 	{
 		super();
-		boneSnapshotCollection = new BoneSnapshotCollection();
+		boneSnapshotCollection = new HashMap<>();
 	}
 
 	/**
@@ -39,22 +42,22 @@ public class AnimationManager extends HashMap<String, BaseAnimationController>
 	 */
 	public BaseAnimationController addAnimationController(BaseAnimationController value)
 	{
-		return this.put(value.getName(), value);
+		return this.animationControllers.put(value.getName(), value);
 	}
 
-	public BoneSnapshotCollection getBoneSnapshotCollection()
+	public HashMap<IBone, BoneSnapshot> getBoneSnapshotCollection()
 	{
 		return boneSnapshotCollection;
 	}
 
-	public void setBoneSnapshotCollection(BoneSnapshotCollection boneSnapshotCollection)
+	public void setBoneSnapshotCollection(HashMap<IBone, BoneSnapshot> boneSnapshotCollection)
 	{
 		this.boneSnapshotCollection = boneSnapshotCollection;
 	}
 
 	public void clearSnapshotCache()
 	{
-		this.boneSnapshotCollection = new BoneSnapshotCollection();
+		this.boneSnapshotCollection = new HashMap<>();
 	}
 
 	/**
@@ -83,5 +86,10 @@ public class AnimationManager extends HashMap<String, BaseAnimationController>
 	public void setResetSpeedInTicks(double resetTickLength)
 	{
 		this.resetTickLength = resetTickLength < 0 ? 0 : resetTickLength;
+	}
+
+	public HashMap<String, BaseAnimationController> getAnimationControllers()
+	{
+		return animationControllers;
 	}
 }

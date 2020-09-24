@@ -55,7 +55,6 @@ public class AnimationController<T extends IAnimatable> extends BaseAnimationCon
 	public void setAnimation(AnimationBuilder builder)
 	{
 		IAnimatableModel model = getModel(this.animatable);
-
 		if (model != null)
 		{
 			if (builder == null || builder.getRawAnimationList().size() == 0)
@@ -65,7 +64,6 @@ public class AnimationController<T extends IAnimatable> extends BaseAnimationCon
 			else if (!builder.getRawAnimationList().equals(currentAnimationBuilder.getRawAnimationList()) || needsAnimationReload)
 			{
 				AtomicBoolean encounteredError = new AtomicBoolean(false);
-
 				// Convert the list of animation names to the actual list, keeping track of the loop boolean along the way
 				IAnimatableModel finalModel = model;
 				LinkedList<Animation> animations = new LinkedList<>(
