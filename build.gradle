@@ -17,7 +17,21 @@ dependencies {
 }
 
 java {
-    withSourcesJar()
+}
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+
+artifacts {
+    archives sourcesJar
+    archives javadocJar
 }
 
 publishing {
@@ -33,6 +47,7 @@ publishing {
         }
     }
 }
+
 publishing {
     repositories {
         maven {
@@ -40,9 +55,10 @@ publishing {
             credentials {
                 def envUsername = System.getenv("repsyUsername")
                 def envPassword = System.getenv("repsyPassword")
-                username = envUsername == null ? repsyUsername : envUsername
-                password = envPassword == null ? repsyPassword : envPassword
+                username = envUsername == null ? findProperty("repsyUsername") : envUsername
+                password = envPassword == null ? findProperty("repsyPassword") : envPassword
             }
         }
     }
 }
+

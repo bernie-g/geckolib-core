@@ -19,7 +19,6 @@ import software.bernie.geckolib.core.event.predicate.AnimationTestPredicate;
 import software.bernie.geckolib.core.keyframe.*;
 import software.bernie.geckolib.core.processor.IBone;
 import software.bernie.geckolib.core.snapshot.BoneSnapshot;
-import software.bernie.geckolib.core.snapshot.BoneSnapshotCollection;
 
 import java.util.*;
 import java.util.function.Function;
@@ -259,7 +258,7 @@ public abstract class BaseAnimationController<T extends IAnimatable>
 	 * @param modelRendererList      The list of all AnimatedModelRender's
 	 * @param boneSnapshotCollection The bone snapshot collection
 	 */
-	public void process(double tick, AnimationTestPredicate AnimationTestPredicate, List<IBone> modelRendererList, BoneSnapshotCollection boneSnapshotCollection, MolangParser parser, boolean crashWhenCantFindBone)
+	public void process(double tick, AnimationTestPredicate AnimationTestPredicate, List<IBone> modelRendererList, HashMap<IBone, BoneSnapshot> boneSnapshotCollection, MolangParser parser, boolean crashWhenCantFindBone)
 	{
 		createInitialQueues(modelRendererList);
 
@@ -374,7 +373,7 @@ public abstract class BaseAnimationController<T extends IAnimatable>
 	protected abstract boolean testAnimationPredicate(AnimationTestPredicate<T> event);
 
 	// At the beginning of a new transition, save a snapshot of the model's rotation, position, and scale values as the initial value to lerp from
-	private void saveSnapshotsForAnimation(Animation animation, BoneSnapshotCollection boneSnapshotCollection)
+	private void saveSnapshotsForAnimation(Animation animation, HashMap<IBone, BoneSnapshot> boneSnapshotCollection)
 	{
 		for (BoneSnapshot snapshot : boneSnapshotCollection.values())
 		{
@@ -421,6 +420,7 @@ public abstract class BaseAnimationController<T extends IAnimatable>
 			}
 		}
 		setAnimTime(parser, tick);
+
 		// Loop through every boneanimation in the current animation and process the values
 		List<BoneAnimation> boneAnimations = currentAnimation.boneAnimations;
 		for (BoneAnimation boneAnimation : boneAnimations)

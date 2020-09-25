@@ -8,7 +8,6 @@ import software.bernie.geckolib.core.keyframe.AnimationPoint;
 import software.bernie.geckolib.core.keyframe.BoneAnimationQueue;
 import software.bernie.geckolib.core.manager.AnimationManager;
 import software.bernie.geckolib.core.snapshot.BoneSnapshot;
-import software.bernie.geckolib.core.snapshot.BoneSnapshotCollection;
 import software.bernie.geckolib.core.snapshot.DirtyTracker;
 import software.bernie.geckolib.core.util.MathUtil;
 
@@ -30,15 +29,13 @@ public class AnimationProcessor<T extends IAnimatable>
 		HashMap<String, DirtyTracker> modelTracker = createNewDirtyTracker();
 
 		// Store the current value of each bone rotation/position/scale
-		if (manager.getBoneSnapshotCollection().isEmpty())
-		{
-			manager.setBoneSnapshotCollection(createNewBoneSnapshotCollection());
-		}
-		BoneSnapshotCollection boneSnapshots = manager.getBoneSnapshotCollection();
+		updateBoneSnapshots(manager.getBoneSnapshotCollection());
 
-		for (BaseAnimationController<T> controller : manager.values())
+		HashMap<IBone, BoneSnapshot> boneSnapshots = manager.getBoneSnapshotCollection();
+
+		for (BaseAnimationController<T> controller : manager.getAnimationControllers().values())
 		{
-			if(reloadAnimations)
+			if (reloadAnimations)
 			{
 				controller.markNeedsReload();
 				controller.getBoneAnimationQueues().clear();
@@ -56,7 +53,7 @@ public class AnimationProcessor<T extends IAnimatable>
 			for (BoneAnimationQueue boneAnimation : controller.getBoneAnimationQueues().values())
 			{
 				IBone bone = boneAnimation.bone;
-				BoneSnapshot snapshot = boneSnapshots.get(bone.getName());
+				BoneSnapshot snapshot = boneSnapshots.get(bone);
 				BoneSnapshot initialSnapshot = bone.getInitialSnapshot();
 
 				AnimationPoint rXPoint = boneAnimation.rotationXQueue.poll();
@@ -73,7 +70,7 @@ public class AnimationProcessor<T extends IAnimatable>
 
 				// If there's any rotation points for this bone
 				DirtyTracker dirtyTracker = modelTracker.get(bone.getName());
-				if(dirtyTracker == null)
+				if (dirtyTracker == null)
 				{
 					continue;
 				}
@@ -136,14 +133,15 @@ public class AnimationProcessor<T extends IAnimatable>
 		{
 			IBone model = tracker.getValue().model;
 			BoneSnapshot initialSnapshot = model.getInitialSnapshot();
-			BoneSnapshot saveSnapshot = boneSnapshots.get(tracker.getValue().model.getName());
-			if(saveSnapshot == null)
+			BoneSnapshot saveSnapshot = boneSnapshots.get(tracker.getValue().model);
+			if (saveSnapshot == null)
 			{
-				if(crashWhenCantFindBone)
+				if (crashWhenCantFindBone)
 				{
 					throw new RuntimeException("Could not find save snapshot for bone: " + tracker.getValue().model.getName() + ". Please don't add bones that are used in an animation at runtime.");
 				}
-				else {
+				else
+				{
 					continue;
 				}
 			}
@@ -165,7 +163,7 @@ public class AnimationProcessor<T extends IAnimatable>
 				model.setRotationZ(MathUtil.lerpValues(percentageReset, saveSnapshot.rotationValueZ,
 						initialSnapshot.rotationValueZ));
 
-				if(percentageReset >= 1)
+				if (percentageReset >= 1)
 				{
 					saveSnapshot.rotationValueX = model.getRotationX();
 					saveSnapshot.rotationValueY = model.getRotationY();
@@ -189,7 +187,7 @@ public class AnimationProcessor<T extends IAnimatable>
 				model.setPositionZ(MathUtil.lerpValues(percentageReset, saveSnapshot.positionOffsetZ,
 						initialSnapshot.positionOffsetZ));
 
-				if(percentageReset >= 1)
+				if (percentageReset >= 1)
 				{
 					saveSnapshot.positionOffsetX = model.getPositionX();
 					saveSnapshot.positionOffsetY = model.getPositionY();
@@ -213,7 +211,7 @@ public class AnimationProcessor<T extends IAnimatable>
 				model.setScaleZ(MathUtil.lerpValues(percentageReset, saveSnapshot.scaleValueZ,
 						initialSnapshot.scaleValueZ));
 
-				if(percentageReset >= 1)
+				if (percentageReset >= 1)
 				{
 					saveSnapshot.scaleValueX = model.getScaleX();
 					saveSnapshot.scaleValueY = model.getScaleY();
@@ -234,14 +232,15 @@ public class AnimationProcessor<T extends IAnimatable>
 		return tracker;
 	}
 
-	private BoneSnapshotCollection createNewBoneSnapshotCollection()
+	private void updateBoneSnapshots(HashMap<IBone, BoneSnapshot> boneSnapshotCollection)
 	{
-		BoneSnapshotCollection collection = new BoneSnapshotCollection();
 		for (IBone bone : modelRendererList)
 		{
-			collection.put(bone.getName(), new BoneSnapshot(bone.getInitialSnapshot()));
+			if (!boneSnapshotCollection.containsKey(bone))
+			{
+				boneSnapshotCollection.put(bone, new BoneSnapshot(bone.getInitialSnapshot()));
+			}
 		}
-		return collection;
 	}
 
 	/**
