@@ -9,13 +9,14 @@ import com.eliotlash.mclib.math.IValue;
 import com.eliotlash.molang.MolangParser;
 import software.bernie.geckolib.core.AnimationState;
 import software.bernie.geckolib.core.IAnimatable;
+import software.bernie.geckolib.core.PlayState;
 import software.bernie.geckolib.core.builder.Animation;
 import software.bernie.geckolib.core.builder.AnimationBuilder;
 import software.bernie.geckolib.core.easing.EasingType;
 import software.bernie.geckolib.core.event.CustomInstructionKeyframeEvent;
 import software.bernie.geckolib.core.event.ParticleKeyFrameEvent;
 import software.bernie.geckolib.core.event.SoundKeyframeEvent;
-import software.bernie.geckolib.core.event.predicate.AnimationTestPredicate;
+import software.bernie.geckolib.core.event.predicate.AnimationEvent;
 import software.bernie.geckolib.core.keyframe.*;
 import software.bernie.geckolib.core.processor.IBone;
 import software.bernie.geckolib.core.snapshot.BoneSnapshot;
@@ -76,7 +77,7 @@ public abstract class BaseAnimationController<T extends IAnimatable>
 		 *
 		 * @return TRUE if the animation should continue, FALSE if it should stop.
 		 */
-		<P extends IAnimatable> boolean test(AnimationTestPredicate<P> event);
+		<P extends IAnimatable> PlayState test(AnimationEvent<P> event);
 	}
 
 	/**
@@ -254,11 +255,11 @@ public abstract class BaseAnimationController<T extends IAnimatable>
 	 * This method is called every frame in order to populate the animation point queues, and process animation state logic.
 	 *
 	 * @param tick                   The current tick + partial tick
-	 * @param AnimationTestPredicate The animation test event
+	 * @param event                  The animation test event
 	 * @param modelRendererList      The list of all AnimatedModelRender's
 	 * @param boneSnapshotCollection The bone snapshot collection
 	 */
-	public void process(double tick, AnimationTestPredicate AnimationTestPredicate, List<IBone> modelRendererList, HashMap<IBone, BoneSnapshot> boneSnapshotCollection, MolangParser parser, boolean crashWhenCantFindBone)
+	public void process(double tick, AnimationEvent event, List<IBone> modelRendererList, HashMap<IBone, BoneSnapshot> boneSnapshotCollection, MolangParser parser, boolean crashWhenCantFindBone)
 	{
 		createInitialQueues(modelRendererList);
 
@@ -276,8 +277,8 @@ public abstract class BaseAnimationController<T extends IAnimatable>
 		assert tick >= 0 : "GeckoLib: Tick was less than zero";
 
 		// This tests the animation predicate
-		boolean shouldStop = !this.testAnimationPredicate(AnimationTestPredicate);
-		if (shouldStop || (currentAnimation == null && animationQueue.size() == 0))
+		PlayState playState = this.testAnimationPredicate(event);
+		if (playState == PlayState.STOP || (currentAnimation == null && animationQueue.size() == 0))
 		{
 			// The animation should transition to the model's initial state
 			animationState = AnimationState.Stopped;
@@ -370,7 +371,7 @@ public abstract class BaseAnimationController<T extends IAnimatable>
 		parser.setValue("query.anim_time", tick / 20);
 	}
 
-	protected abstract boolean testAnimationPredicate(AnimationTestPredicate<T> event);
+	protected abstract PlayState testAnimationPredicate(AnimationEvent<T> event);
 
 	// At the beginning of a new transition, save a snapshot of the model's rotation, position, and scale values as the initial value to lerp from
 	private void saveSnapshotsForAnimation(Animation animation, HashMap<IBone, BoneSnapshot> boneSnapshotCollection)

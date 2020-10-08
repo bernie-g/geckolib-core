@@ -3,25 +3,29 @@ package software.bernie.geckolib.core.event.predicate;
 import software.bernie.geckolib.core.IAnimatable;
 import software.bernie.geckolib.core.controller.BaseAnimationController;
 
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
-public class AnimationTestPredicate<T extends IAnimatable>
+public class AnimationEvent<T extends IAnimatable>
 {
-	private final T entity;
+	private final T animatable;
 	public double animationTick;
 	private final float limbSwing;
 	private final float limbSwingAmount;
 	private final float partialTick;
 	private final boolean isMoving;
-
+	private final List<Object> extraData;
 	protected BaseAnimationController controller;
 
-	public AnimationTestPredicate(T entity, float limbSwing, float limbSwingAmount, float partialTick, boolean isMoving)
+	public AnimationEvent(T animatable, float limbSwing, float limbSwingAmount, float partialTick, boolean isMoving, List<Object> extraData)
 	{
-		this.entity = entity;
+		this.animatable = animatable;
 		this.limbSwing = limbSwing;
 		this.limbSwingAmount = limbSwingAmount;
 		this.partialTick = partialTick;
 		this.isMoving = isMoving;
+		this.extraData = extraData;
 	}
 
 	/**
@@ -33,23 +37,7 @@ public class AnimationTestPredicate<T extends IAnimatable>
 	{
 		return animationTick;
 	}
-
-	public T getEntity()
-	{
-		return entity;
-	}
-
-	public BaseAnimationController getController()
-	{
-		return controller;
-	}
-
-	public void setController(BaseAnimationController controller)
-	{
-		this.controller = controller;
-	}
-
-
+	public T getAnimatable() {return animatable; }
 	public float getLimbSwing()
 	{
 		return limbSwing;
@@ -62,8 +50,24 @@ public class AnimationTestPredicate<T extends IAnimatable>
 	{
 		return partialTick;
 	}
-	public boolean isMoving()
+	public boolean isMoving() { return isMoving; }
+	public BaseAnimationController getController()
 	{
-		return isMoving;
+		return controller;
+	}
+
+	public void setController(BaseAnimationController controller)
+	{
+		this.controller = controller;
+	}
+
+	public List<Object> getExtraData()
+	{
+		return extraData;
+	}
+
+	public <T> List<T> getExtraDataOfType(Class<T> type)
+	{
+		return extraData.stream().filter(x -> x.getClass() == type).map(x -> type.cast(x)).collect(Collectors.toList());
 	}
 }

@@ -3,10 +3,11 @@ package software.bernie.geckolib.core.controller;
 import software.bernie.geckolib.core.AnimationState;
 import software.bernie.geckolib.core.IAnimatable;
 import software.bernie.geckolib.core.IAnimatableModel;
+import software.bernie.geckolib.core.PlayState;
 import software.bernie.geckolib.core.builder.Animation;
 import software.bernie.geckolib.core.builder.AnimationBuilder;
 import software.bernie.geckolib.core.easing.EasingType;
-import software.bernie.geckolib.core.event.predicate.AnimationTestPredicate;
+import software.bernie.geckolib.core.event.predicate.AnimationEvent;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -117,7 +118,7 @@ public class AnimationController<T extends IAnimatable> extends BaseAnimationCon
 	}
 
 	@Override
-	protected boolean testAnimationPredicate(AnimationTestPredicate<T> event)
+	protected PlayState testAnimationPredicate(AnimationEvent<T> event)
 	{
 		return this.animationPredicate.test(event);
 	}

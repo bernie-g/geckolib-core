@@ -3,7 +3,7 @@ package software.bernie.geckolib.core.processor;
 import com.eliotlash.molang.MolangParser;
 import software.bernie.geckolib.core.IAnimatable;
 import software.bernie.geckolib.core.controller.BaseAnimationController;
-import software.bernie.geckolib.core.event.predicate.AnimationTestPredicate;
+import software.bernie.geckolib.core.event.predicate.AnimationEvent;
 import software.bernie.geckolib.core.keyframe.AnimationPoint;
 import software.bernie.geckolib.core.keyframe.BoneAnimationQueue;
 import software.bernie.geckolib.core.manager.AnimationManager;
@@ -21,7 +21,7 @@ public class AnimationProcessor<T extends IAnimatable>
 	public boolean reloadAnimations = false;
 	private List<IBone> modelRendererList = new ArrayList();
 
-	public void tickAnimation(IAnimatable entity, double seekTime, AnimationTestPredicate predicate, MolangParser parser, boolean crashWhenCantFindBone)
+	public void tickAnimation(IAnimatable entity, double seekTime, AnimationEvent event, MolangParser parser, boolean crashWhenCantFindBone)
 	{
 		// Each animation has it's own collection of animations (called the EntityAnimationManager), which allows for multiple independent animations
 		AnimationManager manager = entity.getAnimationManager();
@@ -44,10 +44,10 @@ public class AnimationProcessor<T extends IAnimatable>
 			controller.isJustStarting = manager.isFirstTick;
 
 			// Set current controller to animation test event
-			predicate.setController(controller);
+			event.setController(controller);
 
 			// Process animations and add new values to the point queues
-			controller.process(seekTime, predicate, modelRendererList, boneSnapshots, parser, crashWhenCantFindBone);
+			controller.process(seekTime, event, modelRendererList, boneSnapshots, parser, crashWhenCantFindBone);
 
 			// Loop through every single bone and lerp each property
 			for (BoneAnimationQueue boneAnimation : controller.getBoneAnimationQueues().values())

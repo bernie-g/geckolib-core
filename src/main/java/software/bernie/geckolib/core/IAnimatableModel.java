@@ -1,7 +1,7 @@
 package software.bernie.geckolib.core;
 
 import software.bernie.geckolib.core.builder.Animation;
-import software.bernie.geckolib.core.event.predicate.AnimationTestPredicate;
+import software.bernie.geckolib.core.event.predicate.AnimationEvent;
 import software.bernie.geckolib.core.processor.AnimationProcessor;
 import software.bernie.geckolib.core.processor.IBone;
 
@@ -17,7 +17,7 @@ public interface IAnimatableModel<E>
 		this.setLivingAnimations(entity, null);
 	}
 
-	void setLivingAnimations(E entity, AnimationTestPredicate customPredicate);
+	void setLivingAnimations(E entity, AnimationEvent customPredicate);
 
 	AnimationProcessor getAnimationProcessor();
 
