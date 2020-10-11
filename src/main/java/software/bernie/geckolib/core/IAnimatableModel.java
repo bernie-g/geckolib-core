@@ -12,12 +12,12 @@ public interface IAnimatableModel<E>
 		return (System.nanoTime() / 1000000L / 50f);
 	}
 
-	default void setLivingAnimations(E entity)
+	default void setLivingAnimations(E entity, Integer uniqueID)
 	{
-		this.setLivingAnimations(entity, null);
+		this.setLivingAnimations(entity, uniqueID, null);
 	}
 
-	void setLivingAnimations(E entity, AnimationEvent customPredicate);
+	void setLivingAnimations(E entity, Integer uniqueID, AnimationEvent customPredicate);
 
 	AnimationProcessor getAnimationProcessor();
 

@@ -68,6 +68,6 @@ public class AnimationEvent<T extends IAnimatable>
 
 	public <T> List<T> getExtraDataOfType(Class<T> type)
 	{
-		return extraData.stream().filter(x -> x.getClass() == type).map(x -> type.cast(x)).collect(Collectors.toList());
+		return extraData.stream().filter(x -> type.isAssignableFrom(x.getClass())).map(x -> type.cast(x)).collect(Collectors.toList());
 	}
 }

@@ -5,19 +5,15 @@
 
 package software.bernie.geckolib.core.manager;
 
-import software.bernie.geckolib.core.controller.AnimationController;
 import software.bernie.geckolib.core.controller.BaseAnimationController;
 import software.bernie.geckolib.core.processor.IBone;
 import software.bernie.geckolib.core.snapshot.BoneSnapshot;
 
 import java.util.HashMap;
 
-/**
- * Each entity should have exactly <b>ONE</b> EntityAnimationManager and can add as many animation controllers to the collection as desired.
- */
-public class AnimationManager
+public class AnimationData
 {
-	private HashMap<IBone, BoneSnapshot> boneSnapshotCollection = new HashMap<>();
+	private HashMap<IBone, BoneSnapshot> boneSnapshotCollection;
 	private HashMap<String, BaseAnimationController> animationControllers = new HashMap<>();
 	public float tick;
 	public boolean isFirstTick = true;
@@ -28,7 +24,7 @@ public class AnimationManager
 	/**
 	 * Instantiates a new Animation controller collection.
 	 */
-	public AnimationManager()
+	public AnimationData()
 	{
 		super();
 		boneSnapshotCollection = new HashMap<>();

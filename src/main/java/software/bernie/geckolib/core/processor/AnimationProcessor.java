@@ -6,7 +6,7 @@ import software.bernie.geckolib.core.controller.BaseAnimationController;
 import software.bernie.geckolib.core.event.predicate.AnimationEvent;
 import software.bernie.geckolib.core.keyframe.AnimationPoint;
 import software.bernie.geckolib.core.keyframe.BoneAnimationQueue;
-import software.bernie.geckolib.core.manager.AnimationManager;
+import software.bernie.geckolib.core.manager.AnimationData;
 import software.bernie.geckolib.core.snapshot.BoneSnapshot;
 import software.bernie.geckolib.core.snapshot.DirtyTracker;
 import software.bernie.geckolib.core.util.MathUtil;
@@ -21,10 +21,10 @@ public class AnimationProcessor<T extends IAnimatable>
 	public boolean reloadAnimations = false;
 	private List<IBone> modelRendererList = new ArrayList();
 
-	public void tickAnimation(IAnimatable entity, double seekTime, AnimationEvent event, MolangParser parser, boolean crashWhenCantFindBone)
+	public void tickAnimation(IAnimatable entity, Integer uniqueID, double seekTime, AnimationEvent event, MolangParser parser, boolean crashWhenCantFindBone)
 	{
 		// Each animation has it's own collection of animations (called the EntityAnimationManager), which allows for multiple independent animations
-		AnimationManager manager = entity.getAnimationManager();
+		AnimationData manager = entity.getFactory().getOrCreateAnimationData(uniqueID);
 		// Keeps track of which bones have had animations applied to them, and eventually sets the ones that don't have an animation to their default values
 		HashMap<String, DirtyTracker> modelTracker = createNewDirtyTracker();
 

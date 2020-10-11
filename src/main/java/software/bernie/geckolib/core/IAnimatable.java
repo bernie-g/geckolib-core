@@ -4,17 +4,14 @@
  */
 package software.bernie.geckolib.core;
 
-import software.bernie.geckolib.core.manager.AnimationManager;
+import software.bernie.geckolib.core.manager.AnimationData;
+import software.bernie.geckolib.core.manager.AnimationFactory;
 
 /**
  * This interface must be applied to any object that wants to be animated
  */
 public interface IAnimatable
 {
-	/**
-	 * This method MUST return an Animation Manager, otherwise no animations will be played.
-	 *
-	 * @return the animation controllers
-	 */
-	AnimationManager getAnimationManager();
+	void registerControllers(AnimationData data);
+	AnimationFactory getFactory();
 }
