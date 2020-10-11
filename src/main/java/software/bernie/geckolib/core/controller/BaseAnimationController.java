@@ -9,6 +9,7 @@ import com.eliotlash.mclib.math.IValue;
 import com.eliotlash.molang.MolangParser;
 import software.bernie.geckolib.core.AnimationState;
 import software.bernie.geckolib.core.IAnimatable;
+import software.bernie.geckolib.core.IAnimatableModel;
 import software.bernie.geckolib.core.PlayState;
 import software.bernie.geckolib.core.builder.Animation;
 import software.bernie.geckolib.core.builder.AnimationBuilder;
@@ -120,7 +121,7 @@ public abstract class BaseAnimationController<T extends IAnimatable>
 	private final HashMap<String, BoneAnimationQueue> boneAnimationQueues = new HashMap<>();
 	private double tickOffset = 0;
 	protected Queue<Animation> animationQueue = new LinkedList<>();
-	private Animation currentAnimation;
+	protected Animation currentAnimation;
 	protected AnimationBuilder currentAnimationBuilder = new AnimationBuilder();
 	protected boolean shouldResetTick = false;
 	private HashMap<String, BoneSnapshot> boneSnapshots = new HashMap<>();

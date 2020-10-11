@@ -1,5 +1,6 @@
 package software.bernie.geckolib.core.controller;
 
+import com.eliotlash.molang.MolangParser;
 import software.bernie.geckolib.core.AnimationState;
 import software.bernie.geckolib.core.IAnimatable;
 import software.bernie.geckolib.core.IAnimatableModel;
@@ -8,8 +9,11 @@ import software.bernie.geckolib.core.builder.Animation;
 import software.bernie.geckolib.core.builder.AnimationBuilder;
 import software.bernie.geckolib.core.easing.EasingType;
 import software.bernie.geckolib.core.event.predicate.AnimationEvent;
+import software.bernie.geckolib.core.processor.IBone;
+import software.bernie.geckolib.core.snapshot.BoneSnapshot;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -29,7 +33,6 @@ public class AnimationController<T extends IAnimatable> extends BaseAnimationCon
 	 * The animation predicate, is tested in every process call (i.e. every frame)
 	 */
 	private IAnimationPredicate<T> animationPredicate;
-
 
 
 	public AnimationController(T entity, String name, float transitionLengthTicks, IAnimationPredicate<T> animationPredicate)
@@ -108,12 +111,12 @@ public class AnimationController<T extends IAnimatable> extends BaseAnimationCon
 		for (Function<Object, IAnimatableModel> modelGetter : modelFetchers)
 		{
 			IAnimatableModel model = modelGetter.apply(animatable);
-			if(model != null)
+			if (model != null)
 			{
 				return model;
 			}
 		}
-		System.out.println(String.format("Could not find suitable model for entity of type %s. Did you register a Model Fetcher?", animatable.getClass()));
+		System.out.println(String.format("Could not find suitable model for animatable of type %s. Did you register a Model Fetcher?", animatable.getClass()));
 		return null;
 	}
 
@@ -121,5 +124,22 @@ public class AnimationController<T extends IAnimatable> extends BaseAnimationCon
 	protected PlayState testAnimationPredicate(AnimationEvent<T> event)
 	{
 		return this.animationPredicate.test(event);
+	}
+
+	@Override
+	public void process(double tick, AnimationEvent event, List<IBone> modelRendererList, HashMap<IBone, BoneSnapshot> boneSnapshotCollection, MolangParser parser, boolean crashWhenCantFindBone)
+	{
+		if (currentAnimation != null)
+		{
+			IAnimatableModel model = getModel(this.animatable);
+			Animation animation = model.getAnimation(currentAnimation.animationName, this.animatable);
+			if (model != null && animation != null)
+			{
+				boolean loop = currentAnimation.loop;
+				currentAnimation = animation;
+				currentAnimation.loop = loop;
+			}
+		}
+		super.process(tick, event, modelRendererList, boneSnapshotCollection, parser, crashWhenCantFindBone);
 	}
 }

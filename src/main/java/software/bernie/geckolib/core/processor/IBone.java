@@ -28,6 +28,16 @@ public interface IBone
 	void setScaleY(float value);
 	void setScaleZ(float value);
 
+	void setPivotX(float value);
+	void setPivotY(float value);
+	void setPivotZ(float value);
+
+	float getPivotX();
+	float getPivotY();
+	float getPivotZ();
+
+	boolean isHidden();
+	void setHidden(boolean hidden);
 	void setModelRendererName(String modelRendererName);
 
 	void saveInitialSnapshot();
