@@ -31,6 +31,11 @@ public interface IAnimatableModel<E>
 	 */
 	default IBone getBone(String boneName)
 	{
-		return this.getAnimationProcessor().getBone(boneName);
+		IBone bone = this.getAnimationProcessor().getBone(boneName);
+		if(bone == null)
+		{
+			throw new RuntimeException("Could not find bone: " + boneName);
+		}
+		return bone;
 	}
 }

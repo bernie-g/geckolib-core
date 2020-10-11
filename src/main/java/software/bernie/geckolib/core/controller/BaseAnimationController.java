@@ -291,6 +291,14 @@ public abstract class BaseAnimationController<T extends IAnimatable>
 			justStopped = false;
 			tick = adjustTick(actualTick);
 		}
+		else if(currentAnimation == null && this.animationQueue.size() != 0)
+		{
+			this.shouldResetTick = true;
+			this.animationState = AnimationState.Transitioning;
+			justStartedTransition = true;
+			needsAnimationReload = false;
+			tick = adjustTick(actualTick);
+		}
 		else
 		{
 			if (animationState != AnimationState.Transitioning)
