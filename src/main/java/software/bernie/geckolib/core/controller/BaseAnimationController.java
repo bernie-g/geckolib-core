@@ -8,8 +8,8 @@ package software.bernie.geckolib.core.controller;
 import com.eliotlash.mclib.math.IValue;
 import com.eliotlash.molang.MolangParser;
 import software.bernie.geckolib.core.AnimationState;
+import software.bernie.geckolib.core.ConstantValue;
 import software.bernie.geckolib.core.IAnimatable;
-import software.bernie.geckolib.core.IAnimatableModel;
 import software.bernie.geckolib.core.PlayState;
 import software.bernie.geckolib.core.builder.Animation;
 import software.bernie.geckolib.core.builder.AnimationBuilder;
@@ -130,7 +130,7 @@ public abstract class BaseAnimationController<T extends IAnimatable>
 	public Function<Double, Double> customEasingMethod;
 	protected boolean needsAnimationReload = false;
 
-	public abstract void setAnimation( AnimationBuilder builder);
+	public abstract void setAnimation(AnimationBuilder builder);
 
 
 	/**
@@ -291,7 +291,7 @@ public abstract class BaseAnimationController<T extends IAnimatable>
 			justStopped = false;
 			tick = adjustTick(actualTick);
 		}
-		else if(currentAnimation == null && this.animationQueue.size() != 0)
+		else if (currentAnimation == null && this.animationQueue.size() != 0)
 		{
 			this.shouldResetTick = true;
 			this.animationState = AnimationState.Transitioning;
@@ -453,23 +453,23 @@ public abstract class BaseAnimationController<T extends IAnimatable>
 
 			if (!rotationKeyFrames.xKeyFrames.isEmpty())
 			{
-				boneAnimationQueue.rotationXQueue.add(getAnimationPointAtTick(rotationKeyFrames.xKeyFrames, tick));
-				boneAnimationQueue.rotationYQueue.add(getAnimationPointAtTick(rotationKeyFrames.yKeyFrames, tick));
-				boneAnimationQueue.rotationZQueue.add(getAnimationPointAtTick(rotationKeyFrames.zKeyFrames, tick));
+				boneAnimationQueue.rotationXQueue.add(getAnimationPointAtTick(rotationKeyFrames.xKeyFrames, tick, true));
+				boneAnimationQueue.rotationYQueue.add(getAnimationPointAtTick(rotationKeyFrames.yKeyFrames, tick, true));
+				boneAnimationQueue.rotationZQueue.add(getAnimationPointAtTick(rotationKeyFrames.zKeyFrames, tick, true));
 			}
 
 			if (!positionKeyFrames.xKeyFrames.isEmpty())
 			{
-				boneAnimationQueue.positionXQueue.add(getAnimationPointAtTick(positionKeyFrames.xKeyFrames, tick));
-				boneAnimationQueue.positionYQueue.add(getAnimationPointAtTick(positionKeyFrames.yKeyFrames, tick));
-				boneAnimationQueue.positionZQueue.add(getAnimationPointAtTick(positionKeyFrames.zKeyFrames, tick));
+				boneAnimationQueue.positionXQueue.add(getAnimationPointAtTick(positionKeyFrames.xKeyFrames, tick, false));
+				boneAnimationQueue.positionYQueue.add(getAnimationPointAtTick(positionKeyFrames.yKeyFrames, tick, false));
+				boneAnimationQueue.positionZQueue.add(getAnimationPointAtTick(positionKeyFrames.zKeyFrames, tick, false));
 			}
 
 			if (!scaleKeyFrames.xKeyFrames.isEmpty())
 			{
-				boneAnimationQueue.scaleXQueue.add(getAnimationPointAtTick(scaleKeyFrames.xKeyFrames, tick));
-				boneAnimationQueue.scaleYQueue.add(getAnimationPointAtTick(scaleKeyFrames.yKeyFrames, tick));
-				boneAnimationQueue.scaleZQueue.add(getAnimationPointAtTick(scaleKeyFrames.zKeyFrames, tick));
+				boneAnimationQueue.scaleXQueue.add(getAnimationPointAtTick(scaleKeyFrames.xKeyFrames, tick, false));
+				boneAnimationQueue.scaleYQueue.add(getAnimationPointAtTick(scaleKeyFrames.yKeyFrames, tick, false));
+				boneAnimationQueue.scaleZQueue.add(getAnimationPointAtTick(scaleKeyFrames.zKeyFrames, tick, false));
 			}
 		}
 
@@ -524,7 +524,6 @@ public abstract class BaseAnimationController<T extends IAnimatable>
 		{
 			boneAnimationQueues.put(modelRenderer.getName(), new BoneAnimationQueue(modelRenderer));
 		}
-
 	}
 
 	// Used to reset the "tick" everytime a new animation starts, a transition starts, or something else of importance happens
@@ -541,13 +540,28 @@ public abstract class BaseAnimationController<T extends IAnimatable>
 	}
 
 	//Helper method to transform a KeyFrameLocation to an AnimationPoint
-	private AnimationPoint getAnimationPointAtTick(List<KeyFrame<IValue>> frames, double tick)
+	private AnimationPoint getAnimationPointAtTick(List<KeyFrame<IValue>> frames, double tick, boolean isRotation)
 	{
 		KeyFrameLocation<KeyFrame<IValue>> location = getCurrentKeyFrameLocation(frames, tick);
 		KeyFrame<IValue> currentFrame = location.currentFrame;
+		double startValue = currentFrame.getStartValue().get();
+		double endValue = currentFrame.getEndValue().get();
+
+		if (isRotation)
+		{
+			if (!(currentFrame.getStartValue() instanceof ConstantValue))
+			{
+				startValue = Math.toRadians(startValue);
+			}
+			if (!(currentFrame.getEndValue() instanceof ConstantValue))
+			{
+				endValue = Math.toRadians(endValue);
+			}
+		}
+
 		return new AnimationPoint(currentFrame, location.currentTick, currentFrame.getLength(),
-				currentFrame.getStartValue().get(),
-				currentFrame.getEndValue().get());
+				startValue,
+				endValue);
 	}
 
 	/**
