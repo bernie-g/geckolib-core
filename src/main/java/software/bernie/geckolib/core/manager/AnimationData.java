@@ -5,7 +5,7 @@
 
 package software.bernie.geckolib.core.manager;
 
-import software.bernie.geckolib.core.controller.BaseAnimationController;
+import software.bernie.geckolib.core.controller.AnimationController;
 import software.bernie.geckolib.core.processor.IBone;
 import software.bernie.geckolib.core.snapshot.BoneSnapshot;
 
@@ -14,7 +14,7 @@ import java.util.HashMap;
 public class AnimationData
 {
 	private HashMap<IBone, BoneSnapshot> boneSnapshotCollection;
-	private HashMap<String, BaseAnimationController> animationControllers = new HashMap<>();
+	private HashMap<String, AnimationController> animationControllers = new HashMap<>();
 	public float tick;
 	public boolean isFirstTick = true;
 	private double speedModifier = 1;
@@ -36,7 +36,7 @@ public class AnimationData
 	 * @param value The value
 	 * @return the animation controller
 	 */
-	public BaseAnimationController addAnimationController(BaseAnimationController value)
+	public AnimationController addAnimationController(AnimationController value)
 	{
 		return this.animationControllers.put(value.getName(), value);
 	}
@@ -84,7 +84,7 @@ public class AnimationData
 		this.resetTickLength = resetTickLength < 0 ? 0 : resetTickLength;
 	}
 
-	public HashMap<String, BaseAnimationController> getAnimationControllers()
+	public HashMap<String, AnimationController> getAnimationControllers()
 	{
 		return animationControllers;
 	}

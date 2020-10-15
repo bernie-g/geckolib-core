@@ -1,10 +1,9 @@
 package software.bernie.geckolib.core.event.predicate;
 
 import software.bernie.geckolib.core.IAnimatable;
-import software.bernie.geckolib.core.controller.BaseAnimationController;
+import software.bernie.geckolib.core.controller.AnimationController;
 
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 public class AnimationEvent<T extends IAnimatable>
@@ -16,7 +15,7 @@ public class AnimationEvent<T extends IAnimatable>
 	private final float partialTick;
 	private final boolean isMoving;
 	private final List<Object> extraData;
-	protected BaseAnimationController controller;
+	protected AnimationController controller;
 
 	public AnimationEvent(T animatable, float limbSwing, float limbSwingAmount, float partialTick, boolean isMoving, List<Object> extraData)
 	{
@@ -51,12 +50,12 @@ public class AnimationEvent<T extends IAnimatable>
 		return partialTick;
 	}
 	public boolean isMoving() { return isMoving; }
-	public BaseAnimationController getController()
+	public AnimationController getController()
 	{
 		return controller;
 	}
 
-	public void setController(BaseAnimationController controller)
+	public void setController(AnimationController controller)
 	{
 		this.controller = controller;
 	}

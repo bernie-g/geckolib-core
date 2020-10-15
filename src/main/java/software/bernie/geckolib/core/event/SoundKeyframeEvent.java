@@ -5,7 +5,7 @@
 
 package software.bernie.geckolib.core.event;
 
-import software.bernie.geckolib.core.controller.BaseAnimationController;
+import software.bernie.geckolib.core.controller.AnimationController;
 
 public class SoundKeyframeEvent<T> extends KeyframeEvent<T>
 {
@@ -19,7 +19,7 @@ public class SoundKeyframeEvent<T> extends KeyframeEvent<T>
 	 * @param sound        The name of the sound to play
 	 * @param controller    the controller
 	 */
-	public SoundKeyframeEvent(T entity, double animationTick, String sound, BaseAnimationController controller)
+	public SoundKeyframeEvent(T entity, double animationTick, String sound, AnimationController controller)
 	{
 		super(entity, animationTick, controller);
 		this.sound = sound;

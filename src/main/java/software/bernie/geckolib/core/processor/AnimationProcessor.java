@@ -2,7 +2,7 @@ package software.bernie.geckolib.core.processor;
 
 import com.eliotlash.molang.MolangParser;
 import software.bernie.geckolib.core.IAnimatable;
-import software.bernie.geckolib.core.controller.BaseAnimationController;
+import software.bernie.geckolib.core.controller.AnimationController;
 import software.bernie.geckolib.core.event.predicate.AnimationEvent;
 import software.bernie.geckolib.core.keyframe.AnimationPoint;
 import software.bernie.geckolib.core.keyframe.BoneAnimationQueue;
@@ -33,7 +33,7 @@ public class AnimationProcessor<T extends IAnimatable>
 
 		HashMap<IBone, BoneSnapshot> boneSnapshots = manager.getBoneSnapshotCollection();
 
-		for (BaseAnimationController<T> controller : manager.getAnimationControllers().values())
+		for (AnimationController<T> controller : manager.getAnimationControllers().values())
 		{
 			if (reloadAnimations)
 			{
