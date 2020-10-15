@@ -77,7 +77,6 @@ public class AnimationController<T extends IAnimatable>
 	}
 
 
-
 	/**
 	 * An AnimationPredicate is run every render frame for ever AnimationController. The "test" method is where you should change animations, stop animations, restart, etc.
 	 */
