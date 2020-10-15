@@ -2,7 +2,7 @@ package software.bernie.geckolib.core.event;
 
 import software.bernie.geckolib.core.controller.BaseAnimationController;
 
-public class ParticleKeyFrameEvent<T> extends AnimationEvent<T>
+public class ParticleKeyFrameEvent<T> extends KeyframeEvent<T>
 {
 	public final String effect;
 	public final String locator;

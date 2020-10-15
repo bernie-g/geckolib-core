@@ -9,7 +9,7 @@ import software.bernie.geckolib.core.controller.BaseAnimationController;
 
 import java.util.List;
 
-public class CustomInstructionKeyframeEvent<T> extends AnimationEvent<T>
+public class CustomInstructionKeyframeEvent<T> extends KeyframeEvent<T>
 {
 	public final List<String> instructions;
 

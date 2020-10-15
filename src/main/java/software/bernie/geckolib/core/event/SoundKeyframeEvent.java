@@ -7,7 +7,7 @@ package software.bernie.geckolib.core.event;
 
 import software.bernie.geckolib.core.controller.BaseAnimationController;
 
-public class SoundKeyframeEvent<T> extends AnimationEvent<T>
+public class SoundKeyframeEvent<T> extends KeyframeEvent<T>
 {
 	public final String sound;
 

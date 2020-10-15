@@ -6,7 +6,7 @@
 package software.bernie.geckolib.core.event;
 import software.bernie.geckolib.core.controller.BaseAnimationController;
 
-public class AnimationEvent<T>
+public abstract class KeyframeEvent<T>
 {
 	private final T entity;
 	private final double animationTick;
@@ -18,7 +18,7 @@ public class AnimationEvent<T>
 	 * @param animationTick   The amount of ticks that have passed in either the current transition or animation, depending on the controller's AnimationState.
 	 * @param controller      the controller
 	 */
-	public AnimationEvent(T entity, double animationTick, BaseAnimationController controller)
+	public KeyframeEvent(T entity, double animationTick, BaseAnimationController controller)
 	{
 		this.entity = entity;
 		this.animationTick = animationTick;
