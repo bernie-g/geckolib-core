@@ -20,9 +20,16 @@ public class AnimationProcessor<T extends IAnimatable>
 {
 	public boolean reloadAnimations = false;
 	private List<IBone> modelRendererList = new ArrayList();
+	private double lastTickValue = -1;
 
 	public void tickAnimation(IAnimatable entity, Integer uniqueID, double seekTime, AnimationEvent event, MolangParser parser, boolean crashWhenCantFindBone)
 	{
+		if(seekTime == lastTickValue)
+		{
+			return;
+		}
+		lastTickValue = seekTime;
+
 		// Each animation has it's own collection of animations (called the EntityAnimationManager), which allows for multiple independent animations
 		AnimationData manager = entity.getFactory().getOrCreateAnimationData(uniqueID);
 		// Keeps track of which bones have had animations applied to them, and eventually sets the ones that don't have an animation to their default values

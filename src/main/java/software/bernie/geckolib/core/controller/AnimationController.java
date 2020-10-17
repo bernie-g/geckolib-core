@@ -326,7 +326,7 @@ public class AnimationController<T extends IAnimatable>
 	 */
 	public void process(double tick, AnimationEvent event, List<IBone> modelRendererList, HashMap<IBone, BoneSnapshot> boneSnapshotCollection, MolangParser parser, boolean crashWhenCantFindBone)
 	{
-		if (currentAnimation != null)
+		/*if (currentAnimation != null)
 		{
 			IAnimatableModel model = getModel(this.animatable);
 			Animation animation = model.getAnimation(currentAnimation.animationName, this.animatable);
@@ -336,9 +336,10 @@ public class AnimationController<T extends IAnimatable>
 				currentAnimation = animation;
 				currentAnimation.loop = loop;
 			}
-		}
+		}*/
 
 		createInitialQueues(modelRendererList);
+
 
 		double actualTick = tick;
 		tick = adjustTick(tick);
@@ -382,6 +383,7 @@ public class AnimationController<T extends IAnimatable>
 				animationState = AnimationState.Running;
 			}
 		}
+
 		// Handle transitioning to a different animation (or just starting one)
 		if (animationState == AnimationState.Transitioning)
 		{
