@@ -2,6 +2,7 @@ package software.bernie.geckolib.core.processor;
 
 import com.eliotlash.molang.MolangParser;
 import software.bernie.geckolib.core.IAnimatable;
+import software.bernie.geckolib.core.IAnimatableModel;
 import software.bernie.geckolib.core.controller.AnimationController;
 import software.bernie.geckolib.core.event.predicate.AnimationEvent;
 import software.bernie.geckolib.core.keyframe.AnimationPoint;
@@ -21,6 +22,12 @@ public class AnimationProcessor<T extends IAnimatable>
 	public boolean reloadAnimations = false;
 	private List<IBone> modelRendererList = new ArrayList();
 	private double lastTickValue = -1;
+	private final IAnimatableModel animatedModel;
+
+	public AnimationProcessor(IAnimatableModel animatedModel)
+	{
+		this.animatedModel = animatedModel;
+	}
 
 	public void tickAnimation(IAnimatable entity, Integer uniqueID, double seekTime, AnimationEvent event, MolangParser parser, boolean crashWhenCantFindBone)
 	{
@@ -282,5 +289,10 @@ public class AnimationProcessor<T extends IAnimatable>
 	public List<IBone> getModelRendererList()
 	{
 		return modelRendererList;
+	}
+
+	public void preAnimationSetup(double seekTime)
+	{
+		this.animatedModel.setMolangQueries(seekTime);
 	}
 }

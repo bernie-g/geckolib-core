@@ -38,4 +38,6 @@ public interface IAnimatableModel<E>
 		}
 		return bone;
 	}
+
+	void setMolangQueries(double currentTick);
 }

@@ -17,7 +17,6 @@ public class AnimationData
 	private HashMap<String, AnimationController> animationControllers = new HashMap<>();
 	public float tick;
 	public boolean isFirstTick = true;
-	private double speedModifier = 1;
 	private double resetTickLength = 30;
 	public Float startTick;
 
@@ -56,18 +55,6 @@ public class AnimationData
 		this.boneSnapshotCollection = new HashMap<>();
 	}
 
-	/**
-	 * Sets the speed multipler of how fast the animation goes. This cannot be negative, and the default value is 1.
-	 */
-	public void setAnimationSpeed(double speed)
-	{
-		this.speedModifier = speed < 0 ? 0 : speed;
-	}
-
-	public double getCurrentAnimationSpeed()
-	{
-		return this.speedModifier;
-	}
 
 	public double getResetSpeed()
 	{
