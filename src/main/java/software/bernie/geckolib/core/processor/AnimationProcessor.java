@@ -291,8 +291,8 @@ public class AnimationProcessor<T extends IAnimatable>
 		return modelRendererList;
 	}
 
-	public void preAnimationSetup(double seekTime)
+	public void preAnimationSetup(IAnimatable animatable, double seekTime)
 	{
-		this.animatedModel.setMolangQueries(seekTime);
+		this.animatedModel.setMolangQueries(animatable, seekTime);
 	}
 }

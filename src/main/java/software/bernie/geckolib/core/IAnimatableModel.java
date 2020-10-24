@@ -39,5 +39,5 @@ public interface IAnimatableModel<E>
 		return bone;
 	}
 
-	void setMolangQueries(double currentTick);
+	void setMolangQueries(IAnimatable animatable, double currentTick);
 }
