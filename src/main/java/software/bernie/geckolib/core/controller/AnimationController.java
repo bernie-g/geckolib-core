@@ -32,7 +32,7 @@ import java.util.stream.Collectors;
  */
 public class AnimationController<T extends IAnimatable>
 {
-	static List<Function<Object, IAnimatableModel>> modelFetchers = new ArrayList<>();
+	static List<Function<IAnimatable, IAnimatableModel>> modelFetchers = new ArrayList<>();
 	/**
 	 * The Entity.
 	 */
@@ -72,7 +72,7 @@ public class AnimationController<T extends IAnimatable>
 
 	public boolean isJustStarting = false;
 
-	public static void addModelFetcher(Function<Object, IAnimatableModel> fetcher)
+	public static void addModelFetcher(Function<IAnimatable, IAnimatableModel> fetcher)
 	{
 		modelFetchers.add(fetcher);
 	}
@@ -460,7 +460,7 @@ public class AnimationController<T extends IAnimatable>
 
 	private IAnimatableModel getModel(T animatable)
 	{
-		for (Function<Object, IAnimatableModel> modelGetter : modelFetchers)
+		for (Function<IAnimatable, IAnimatableModel> modelGetter : modelFetchers)
 		{
 			IAnimatableModel model = modelGetter.apply(animatable);
 			if (model != null)
