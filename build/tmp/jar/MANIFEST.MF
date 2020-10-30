@@ -4,7 +4,7 @@ Implementation-Version: null
 Specification-Vendor: geckolib
 Specification-Title: geckolib
 FMLModType: LIBRARY
-Implementation-Timestamp: 2020-10-27T18:14:00-0400
+Implementation-Timestamp: 2020-10-30T17:20:49-0400
 Specification-Version: 1
 Implementation-Vendor: geckolib
 
