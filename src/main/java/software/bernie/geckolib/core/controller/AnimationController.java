@@ -397,7 +397,7 @@ public class AnimationController<T extends IAnimatable>
 			}
 			if (currentAnimation != null)
 			{
-				setAnimTime(parser, tick);
+				setAnimTime(parser, 0 );
 				for (BoneAnimation boneAnimation : currentAnimation.boneAnimations)
 				{
 					BoneAnimationQueue boneAnimationQueue = boneAnimationQueues.get(boneAnimation.boneName);
@@ -456,6 +456,7 @@ public class AnimationController<T extends IAnimatable>
 	private void setAnimTime(MolangParser parser, double tick)
 	{
 		parser.setValue("query.anim_time", tick / 20);
+		parser.setValue("query.life_time", tick / 20);
 	}
 
 	private IAnimatableModel getModel(T animatable)
