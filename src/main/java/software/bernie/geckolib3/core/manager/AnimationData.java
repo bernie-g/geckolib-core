@@ -19,6 +19,8 @@ public class AnimationData
 	public boolean isFirstTick = true;
 	private double resetTickLength = 30;
 	public Float startTick;
+	public Object ticker;
+	public boolean shouldPlayWhilePaused = false;
 
 	/**
 	 * Instantiates a new Animation controller collection.
