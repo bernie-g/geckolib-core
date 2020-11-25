@@ -47,18 +47,11 @@ artifacts {
     archives javadocJar
 }
 
-
-
 publishing {
     publications {
         mavenJava(MavenPublication) {
             artifact jar
             artifactId = project.archivesBaseName
-        }
-    }
-    repositories {
-        maven {
-            url "file:///${project.projectDir}/mcmodsrepo"
         }
     }
 }

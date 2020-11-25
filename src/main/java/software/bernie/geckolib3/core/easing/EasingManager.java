@@ -300,7 +300,7 @@ public class EasingManager
 	 * using min instead of ternaries
 	 * http://easings.net/#easeInBounce
 	 */
-	static Function<Double, Double> bounce(Double s)
+	public static Function<Double, Double> bounce(Double s)
 	{
 		double k = s == null ? 0.5 : s;
 		Function<Double, Double> q = x -> (121.0 / 16.0) * x * x;
