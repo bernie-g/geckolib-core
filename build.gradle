@@ -12,8 +12,8 @@ repositories {
 }
 
 dependencies {
-    compile 'com.eliotlash.molang:molang:SNAPSHOT.8'
-    compile 'com.eliotlash.mclib:mclib:SNAPSHOT.8'
+    compile 'com.eliotlash.molang:molang:SNAPSHOT.12'
+    compile 'com.eliotlash.mclib:mclib:SNAPSHOT.12'
 }
 
 jar {
