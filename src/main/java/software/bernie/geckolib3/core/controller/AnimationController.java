@@ -7,6 +7,7 @@ package software.bernie.geckolib3.core.controller;
 
 import com.eliotlash.mclib.math.IValue;
 import com.eliotlash.molang.MolangParser;
+import org.apache.commons.lang3.tuple.Pair;
 import software.bernie.geckolib3.core.*;
 import software.bernie.geckolib3.core.builder.Animation;
 import software.bernie.geckolib3.core.builder.AnimationBuilder;
@@ -325,7 +326,7 @@ public class AnimationController<T extends IAnimatable>
 	 * @param modelRendererList      The list of all AnimatedModelRender's
 	 * @param boneSnapshotCollection The bone snapshot collection
 	 */
-	public void process(double tick, AnimationEvent event, List<IBone> modelRendererList, HashMap<IBone, BoneSnapshot> boneSnapshotCollection, MolangParser parser, boolean crashWhenCantFindBone)
+	public void process(double tick, AnimationEvent event, List<IBone> modelRendererList, HashMap<String, Pair<IBone, BoneSnapshot>> boneSnapshotCollection, MolangParser parser, boolean crashWhenCantFindBone)
 	{
 		if (currentAnimation != null)
 		{
@@ -488,15 +489,15 @@ public class AnimationController<T extends IAnimatable>
 	}
 
 	// At the beginning of a new transition, save a snapshot of the model's rotation, position, and scale values as the initial value to lerp from
-	private void saveSnapshotsForAnimation(Animation animation, HashMap<IBone, BoneSnapshot> boneSnapshotCollection)
+	private void saveSnapshotsForAnimation(Animation animation, HashMap<String, Pair<IBone, BoneSnapshot>> boneSnapshotCollection)
 	{
-		for (BoneSnapshot snapshot : boneSnapshotCollection.values())
+		for (Pair<IBone, BoneSnapshot> snapshot : boneSnapshotCollection.values())
 		{
 			if (animation != null && animation.boneAnimations != null)
 			{
-				if (animation.boneAnimations.stream().anyMatch(x -> x.boneName.equals(snapshot.name)))
+				if (animation.boneAnimations.stream().anyMatch(x -> x.boneName.equals(snapshot.getLeft().getName())))
 				{
-					this.boneSnapshots.put(snapshot.name, new BoneSnapshot(snapshot));
+					this.boneSnapshots.put(snapshot.getLeft().getName(), new BoneSnapshot(snapshot.getRight()));
 				}
 			}
 		}
