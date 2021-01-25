@@ -100,7 +100,6 @@ public class AnimationProcessor<T extends IAnimatable>
 					snapshot.rotationValueY = bone.getRotationY();
 					snapshot.rotationValueZ = bone.getRotationZ();
 					snapshot.isCurrentlyRunningRotationAnimation = true;
-
 					dirtyTracker.hasRotationChanged = true;
 				}
 
@@ -250,7 +249,7 @@ public class AnimationProcessor<T extends IAnimatable>
 	{
 		for (IBone bone : modelRendererList)
 		{
-			if (!boneSnapshotCollection.containsKey(bone))
+			if (boneSnapshotCollection.keySet().stream().noneMatch(x -> x.getName().equals(bone.getName())))
 			{
 				boneSnapshotCollection.put(bone, new BoneSnapshot(bone.getInitialSnapshot()));
 			}
