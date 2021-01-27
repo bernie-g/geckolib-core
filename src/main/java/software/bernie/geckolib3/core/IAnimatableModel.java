@@ -7,9 +7,9 @@ import software.bernie.geckolib3.core.processor.IBone;
 
 public interface IAnimatableModel<E>
 {
-	default float getCurrentTick()
+	default double getCurrentTick()
 	{
-		return (System.nanoTime() / 1000000L / 50f);
+		return (System.nanoTime() / 1000000L / 50.0);
 	}
 
 	default void setLivingAnimations(E entity, Integer uniqueID)
