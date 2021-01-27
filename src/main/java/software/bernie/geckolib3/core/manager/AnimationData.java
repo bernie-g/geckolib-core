@@ -16,10 +16,10 @@ public class AnimationData
 {
 	private HashMap<String, Pair<IBone, BoneSnapshot>> boneSnapshotCollection;
 	private HashMap<String, AnimationController> animationControllers = new HashMap<>();
-	public float tick;
+	public double tick;
 	public boolean isFirstTick = true;
 	private double resetTickLength = 30;
-	public Float startTick;
+	public Double startTick;
 	public Object ticker;
 	public boolean shouldPlayWhilePaused = false;
 
