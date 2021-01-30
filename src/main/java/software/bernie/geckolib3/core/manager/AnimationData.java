@@ -18,7 +18,7 @@ public class AnimationData
 	private HashMap<String, AnimationController> animationControllers = new HashMap<>();
 	public double tick;
 	public boolean isFirstTick = true;
-	private double resetTickLength = 30;
+	private double resetTickLength = 1;
 	public Double startTick;
 	public Object ticker;
 	public boolean shouldPlayWhilePaused = false;
