@@ -83,14 +83,14 @@ public class AnimationController<T extends IAnimatable>
 	 * An AnimationPredicate is run every render frame for ever AnimationController. The "test" method is where you should change animations, stop animations, restart, etc.
 	 */
 	@FunctionalInterface
-	public interface IAnimationPredicate<P>
+	public interface IAnimationPredicate<P extends IAnimatable>
 	{
 		/**
 		 * An AnimationPredicate is run every render frame for ever AnimationController. The "test" method is where you should change animations, stop animations, restart, etc.
 		 *
-		 * @return TRUE if the animation should continue, FALSE if it should stop.
+		 * @return CONTINUE if the animation should continue, STOP if it should stop.
 		 */
-		<P extends IAnimatable> PlayState test(AnimationEvent<P> event);
+		PlayState test(AnimationEvent<P> event);
 	}
 
 	/**
