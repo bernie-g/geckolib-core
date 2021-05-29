@@ -15,9 +15,9 @@ repositories {
 }
 
 dependencies {
-    compile 'com.eliotlash.molang:molang:SNAPSHOT.12'
-    compile 'com.eliotlash.mclib:mclib:SNAPSHOT.12'
-    compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.11'
+    implementation 'com.eliotlash.molang:molang:SNAPSHOT.12'
+    implementation 'com.eliotlash.mclib:mclib:SNAPSHOT.12'
+    implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.11'
 }
 
 jar {
