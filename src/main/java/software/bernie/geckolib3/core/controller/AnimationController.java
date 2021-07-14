@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
  */
 public class AnimationController<T extends IAnimatable>
 {
-	static List<Function<IAnimatable, IAnimatableModel>> modelFetchers = new ArrayList<>();
+	static List<ModelFetcher<?>> modelFetchers = new ArrayList<>();
 	/**
 	 * The Entity.
 	 */
@@ -46,7 +46,7 @@ public class AnimationController<T extends IAnimatable>
 	/**
 	 * The name of the animation controller
 	 */
-	private String name;
+	private final String name;
 
 	protected AnimationState animationState = AnimationState.Stopped;
 
@@ -58,22 +58,22 @@ public class AnimationController<T extends IAnimatable>
 	/**
 	 * The sound listener is called every time a sound keyframe is encountered (i.e. every frame)
 	 */
-	private ISoundListener soundListener;
+	private ISoundListener<T> soundListener;
 
 	/**
 	 * The particle listener is called every time a particle keyframe is encountered (i.e. every frame)
 	 */
-	private IParticleListener particleListener;
+	private IParticleListener<T> particleListener;
 
 
 	/**
 	 * The custom instruction listener is called every time a custom instruction keyframe is encountered (i.e. every frame)
 	 */
-	private ICustomInstructionListener customInstructionListener;
+	private ICustomInstructionListener<T> customInstructionListener;
 
 	public boolean isJustStarting = false;
 
-	public static void addModelFetcher(Function<IAnimatable, IAnimatableModel> fetcher)
+	public static void addModelFetcher(ModelFetcher<?> fetcher)
 	{
 		modelFetchers.add(fetcher);
 	}
@@ -136,7 +136,7 @@ public class AnimationController<T extends IAnimatable>
 	protected Animation currentAnimation;
 	protected AnimationBuilder currentAnimationBuilder = new AnimationBuilder();
 	protected boolean shouldResetTick = false;
-	private HashMap<String, BoneSnapshot> boneSnapshots = new HashMap<>();
+	private final HashMap<String, BoneSnapshot> boneSnapshots = new HashMap<>();
 	private boolean justStopped = false;
 	protected boolean justStartedTransition = false;
 	public Function<Double, Double> customEasingMethod;
@@ -147,7 +147,7 @@ public class AnimationController<T extends IAnimatable>
 	 */
 	public void setAnimation(AnimationBuilder builder)
 	{
-		IAnimatableModel model = getModel(this.animatable);
+		IAnimatableModel<T> model = getModel(this.animatable);
 		if (model != null)
 		{
 			if (builder == null || builder.getRawAnimationList().size() == 0)
@@ -158,23 +158,18 @@ public class AnimationController<T extends IAnimatable>
 			{
 				AtomicBoolean encounteredError = new AtomicBoolean(false);
 				// Convert the list of animation names to the actual list, keeping track of the loop boolean along the way
-				IAnimatableModel finalModel = model;
-				LinkedList<Animation> animations = new LinkedList<>(
-						builder.getRawAnimationList().stream().map((rawAnimation) ->
-						{
-							Animation animation = finalModel.getAnimation(rawAnimation.animationName, animatable);
-							if (animation == null)
-							{
-								System.out.println(
-										"Could not load animation: " + rawAnimation.animationName + ". Is it missing?");
-								encounteredError.set(true);
-							}
-							if (animation != null && rawAnimation.loop != null)
-							{
-								animation.loop = rawAnimation.loop;
-							}
-							return animation;
-						}).collect(Collectors.toList()));
+				LinkedList<Animation> animations = builder.getRawAnimationList().stream().map((rawAnimation) ->
+				{
+					Animation animation = model.getAnimation(rawAnimation.animationName, animatable);
+					if (animation == null) {
+						System.out.printf("Could not load animation: %s. Is it missing?", rawAnimation.animationName);
+						encounteredError.set(true);
+					}
+					if (animation != null && rawAnimation.loop != null) {
+						animation.loop = rawAnimation.loop;
+					}
+					return animation;
+				}).collect(Collectors.toCollection(LinkedList::new));
 
 				if (encounteredError.get())
 				{
@@ -296,7 +291,7 @@ public class AnimationController<T extends IAnimatable>
 	/**
 	 * Registers a sound listener.
 	 */
-	public void registerSoundListener(ISoundListener soundListener)
+	public void registerSoundListener(ISoundListener<T> soundListener)
 	{
 		this.soundListener = soundListener;
 	}
@@ -304,7 +299,7 @@ public class AnimationController<T extends IAnimatable>
 	/**
 	 * Registers a particle listener.
 	 */
-	public void registerParticleListener(IParticleListener particleListener)
+	public void registerParticleListener(IParticleListener<T> particleListener)
 	{
 		this.particleListener = particleListener;
 	}
@@ -312,7 +307,7 @@ public class AnimationController<T extends IAnimatable>
 	/**
 	 * Registers a custom instruction listener.
 	 */
-	public void registerCustomInstructionListener(ICustomInstructionListener customInstructionListener)
+	public void registerCustomInstructionListener(ICustomInstructionListener<T> customInstructionListener)
 	{
 		this.customInstructionListener = customInstructionListener;
 	}
@@ -326,17 +321,20 @@ public class AnimationController<T extends IAnimatable>
 	 * @param modelRendererList      The list of all AnimatedModelRender's
 	 * @param boneSnapshotCollection The bone snapshot collection
 	 */
-	public void process(double tick, AnimationEvent event, List<IBone> modelRendererList, HashMap<String, Pair<IBone, BoneSnapshot>> boneSnapshotCollection, MolangParser parser, boolean crashWhenCantFindBone)
+	public void process(double tick, AnimationEvent<T> event, List<IBone> modelRendererList, HashMap<String, Pair<IBone, BoneSnapshot>> boneSnapshotCollection, MolangParser parser, boolean crashWhenCantFindBone)
 	{
 		if (currentAnimation != null)
 		{
-			IAnimatableModel model = getModel(this.animatable);
-			Animation animation = model.getAnimation(currentAnimation.animationName, this.animatable);
-			if (model != null && animation != null)
+			IAnimatableModel<T> model = getModel(this.animatable);
+			if (model != null)
 			{
-				boolean loop = currentAnimation.loop;
-				currentAnimation = animation;
-				currentAnimation.loop = loop;
+				Animation animation = model.getAnimation(currentAnimation.animationName, this.animatable);
+				if (animation != null)
+				{
+					boolean loop = currentAnimation.loop;
+					currentAnimation = animation;
+					currentAnimation.loop = loop;
+				}
 			}
 		}
 
@@ -469,17 +467,18 @@ public class AnimationController<T extends IAnimatable>
 		parser.setValue("query.life_time", tick / 20);
 	}
 
-	private IAnimatableModel getModel(T animatable)
+	private IAnimatableModel<T> getModel(T animatable)
 	{
-		for (Function<IAnimatable, IAnimatableModel> modelGetter : modelFetchers)
+		for (ModelFetcher<?> modelFetcher : modelFetchers)
 		{
-			IAnimatableModel model = modelGetter.apply(animatable);
+			// TODO: what the hell? - leocth
+			IAnimatableModel<T> model = (IAnimatableModel<T>) modelFetcher.apply(animatable);
 			if (model != null)
 			{
 				return model;
 			}
 		}
-		System.out.println(String.format("Could not find suitable model for animatable of type %s. Did you register a Model Fetcher?", animatable.getClass()));
+		System.out.printf("Could not find suitable model for animatable of type %s. Did you register a Model Fetcher?%n", animatable.getClass());
 		return null;
 	}
 
@@ -586,7 +585,7 @@ public class AnimationController<T extends IAnimatable>
 			{
 				if (!soundKeyFrame.hasExecuted && tick >= soundKeyFrame.getStartTick())
 				{
-					SoundKeyframeEvent event = new SoundKeyframeEvent(this.animatable, tick, soundKeyFrame.getEventData(),
+					SoundKeyframeEvent<T> event = new SoundKeyframeEvent<>(this.animatable, tick, soundKeyFrame.getEventData(),
 							this);
 					soundListener.playSound(event);
 					soundKeyFrame.hasExecuted = true;
@@ -597,7 +596,7 @@ public class AnimationController<T extends IAnimatable>
 			{
 				if (!particleEventKeyFrame.hasExecuted && tick >= particleEventKeyFrame.getStartTick())
 				{
-					ParticleKeyFrameEvent event = new ParticleKeyFrameEvent(this.animatable, tick,
+					ParticleKeyFrameEvent<T> event = new ParticleKeyFrameEvent<>(this.animatable, tick,
 							particleEventKeyFrame.effect, particleEventKeyFrame.locator, particleEventKeyFrame.script,
 							this);
 					particleListener.summonParticle(event);
@@ -609,7 +608,7 @@ public class AnimationController<T extends IAnimatable>
 			{
 				if (!customInstructionKeyFrame.hasExecuted && tick >= customInstructionKeyFrame.getStartTick())
 				{
-					CustomInstructionKeyframeEvent event = new CustomInstructionKeyframeEvent(this.animatable, tick,
+					CustomInstructionKeyframeEvent<T> event = new CustomInstructionKeyframeEvent<>(this.animatable, tick,
 							customInstructionKeyFrame.getEventData(), this);
 					customInstructionListener.executeInstruction(event);
 					customInstructionKeyFrame.hasExecuted = true;
@@ -685,17 +684,14 @@ public class AnimationController<T extends IAnimatable>
 	private KeyFrameLocation<KeyFrame<IValue>> getCurrentKeyFrameLocation(List<KeyFrame<IValue>> frames, double ageInTicks)
 	{
 		double totalTimeTracker = 0;
-		for (int i = 0; i < frames.size(); i++)
-		{
-			KeyFrame frame = frames.get(i);
+		for (KeyFrame<IValue> frame : frames) {
 			totalTimeTracker += frame.getLength();
-			if (totalTimeTracker > ageInTicks)
-			{
+			if (totalTimeTracker > ageInTicks) {
 				double tick = (ageInTicks - (totalTimeTracker - frame.getLength()));
 				return new KeyFrameLocation<>(frame, tick);
 			}
 		}
-		return new KeyFrameLocation(frames.get(frames.size() - 1), ageInTicks);
+		return new KeyFrameLocation<>(frames.get(frames.size() - 1), ageInTicks);
 	}
 
 
@@ -705,26 +701,17 @@ public class AnimationController<T extends IAnimatable>
 		{
 			return;
 		}
-		if (!animation.soundKeyFrames.isEmpty())
+		for (EventKeyFrame<String> soundKeyFrame : animation.soundKeyFrames)
 		{
-			for (EventKeyFrame soundKeyFrame : animation.soundKeyFrames)
-			{
-				soundKeyFrame.hasExecuted = false;
-			}
+			soundKeyFrame.hasExecuted = false;
 		}
-		if (!animation.particleKeyFrames.isEmpty())
+		for (ParticleEventKeyFrame particleKeyFrame : animation.particleKeyFrames)
 		{
-			for (EventKeyFrame particleKeyFrame : animation.particleKeyFrames)
-			{
-				particleKeyFrame.hasExecuted = false;
-			}
+			particleKeyFrame.hasExecuted = false;
 		}
-		if (!animation.customInstructionKeyframes.isEmpty())
+		for (EventKeyFrame<List<String>> customInstructionKeyFrame : animation.customInstructionKeyframes)
 		{
-			for (EventKeyFrame customInstructionKeyFrame : animation.customInstructionKeyframes)
-			{
-				customInstructionKeyFrame.hasExecuted = false;
-			}
+			customInstructionKeyFrame.hasExecuted = false;
 		}
 	}
 
@@ -737,4 +724,8 @@ public class AnimationController<T extends IAnimatable>
 	{
 		this.currentAnimationBuilder = new AnimationBuilder();
 	}
+
+
+	@FunctionalInterface
+	public interface ModelFetcher<T> extends Function<IAnimatable, IAnimatableModel<T>> {}
 }
