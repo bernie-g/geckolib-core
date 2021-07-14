@@ -97,36 +97,36 @@ public class AnimationController<T extends IAnimatable>
 	 * Sound Listeners are run when a sound keyframe is hit. You can either return the SoundEvent and geckolib will play the sound for you, or return null and handle the sounds yourself.
 	 */
 	@FunctionalInterface
-	public interface ISoundListener
+	public interface ISoundListener<A extends IAnimatable>
 	{
 		/**
 		 * Sound Listeners are run when a sound keyframe is hit. You can either return the SoundEvent and geckolib will play the sound for you, or return null and handle the sounds yourself.
 		 */
-		<A extends IAnimatable> void playSound(SoundKeyframeEvent<A> event);
+		void playSound(SoundKeyframeEvent<A> event);
 	}
 
 	/**
 	 * Particle Listeners are run when a sound keyframe is hit. You need to handle the actual playing of the particle yourself.
 	 */
 	@FunctionalInterface
-	public interface IParticleListener
+	public interface IParticleListener<A extends IAnimatable>
 	{
 		/**
 		 * Particle Listeners are run when a sound keyframe is hit. You need to handle the actual playing of the particle yourself.
 		 */
-		<A extends IAnimatable> void summonParticle(ParticleKeyFrameEvent<A> event);
+		void summonParticle(ParticleKeyFrameEvent<A> event);
 	}
 
 	/**
 	 * Custom instructions can be added in blockbench by enabling animation effects in Animation - Animate Effects. You can then add custom instruction keyframes and use them as timecodes/events to handle in code.
 	 */
 	@FunctionalInterface
-	public interface ICustomInstructionListener
+	public interface ICustomInstructionListener<A extends IAnimatable>
 	{
 		/**
 		 * Custom instructions can be added in blockbench by enabling animation effects in Animation - Animate Effects. You can then add custom instruction keyframes and use them as timecodes/events to handle in code.
 		 */
-		<A extends IAnimatable> void executeInstruction(CustomInstructionKeyframeEvent<A> event);
+		void executeInstruction(CustomInstructionKeyframeEvent<A> event);
 	}
 
 
