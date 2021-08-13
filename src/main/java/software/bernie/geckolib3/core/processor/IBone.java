@@ -49,4 +49,5 @@ public interface IBone
 	String getName();
 
 	boolean isDirty();
+	void setDirty(boolean dirty);
 }
