@@ -47,4 +47,6 @@ public interface IBone
 		return new BoneSnapshot(this);
 	}
 	String getName();
+
+	boolean isDirty();
 }
