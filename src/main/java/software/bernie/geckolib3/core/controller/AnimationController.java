@@ -633,7 +633,7 @@ public class AnimationController<T extends IAnimatable>
 	}
 
 	// Used to reset the "tick" everytime a new animation starts, a transition starts, or something else of importance happens
-	private double adjustTick(double tick)
+	protected double adjustTick(double tick)
 	{
 		if (shouldResetTick)
 		{
