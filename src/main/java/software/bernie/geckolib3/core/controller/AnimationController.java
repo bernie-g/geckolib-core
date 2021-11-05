@@ -5,10 +5,26 @@
 
 package software.bernie.geckolib3.core.controller;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Optional;
+import java.util.Queue;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+import org.apache.commons.lang3.tuple.Pair;
+
 import com.eliotlash.mclib.math.IValue;
 import com.eliotlash.molang.MolangParser;
-import org.apache.commons.lang3.tuple.Pair;
-import software.bernie.geckolib3.core.*;
+
+import software.bernie.geckolib3.core.AnimationState;
+import software.bernie.geckolib3.core.ConstantValue;
+import software.bernie.geckolib3.core.IAnimatable;
+import software.bernie.geckolib3.core.IAnimatableModel;
+import software.bernie.geckolib3.core.PlayState;
 import software.bernie.geckolib3.core.builder.Animation;
 import software.bernie.geckolib3.core.builder.AnimationBuilder;
 import software.bernie.geckolib3.core.easing.EasingType;
@@ -16,15 +32,17 @@ import software.bernie.geckolib3.core.event.CustomInstructionKeyframeEvent;
 import software.bernie.geckolib3.core.event.ParticleKeyFrameEvent;
 import software.bernie.geckolib3.core.event.SoundKeyframeEvent;
 import software.bernie.geckolib3.core.event.predicate.AnimationEvent;
-import software.bernie.geckolib3.core.keyframe.*;
+import software.bernie.geckolib3.core.keyframe.AnimationPoint;
+import software.bernie.geckolib3.core.keyframe.BoneAnimation;
+import software.bernie.geckolib3.core.keyframe.BoneAnimationQueue;
+import software.bernie.geckolib3.core.keyframe.EventKeyFrame;
+import software.bernie.geckolib3.core.keyframe.KeyFrame;
+import software.bernie.geckolib3.core.keyframe.KeyFrameLocation;
+import software.bernie.geckolib3.core.keyframe.ParticleEventKeyFrame;
+import software.bernie.geckolib3.core.keyframe.VectorKeyFrameList;
 import software.bernie.geckolib3.core.processor.IBone;
 import software.bernie.geckolib3.core.snapshot.BoneSnapshot;
 import software.bernie.geckolib3.core.util.Axis;
-
-import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 /**
  * The type Animation controller.
@@ -131,7 +149,7 @@ public class AnimationController<T extends IAnimatable>
 
 
 	private final HashMap<String, BoneAnimationQueue> boneAnimationQueues = new HashMap<>();
-	private double tickOffset = 0;
+	private double tickOffset;
 	protected Queue<Animation> animationQueue = new LinkedList<>();
 	protected Animation currentAnimation;
 	protected AnimationBuilder currentAnimationBuilder = new AnimationBuilder();
@@ -210,6 +228,7 @@ public class AnimationController<T extends IAnimatable>
 		this.name = name;
 		this.transitionLengthTicks = transitionLengthTicks;
 		this.animationPredicate = animationPredicate;
+		tickOffset = 0.0d;
 	}
 
 
@@ -228,6 +247,7 @@ public class AnimationController<T extends IAnimatable>
 		this.transitionLengthTicks = transitionLengthTicks;
 		this.easingType = easingtype;
 		this.animationPredicate = animationPredicate;
+		tickOffset = 0.0d;
 	}
 
 	/**
@@ -246,6 +266,7 @@ public class AnimationController<T extends IAnimatable>
 		this.customEasingMethod = customEasingMethod;
 		this.easingType = EasingType.CUSTOM;
 		this.animationPredicate = animationPredicate;
+		tickOffset = 0.0d;
 	}
 
 	/**
@@ -636,14 +657,18 @@ public class AnimationController<T extends IAnimatable>
 	// Used to reset the "tick" everytime a new animation starts, a transition starts, or something else of importance happens
 	protected double adjustTick(double tick)
 	{
-		if (shouldResetTick)
-		{
-			this.tickOffset = tick;
-			shouldResetTick = false;
-			return 0;
-		}
+		if (shouldResetTick) {
+            if (getAnimationState() == AnimationState.Transitioning) {
+                this.tickOffset = tick;
+            }
+            else if (getAnimationState() == AnimationState.Running) {
+                this.tickOffset = tick;
+            }
+            shouldResetTick = false;
+            return 0;
+        }
 		//assert tick - this.tickOffset >= 0;
-		return (tick - this.tickOffset < 0 ? 0 : tick - this.tickOffset);
+		return Math.max(tick - this.tickOffset, 0.0D);
 	}
 
 	//Helper method to transform a KeyFrameLocation to an AnimationPoint
