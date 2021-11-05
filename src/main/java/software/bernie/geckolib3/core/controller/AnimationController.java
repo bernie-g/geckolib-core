@@ -131,7 +131,7 @@ public class AnimationController<T extends IAnimatable>
 
 
 	private final HashMap<String, BoneAnimationQueue> boneAnimationQueues = new HashMap<>();
-	private double tickOffset;
+	private double tickOffset = 0;
 	protected Queue<Animation> animationQueue = new LinkedList<>();
 	protected Animation currentAnimation;
 	protected AnimationBuilder currentAnimationBuilder = new AnimationBuilder();
@@ -210,7 +210,6 @@ public class AnimationController<T extends IAnimatable>
 		this.name = name;
 		this.transitionLengthTicks = transitionLengthTicks;
 		this.animationPredicate = animationPredicate;
-		this.tickOffset = 0.0d;
 	}
 
 
@@ -639,15 +638,12 @@ public class AnimationController<T extends IAnimatable>
 	{
 		if (shouldResetTick)
 		{
-			if (getAnimationState() == AnimationState.Transitioning) {
-                this.tickOffset = tick;
-            }
-            else if (getAnimationState() == AnimationState.Running) {
-                this.tickOffset += transitionLengthTicks;
-            }
-            this.shouldResetTick = false;
+			this.tickOffset = tick;
+			shouldResetTick = false;
+			return 0;
 		}
-		return Math.max(tick - this.tickOffset, 0.0D);
+		//assert tick - this.tickOffset >= 0;
+		return (tick - this.tickOffset < 0 ? 0 : tick - this.tickOffset);
 	}
 
 	//Helper method to transform a KeyFrameLocation to an AnimationPoint
