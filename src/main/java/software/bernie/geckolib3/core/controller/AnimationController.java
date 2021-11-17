@@ -546,7 +546,7 @@ public class AnimationController<T extends IAnimatable>
 					// Otherwise, set the state to transitioning and start transitioning to the next animation next frame
 					this.animationState = AnimationState.Transitioning;
 					shouldResetTick = true;
-					currentAnimation = this.animationQueue.peek();
+					currentAnimation = this.animationQueue.poll();
 				}
 			}
 			else
