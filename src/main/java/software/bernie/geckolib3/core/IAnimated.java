@@ -10,8 +10,10 @@ import software.bernie.geckolib3.core.manager.AnimationFactory;
 /**
  * This interface must be applied to any object that wants to be animated
  */
-public interface IAnimatable
+public interface IAnimated extends IAnimate
 {
-	void registerControllers(AnimationData data);
-	AnimationFactory getFactory();
+	/**
+	 * Get (or create) the {@code AnimationData} unique to this object.
+	 */
+	AnimationData getAnimationData();
 }

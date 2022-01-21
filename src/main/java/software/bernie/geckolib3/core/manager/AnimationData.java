@@ -5,17 +5,19 @@
 
 package software.bernie.geckolib3.core.manager;
 
-import org.apache.commons.lang3.tuple.Pair;
+import software.bernie.geckolib3.core.IAnimated;
 import software.bernie.geckolib3.core.controller.AnimationController;
 import software.bernie.geckolib3.core.processor.IBone;
 import software.bernie.geckolib3.core.snapshot.BoneSnapshot;
+import software.bernie.geckolib3.core.snapshot.DirtyTracker;
 
 import java.util.HashMap;
+import java.util.Map;
 
 public class AnimationData
 {
-	private HashMap<String, Pair<IBone, BoneSnapshot>> boneSnapshotCollection;
-	private HashMap<String, AnimationController> animationControllers = new HashMap<>();
+	private final HashMap<IBone, BoneSnapshot> boneSnapshotCollection = new HashMap<>();
+	private final HashMap<String, AnimationController> animationControllers = new HashMap<>();
 	public double tick;
 	public boolean isFirstTick = true;
 	private double resetTickLength = 1;
@@ -24,38 +26,24 @@ public class AnimationData
 	public boolean shouldPlayWhilePaused = false;
 
 	/**
-	 * Instantiates a new Animation controller collection.
-	 */
-	public AnimationData()
-	{
-		super();
-		boneSnapshotCollection = new HashMap<>();
-	}
-
-	/**
 	 * This method is how you register animation controllers, without this, your AnimationPredicate method will never be called
 	 *
 	 * @param value The value
 	 * @return the animation controller
 	 */
-	public AnimationController addAnimationController(AnimationController value)
+	public <T extends IAnimated> AnimationController<T> addAnimationController(AnimationController<T> value)
 	{
 		return this.animationControllers.put(value.getName(), value);
 	}
 
-	public HashMap<String, Pair<IBone, BoneSnapshot>> getBoneSnapshotCollection()
+	public Map<IBone, BoneSnapshot> getBoneSnapshotCollection()
 	{
 		return boneSnapshotCollection;
 	}
 
-	public void setBoneSnapshotCollection(HashMap<String, Pair<IBone, BoneSnapshot>> boneSnapshotCollection)
-	{
-		this.boneSnapshotCollection = boneSnapshotCollection;
-	}
-
 	public void clearSnapshotCache()
 	{
-		this.boneSnapshotCollection = new HashMap<>();
+		this.boneSnapshotCollection.clear();
 	}
 
 
@@ -77,5 +65,33 @@ public class AnimationData
 	public HashMap<String, AnimationController> getAnimationControllers()
 	{
 		return animationControllers;
+	}
+
+	public Map<IBone, BoneSnapshot> updateBoneSnapshots()
+	{
+		Map<IBone, BoneSnapshot> boneSnapshotCollection = getBoneSnapshotCollection();
+		for (IBone bone : modelRendererList)
+		{
+			if (!boneSnapshotCollection.containsKey(bone))
+			{
+				boneSnapshotCollection.put(bone, new BoneSnapshot(bone.getInitialSnapshot()));
+			}
+		}
+		return boneSnapshotCollection;
+	}
+
+	public Map<IBone, DirtyTracker> createNewDirtyTracker()
+	{
+		HashMap<IBone, DirtyTracker> tracker = new HashMap<>();
+		for (IBone bone : modelRendererList)
+		{
+			tracker.put(bone, new DirtyTracker(false, false, false, bone));
+		}
+		return tracker;
+	}
+
+	public IBone getBone(String name)
+	{
+		return null;
 	}
 }

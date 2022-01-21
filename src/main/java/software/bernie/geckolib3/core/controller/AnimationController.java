@@ -5,26 +5,15 @@
 
 package software.bernie.geckolib3.core.controller;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Queue;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang3.tuple.Pair;
-
 import com.eliotlash.mclib.math.IValue;
 import com.eliotlash.molang.MolangParser;
 
-import software.bernie.geckolib3.core.AnimationState;
-import software.bernie.geckolib3.core.ConstantValue;
-import software.bernie.geckolib3.core.IAnimatable;
-import software.bernie.geckolib3.core.IAnimatableModel;
-import software.bernie.geckolib3.core.PlayState;
+import software.bernie.geckolib3.core.*;
 import software.bernie.geckolib3.core.builder.Animation;
 import software.bernie.geckolib3.core.builder.AnimationBuilder;
 import software.bernie.geckolib3.core.easing.EasingType;
@@ -49,7 +38,7 @@ import software.bernie.geckolib3.core.util.Axis;
  *
  * @param <T> the type parameter
  */
-public class AnimationController<T extends IAnimatable>
+public class AnimationController<T extends IAnimate>
 {
 	static List<ModelFetcher<?>> modelFetchers = new ArrayList<>();
 	/**
@@ -101,7 +90,7 @@ public class AnimationController<T extends IAnimatable>
 	 * An AnimationPredicate is run every render frame for ever AnimationController. The "test" method is where you should change animations, stop animations, restart, etc.
 	 */
 	@FunctionalInterface
-	public interface IAnimationPredicate<P extends IAnimatable>
+	public interface IAnimationPredicate<P extends IAnimated>
 	{
 		/**
 		 * An AnimationPredicate is run every render frame for ever AnimationController. The "test" method is where you should change animations, stop animations, restart, etc.
@@ -115,7 +104,7 @@ public class AnimationController<T extends IAnimatable>
 	 * Sound Listeners are run when a sound keyframe is hit. You can either return the SoundEvent and geckolib will play the sound for you, or return null and handle the sounds yourself.
 	 */
 	@FunctionalInterface
-	public interface ISoundListener<A extends IAnimatable>
+	public interface ISoundListener<A extends IAnimated>
 	{
 		/**
 		 * Sound Listeners are run when a sound keyframe is hit. You can either return the SoundEvent and geckolib will play the sound for you, or return null and handle the sounds yourself.
@@ -127,7 +116,7 @@ public class AnimationController<T extends IAnimatable>
 	 * Particle Listeners are run when a sound keyframe is hit. You need to handle the actual playing of the particle yourself.
 	 */
 	@FunctionalInterface
-	public interface IParticleListener<A extends IAnimatable>
+	public interface IParticleListener<A extends IAnimated>
 	{
 		/**
 		 * Particle Listeners are run when a sound keyframe is hit. You need to handle the actual playing of the particle yourself.
@@ -139,7 +128,7 @@ public class AnimationController<T extends IAnimatable>
 	 * Custom instructions can be added in blockbench by enabling animation effects in Animation - Animate Effects. You can then add custom instruction keyframes and use them as timecodes/events to handle in code.
 	 */
 	@FunctionalInterface
-	public interface ICustomInstructionListener<A extends IAnimatable>
+	public interface ICustomInstructionListener<A extends IAnimated>
 	{
 		/**
 		 * Custom instructions can be added in blockbench by enabling animation effects in Animation - Animate Effects. You can then add custom instruction keyframes and use them as timecodes/events to handle in code.
@@ -342,7 +331,7 @@ public class AnimationController<T extends IAnimatable>
 	 * @param modelRendererList      The list of all AnimatedModelRender's
 	 * @param boneSnapshotCollection The bone snapshot collection
 	 */
-	public void process(double tick, AnimationEvent<T> event, List<IBone> modelRendererList, HashMap<String, Pair<IBone, BoneSnapshot>> boneSnapshotCollection, MolangParser parser, boolean crashWhenCantFindBone)
+	public void process(double tick, AnimationEvent<T> event, List<IBone> modelRendererList, Map<IBone, BoneSnapshot> boneSnapshotCollection, MolangParser parser, boolean crashWhenCantFindBone)
 	{
 		if (currentAnimation != null)
 		{
@@ -509,15 +498,16 @@ public class AnimationController<T extends IAnimatable>
 	}
 
 	// At the beginning of a new transition, save a snapshot of the model's rotation, position, and scale values as the initial value to lerp from
-	private void saveSnapshotsForAnimation(Animation animation, HashMap<String, Pair<IBone, BoneSnapshot>> boneSnapshotCollection)
+	private void saveSnapshotsForAnimation(Animation animation, Map<IBone, BoneSnapshot> boneSnapshotCollection)
 	{
-		for (Pair<IBone, BoneSnapshot> snapshot : boneSnapshotCollection.values())
+		for (Map.Entry<IBone, BoneSnapshot> snapshot : boneSnapshotCollection.entrySet())
 		{
 			if (animation != null && animation.boneAnimations != null)
 			{
-				if (animation.boneAnimations.stream().anyMatch(x -> x.boneName.equals(snapshot.getLeft().getName())))
+				String boneName = snapshot.getKey().getName();
+				if (animation.boneAnimations.stream().anyMatch(x -> x.boneName.equals(boneName)))
 				{
-					this.boneSnapshots.put(snapshot.getLeft().getName(), new BoneSnapshot(snapshot.getRight()));
+					this.boneSnapshots.put(boneName, new BoneSnapshot(snapshot.getValue()));
 				}
 			}
 		}
@@ -753,5 +743,5 @@ public class AnimationController<T extends IAnimatable>
 
 
 	@FunctionalInterface
-	public interface ModelFetcher<T> extends Function<IAnimatable, IAnimatableModel<T>> {}
+	public interface ModelFetcher<T> extends Function<IAnimated, IAnimatableModel<T>> {}
 }

@@ -1,17 +1,19 @@
 package software.bernie.geckolib3.core.manager;
 
-import software.bernie.geckolib3.core.IAnimatable;
-
 import java.util.HashMap;
+import java.util.Map;
+import java.util.WeakHashMap;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
-public class AnimationFactory
+public class AnimationFactory<T>
 {
-	private final IAnimatable animatable;
-	private HashMap<Integer, AnimationData> animationDataMap = new HashMap<>();
+	private final BiConsumer<T, AnimationData> initializer;
+	private final Map<T, AnimationData> animationDataMap = new WeakHashMap<>();
 
-	public AnimationFactory(IAnimatable animatable)
+	public AnimationFactory(BiConsumer<T, AnimationData> initializer)
 	{
-		this.animatable = animatable;
+		this.initializer = initializer;
 	}
 
 	/**
@@ -19,17 +21,18 @@ public class AnimationFactory
 	 * For itemstacks, this is typically a hashcode of their nbt. For entities it should be their unique uuid.
 	 * For tile entities you can use nbt or just one constant value since they are not singletons.
 	 *
-	 * @param uniqueID A unique integer ID. For every ID the same animation manager will be returned.
+	 * @param key A unique integer ID. For every ID the same animation manager will be returned.
 	 * @return the animatable manager
 	 */
-	public AnimationData getOrCreateAnimationData(Integer uniqueID)
+	public AnimationData getOrCreateAnimationData(T key)
 	{
-		if (!animationDataMap.containsKey(uniqueID))
-		{
-			AnimationData data = new AnimationData();
-			animatable.registerControllers(data);
-			animationDataMap.put(uniqueID, data);
-		}
-		return animationDataMap.get(uniqueID);
+		return animationDataMap.computeIfAbsent(key, this::createAnimationData);
+	}
+
+	private AnimationData createAnimationData(T key)
+	{
+		AnimationData data = new AnimationData();
+		initializer.accept(key, data);
+		return data;
 	}
 }

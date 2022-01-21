@@ -1,8 +1,8 @@
 package software.bernie.geckolib3.core.processor;
 
 import com.eliotlash.molang.MolangParser;
-import org.apache.commons.lang3.tuple.Pair;
-import software.bernie.geckolib3.core.IAnimatable;
+
+import software.bernie.geckolib3.core.IAnimated;
 import software.bernie.geckolib3.core.IAnimatableModel;
 import software.bernie.geckolib3.core.controller.AnimationController;
 import software.bernie.geckolib3.core.event.predicate.AnimationEvent;
@@ -13,46 +13,24 @@ import software.bernie.geckolib3.core.snapshot.BoneSnapshot;
 import software.bernie.geckolib3.core.snapshot.DirtyTracker;
 import software.bernie.geckolib3.core.util.MathUtil;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
-public class AnimationProcessor<T extends IAnimatable>
+public class AnimationProcessor<T extends IAnimated>
 {
 	public boolean reloadAnimations = false;
-	private List<IBone> modelRendererList = new ArrayList();
-	private double lastTickValue = -1;
-	private Set<Integer> animatedEntities = new HashSet<>();
-	private final IAnimatableModel animatedModel;
+	private final IAnimatableModel<T> animatedModel;
 
-	public AnimationProcessor(IAnimatableModel animatedModel)
+	public AnimationProcessor(IAnimatableModel<T> animatedModel)
 	{
 		this.animatedModel = animatedModel;
 	}
 
-	public void tickAnimation(IAnimatable entity, Integer uniqueID, double seekTime, AnimationEvent event, MolangParser parser, boolean crashWhenCantFindBone)
+	public void tickAnimation(IAnimated entity, AnimationData manager, double seekTime, AnimationEvent<T> event, MolangParser parser, boolean crashWhenCantFindBone)
 	{
-		if (seekTime != lastTickValue) {
-			animatedEntities.clear();
-		} else if (animatedEntities.contains(uniqueID)) { // Entity already animated on this tick
-			return;
-		}
-
-		lastTickValue = seekTime;
-		animatedEntities.add(uniqueID);
-
-		// Each animation has it's own collection of animations (called the EntityAnimationManager), which allows for multiple independent animations
-		AnimationData manager = entity.getFactory().getOrCreateAnimationData(uniqueID);
-		// Keeps track of which bones have had animations applied to them, and eventually sets the ones that don't have an animation to their default values
-		HashMap<String, DirtyTracker> modelTracker = createNewDirtyTracker();
-
 		// Store the current value of each bone rotation/position/scale
-		updateBoneSnapshots(manager.getBoneSnapshotCollection());
-
-		HashMap<String, Pair<IBone, BoneSnapshot>> boneSnapshots = manager.getBoneSnapshotCollection();
+		Map<IBone, BoneSnapshot> boneSnapshots = manager.updateBoneSnapshots();
+		// Keeps track of which bones have had animations applied to them, and eventually sets the ones that don't have an animation to their default values
+		Map<IBone, DirtyTracker> modelTracker = manager.createNewDirtyTracker();
 
 		for (AnimationController<T> controller : manager.getAnimationControllers().values())
 		{
@@ -68,13 +46,13 @@ public class AnimationProcessor<T extends IAnimatable>
 			event.setController(controller);
 
 			// Process animations and add new values to the point queues
-			controller.process(seekTime, event, modelRendererList, boneSnapshots, parser, crashWhenCantFindBone);
+			controller.process(seekTime, event, null, boneSnapshots, parser, crashWhenCantFindBone);
 
 			// Loop through every single bone and lerp each property
 			for (BoneAnimationQueue boneAnimation : controller.getBoneAnimationQueues().values())
 			{
 				IBone bone = boneAnimation.bone;
-				BoneSnapshot snapshot = boneSnapshots.get(bone.getName()).getRight();
+				BoneSnapshot snapshot = boneSnapshots.get(bone);
 				BoneSnapshot initialSnapshot = bone.getInitialSnapshot();
 
 				AnimationPoint rXPoint = boneAnimation.rotationXQueue.poll();
@@ -90,7 +68,7 @@ public class AnimationProcessor<T extends IAnimatable>
 				AnimationPoint sZPoint = boneAnimation.scaleZQueue.poll();
 
 				// If there's any rotation points for this bone
-				DirtyTracker dirtyTracker = modelTracker.get(bone.getName());
+				DirtyTracker dirtyTracker = modelTracker.get(bone);
 				if (dirtyTracker == null)
 				{
 					continue;
@@ -149,16 +127,16 @@ public class AnimationProcessor<T extends IAnimatable>
 		this.reloadAnimations = false;
 
 		double resetTickLength = manager.getResetSpeed();
-		for (Map.Entry<String, DirtyTracker> tracker : modelTracker.entrySet())
+		for (Map.Entry<IBone, DirtyTracker> tracker : modelTracker.entrySet())
 		{
-			IBone model = tracker.getValue().model;
+			IBone model = tracker.getKey();
 			BoneSnapshot initialSnapshot = model.getInitialSnapshot();
-			BoneSnapshot saveSnapshot = boneSnapshots.get(tracker.getKey()).getRight();
+			BoneSnapshot saveSnapshot = boneSnapshots.get(tracker.getKey());
 			if (saveSnapshot == null)
 			{
 				if (crashWhenCantFindBone)
 				{
-					throw new RuntimeException("Could not find save snapshot for bone: " + tracker.getValue().model.getName() + ". Please don't add bones that are used in an animation at runtime.");
+					throw new RuntimeException("Could not find save snapshot for bone: " + tracker.getKey().getName() + ". Please don't add bones that are used in an animation at runtime.");
 				}
 				else
 				{
@@ -242,62 +220,12 @@ public class AnimationProcessor<T extends IAnimatable>
 		manager.isFirstTick = false;
 	}
 
-	private HashMap<String, DirtyTracker> createNewDirtyTracker()
+	public boolean isNotEmpty()
 	{
-		HashMap<String, DirtyTracker> tracker = new HashMap<>();
-		for (IBone bone : modelRendererList)
-		{
-			tracker.put(bone.getName(), new DirtyTracker(false, false, false, bone));
-		}
-		return tracker;
+		return true;
 	}
 
-	private void updateBoneSnapshots(HashMap<String, Pair<IBone, BoneSnapshot>> boneSnapshotCollection)
-	{
-		for (IBone bone : modelRendererList)
-		{
-			if (!boneSnapshotCollection.containsKey(bone.getName()))
-			{
-				boneSnapshotCollection.put(bone.getName(), Pair.of(bone, new BoneSnapshot(bone.getInitialSnapshot())));
-			}
-		}
-	}
-
-	/**
-	 * Gets a bone by name.
-	 *
-	 * @param boneName The bone name
-	 * @return the bone
-	 */
-	public IBone getBone(String boneName)
-	{
-		return modelRendererList.stream().filter(x -> x.getName().equals(boneName)).findFirst().orElse(
-				null);
-	}
-
-	/**
-	 * Register model renderer. Each AnimatedModelRenderer (group in blockbench) NEEDS to be registered via this method.
-	 *
-	 * @param modelRenderer The model renderer
-	 */
-	public void registerModelRenderer(IBone modelRenderer)
-	{
-		modelRenderer.saveInitialSnapshot();
-		modelRendererList.add(modelRenderer);
-	}
-
-
-	public void clearModelRendererList()
-	{
-		this.modelRendererList.clear();
-	}
-
-	public List<IBone> getModelRendererList()
-	{
-		return modelRendererList;
-	}
-
-	public void preAnimationSetup(IAnimatable animatable, double seekTime)
+	public void preAnimationSetup(IAnimated animatable, double seekTime)
 	{
 		this.animatedModel.setMolangQueries(animatable, seekTime);
 	}
