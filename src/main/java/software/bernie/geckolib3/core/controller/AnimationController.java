@@ -29,6 +29,7 @@ import software.bernie.geckolib3.core.keyframe.KeyFrame;
 import software.bernie.geckolib3.core.keyframe.KeyFrameLocation;
 import software.bernie.geckolib3.core.keyframe.ParticleEventKeyFrame;
 import software.bernie.geckolib3.core.keyframe.VectorKeyFrameList;
+import software.bernie.geckolib3.core.manager.AnimationData;
 import software.bernie.geckolib3.core.processor.IBone;
 import software.bernie.geckolib3.core.snapshot.BoneSnapshot;
 import software.bernie.geckolib3.core.util.Axis;
@@ -38,7 +39,7 @@ import software.bernie.geckolib3.core.util.Axis;
  *
  * @param <T> the type parameter
  */
-public class AnimationController<T extends IAnimate>
+public class AnimationController<T>
 {
 	static List<ModelFetcher<?>> modelFetchers = new ArrayList<>();
 	/**
@@ -80,7 +81,7 @@ public class AnimationController<T extends IAnimate>
 
 	public boolean isJustStarting = false;
 
-	public static void addModelFetcher(ModelFetcher<?> fetcher)
+	public static <T> void addModelFetcher(ModelFetcher<T> fetcher)
 	{
 		modelFetchers.add(fetcher);
 	}
@@ -90,7 +91,7 @@ public class AnimationController<T extends IAnimate>
 	 * An AnimationPredicate is run every render frame for ever AnimationController. The "test" method is where you should change animations, stop animations, restart, etc.
 	 */
 	@FunctionalInterface
-	public interface IAnimationPredicate<P extends IAnimated>
+	public interface IAnimationPredicate<P>
 	{
 		/**
 		 * An AnimationPredicate is run every render frame for ever AnimationController. The "test" method is where you should change animations, stop animations, restart, etc.
@@ -104,7 +105,7 @@ public class AnimationController<T extends IAnimate>
 	 * Sound Listeners are run when a sound keyframe is hit. You can either return the SoundEvent and geckolib will play the sound for you, or return null and handle the sounds yourself.
 	 */
 	@FunctionalInterface
-	public interface ISoundListener<A extends IAnimated>
+	public interface ISoundListener<A>
 	{
 		/**
 		 * Sound Listeners are run when a sound keyframe is hit. You can either return the SoundEvent and geckolib will play the sound for you, or return null and handle the sounds yourself.
@@ -116,7 +117,7 @@ public class AnimationController<T extends IAnimate>
 	 * Particle Listeners are run when a sound keyframe is hit. You need to handle the actual playing of the particle yourself.
 	 */
 	@FunctionalInterface
-	public interface IParticleListener<A extends IAnimated>
+	public interface IParticleListener<A>
 	{
 		/**
 		 * Particle Listeners are run when a sound keyframe is hit. You need to handle the actual playing of the particle yourself.
@@ -128,7 +129,7 @@ public class AnimationController<T extends IAnimate>
 	 * Custom instructions can be added in blockbench by enabling animation effects in Animation - Animate Effects. You can then add custom instruction keyframes and use them as timecodes/events to handle in code.
 	 */
 	@FunctionalInterface
-	public interface ICustomInstructionListener<A extends IAnimated>
+	public interface ICustomInstructionListener<A>
 	{
 		/**
 		 * Custom instructions can be added in blockbench by enabling animation effects in Animation - Animate Effects. You can then add custom instruction keyframes and use them as timecodes/events to handle in code.
@@ -137,7 +138,7 @@ public class AnimationController<T extends IAnimate>
 	}
 
 
-	private final HashMap<String, BoneAnimationQueue> boneAnimationQueues = new HashMap<>();
+	private final Map<String, BoneAnimationQueue> boneAnimationQueues = new HashMap<>();
 	private double tickOffset;
 	protected Queue<Animation> animationQueue = new LinkedList<>();
 	protected Animation currentAnimation;
@@ -293,7 +294,7 @@ public class AnimationController<T extends IAnimate>
 	 *
 	 * @return the bone animation queues
 	 */
-	public HashMap<String, BoneAnimationQueue> getBoneAnimationQueues()
+	public Map<String, BoneAnimationQueue> getBoneAnimationQueues()
 	{
 		return boneAnimationQueues;
 	}
@@ -326,12 +327,12 @@ public class AnimationController<T extends IAnimate>
 	/**
 	 * This method is called every frame in order to populate the animation point queues, and process animation state logic.
 	 *
+	 * @param manager
 	 * @param tick                   The current tick + partial tick
 	 * @param event                  The animation test event
-	 * @param modelRendererList      The list of all AnimatedModelRender's
 	 * @param boneSnapshotCollection The bone snapshot collection
 	 */
-	public void process(double tick, AnimationEvent<T> event, List<IBone> modelRendererList, Map<IBone, BoneSnapshot> boneSnapshotCollection, MolangParser parser, boolean crashWhenCantFindBone)
+	public void process(AnimationData manager, double tick, AnimationEvent<T> event, Map<IBone, BoneSnapshot> boneSnapshotCollection, MolangParser parser, boolean crashWhenCantFindBone)
 	{
 		if (currentAnimation != null)
 		{
@@ -347,8 +348,6 @@ public class AnimationController<T extends IAnimate>
 				}
 			}
 		}
-
-		createInitialQueues(modelRendererList);
 
 		double actualTick = tick;
 		tick = adjustTick(tick);
@@ -409,11 +408,9 @@ public class AnimationController<T extends IAnimate>
 				setAnimTime(parser, 0);
 				for (BoneAnimation boneAnimation : currentAnimation.boneAnimations)
 				{
-					BoneAnimationQueue boneAnimationQueue = boneAnimationQueues.get(boneAnimation.boneName);
 					BoneSnapshot boneSnapshot = this.boneSnapshots.get(boneAnimation.boneName);
-					Optional<IBone> first = modelRendererList.stream().filter(
-							x -> x.getName().equals(boneAnimation.boneName)).findFirst();
-					if (!first.isPresent())
+					IBone bone = manager.getBone(boneAnimation.boneName);
+					if (bone == null)
 					{
 						if (crashWhenCantFindBone)
 						{
@@ -424,12 +421,14 @@ public class AnimationController<T extends IAnimate>
 							continue;
 						}
 					}
-					BoneSnapshot initialSnapshot = first.get().getInitialSnapshot();
+					BoneSnapshot initialSnapshot = bone.getInitialSnapshot();
 					assert boneSnapshot != null : "Bone snapshot was null";
 
-					VectorKeyFrameList<KeyFrame<IValue>> rotationKeyFrames = boneAnimation.rotationKeyFrames;
-					VectorKeyFrameList<KeyFrame<IValue>> positionKeyFrames = boneAnimation.positionKeyFrames;
-					VectorKeyFrameList<KeyFrame<IValue>> scaleKeyFrames = boneAnimation.scaleKeyFrames;
+					BoneAnimationQueue boneAnimationQueue = boneAnimationQueues.get(boneAnimation.boneName);
+
+					VectorKeyFrameList<IValue> rotationKeyFrames = boneAnimation.rotationKeyFrames;
+					VectorKeyFrameList<IValue> positionKeyFrames = boneAnimation.positionKeyFrames;
+					VectorKeyFrameList<IValue> scaleKeyFrames = boneAnimation.scaleKeyFrames;
 
 					// Adding the initial positions of the upcoming animation, so the model transitions to the initial state of the new animation
 					if (!rotationKeyFrames.xKeyFrames.isEmpty())
@@ -565,9 +564,9 @@ public class AnimationController<T extends IAnimate>
 				}
 			}
 
-			VectorKeyFrameList<KeyFrame<IValue>> rotationKeyFrames = boneAnimation.rotationKeyFrames;
-			VectorKeyFrameList<KeyFrame<IValue>> positionKeyFrames = boneAnimation.positionKeyFrames;
-			VectorKeyFrameList<KeyFrame<IValue>> scaleKeyFrames = boneAnimation.scaleKeyFrames;
+			VectorKeyFrameList<IValue> rotationKeyFrames = boneAnimation.rotationKeyFrames;
+			VectorKeyFrameList<IValue> positionKeyFrames = boneAnimation.positionKeyFrames;
+			VectorKeyFrameList<IValue> scaleKeyFrames = boneAnimation.scaleKeyFrames;
 
 			if (!rotationKeyFrames.xKeyFrames.isEmpty())
 			{
@@ -631,16 +630,6 @@ public class AnimationController<T extends IAnimate>
 		if (this.transitionLengthTicks == 0 && shouldResetTick && this.animationState == AnimationState.Transitioning)
 		{
 			this.currentAnimation = animationQueue.poll();
-		}
-	}
-
-	//Helper method to populate all the initial animation point queues
-	private void createInitialQueues(List<IBone> modelRendererList)
-	{
-		boneAnimationQueues.clear();
-		for (IBone modelRenderer : modelRendererList)
-		{
-			boneAnimationQueues.put(modelRenderer.getName(), new BoneAnimationQueue(modelRenderer));
 		}
 	}
 
@@ -743,5 +732,5 @@ public class AnimationController<T extends IAnimate>
 
 
 	@FunctionalInterface
-	public interface ModelFetcher<T> extends Function<IAnimated, IAnimatableModel<T>> {}
+	public interface ModelFetcher<T> extends Function<Object, IAnimatableModel<T>> {}
 }

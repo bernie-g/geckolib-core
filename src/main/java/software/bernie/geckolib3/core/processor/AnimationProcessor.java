@@ -15,7 +15,7 @@ import software.bernie.geckolib3.core.util.MathUtil;
 
 import java.util.Map;
 
-public class AnimationProcessor<T extends IAnimated>
+public class AnimationProcessor<T>
 {
 	public boolean reloadAnimations = false;
 	private final IAnimatableModel<T> animatedModel;
@@ -25,7 +25,7 @@ public class AnimationProcessor<T extends IAnimated>
 		this.animatedModel = animatedModel;
 	}
 
-	public void tickAnimation(IAnimated entity, AnimationData manager, double seekTime, AnimationEvent<T> event, MolangParser parser, boolean crashWhenCantFindBone)
+	public void tickAnimation(AnimationData manager, double seekTime, AnimationEvent<T> event, MolangParser parser, boolean crashWhenCantFindBone)
 	{
 		// Store the current value of each bone rotation/position/scale
 		Map<IBone, BoneSnapshot> boneSnapshots = manager.updateBoneSnapshots();
@@ -46,7 +46,7 @@ public class AnimationProcessor<T extends IAnimated>
 			event.setController(controller);
 
 			// Process animations and add new values to the point queues
-			controller.process(seekTime, event, null, boneSnapshots, parser, crashWhenCantFindBone);
+			controller.process(manager, seekTime, event, boneSnapshots, parser, crashWhenCantFindBone);
 
 			// Loop through every single bone and lerp each property
 			for (BoneAnimationQueue boneAnimation : controller.getBoneAnimationQueues().values())
@@ -225,7 +225,7 @@ public class AnimationProcessor<T extends IAnimated>
 		return true;
 	}
 
-	public void preAnimationSetup(IAnimated animatable, double seekTime)
+	public void preAnimationSetup(T animatable, double seekTime)
 	{
 		this.animatedModel.setMolangQueries(animatable, seekTime);
 	}

@@ -17,11 +17,11 @@ public interface IAnimatableModel<E>
 		this.setLivingAnimations(entity, data, null);
 	}
 
-	void setLivingAnimations(E entity, AnimationData data, AnimationEvent customPredicate);
+	void setLivingAnimations(E entity, AnimationData data, AnimationEvent<E> customPredicate);
 
-	AnimationProcessor getAnimationProcessor();
+	AnimationProcessor<E> getAnimationProcessor();
 
-	Animation getAnimation(String name, IAnimated animatable);
+	Animation getAnimation(String name, E animatable);
 
-	void setMolangQueries(IAnimated animatable, double currentTick);
+	void setMolangQueries(E animatable, double currentTick);
 }

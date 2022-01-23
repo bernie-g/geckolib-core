@@ -13,20 +13,20 @@ import java.util.List;
  *
  * @param <T> the type parameter
  */
-public class VectorKeyFrameList<T extends KeyFrame>
+public class VectorKeyFrameList<T>
 {
 	/**
 	 * The X key frames.
 	 */
-	public List<T> xKeyFrames;
+	public List<KeyFrame<T>> xKeyFrames;
 	/**
 	 * The Y key frames.
 	 */
-	public List<T> yKeyFrames;
+	public List<KeyFrame<T>> yKeyFrames;
 	/**
 	 * The Z key frames.
 	 */
-	public List<T> zKeyFrames;
+	public List<KeyFrame<T>> zKeyFrames;
 
 	/**
 	 * Instantiates a new vector key frame list from 3 lists of keyframes
@@ -35,7 +35,7 @@ public class VectorKeyFrameList<T extends KeyFrame>
 	 * @param YKeyFrames the y key frames
 	 * @param ZKeyFrames the z key frames
 	 */
-	public VectorKeyFrameList(List<T> XKeyFrames, List<T> YKeyFrames, List<T> ZKeyFrames)
+	public VectorKeyFrameList(List<KeyFrame<T>> XKeyFrames, List<KeyFrame<T>> YKeyFrames, List<KeyFrame<T>> ZKeyFrames)
 	{
 		xKeyFrames = XKeyFrames;
 		yKeyFrames = YKeyFrames;
@@ -55,19 +55,19 @@ public class VectorKeyFrameList<T extends KeyFrame>
 	public double getLastKeyframeTime()
 	{
 		double xTime = 0;
-		for (T frame : xKeyFrames)
+		for (KeyFrame<T> frame : xKeyFrames)
 		{
 			xTime += frame.getLength();
 		}
 
 		double yTime = 0;
-		for (T frame : yKeyFrames)
+		for (KeyFrame<T> frame : yKeyFrames)
 		{
 			yTime += frame.getLength();
 		}
 
 		double zTime = 0;
-		for (T frame : zKeyFrames)
+		for (KeyFrame<T> frame : zKeyFrames)
 		{
 			zTime += frame.getLength();
 		}

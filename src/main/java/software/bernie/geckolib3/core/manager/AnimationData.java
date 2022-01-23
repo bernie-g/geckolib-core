@@ -11,13 +11,17 @@ import software.bernie.geckolib3.core.processor.IBone;
 import software.bernie.geckolib3.core.snapshot.BoneSnapshot;
 import software.bernie.geckolib3.core.snapshot.DirtyTracker;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class AnimationData
 {
-	private final HashMap<IBone, BoneSnapshot> boneSnapshotCollection = new HashMap<>();
-	private final HashMap<String, AnimationController> animationControllers = new HashMap<>();
+	private final List<IBone> modelRendererList = new ArrayList<>();
+	private final Map<String, IBone> nameLookup = new HashMap<>();
+	private final Map<IBone, BoneSnapshot> boneSnapshotCollection = new HashMap<>();
+	private final Map<String, AnimationController> animationControllers = new HashMap<>();
 	public double tick;
 	public boolean isFirstTick = true;
 	private double resetTickLength = 1;
@@ -31,21 +35,10 @@ public class AnimationData
 	 * @param value The value
 	 * @return the animation controller
 	 */
-	public <T extends IAnimated> AnimationController<T> addAnimationController(AnimationController<T> value)
+	public <T> AnimationController<T> addAnimationController(AnimationController<T> value)
 	{
 		return this.animationControllers.put(value.getName(), value);
 	}
-
-	public Map<IBone, BoneSnapshot> getBoneSnapshotCollection()
-	{
-		return boneSnapshotCollection;
-	}
-
-	public void clearSnapshotCache()
-	{
-		this.boneSnapshotCollection.clear();
-	}
-
 
 	public double getResetSpeed()
 	{
@@ -62,14 +55,25 @@ public class AnimationData
 		this.resetTickLength = resetTickLength < 0 ? 0 : resetTickLength;
 	}
 
-	public HashMap<String, AnimationController> getAnimationControllers()
+	public void setModelRendererList(List<IBone> modelRendererList)
+	{
+		if (modelRendererList.isEmpty())
+		{
+			this.modelRendererList.addAll(modelRendererList);
+			for (IBone iBone : this.modelRendererList) {
+				this.nameLookup.put(iBone.getName(), iBone);
+				iBone.saveInitialSnapshot();
+			}
+		}
+	}
+
+	public Map<String, AnimationController> getAnimationControllers()
 	{
 		return animationControllers;
 	}
 
 	public Map<IBone, BoneSnapshot> updateBoneSnapshots()
 	{
-		Map<IBone, BoneSnapshot> boneSnapshotCollection = getBoneSnapshotCollection();
 		for (IBone bone : modelRendererList)
 		{
 			if (!boneSnapshotCollection.containsKey(bone))
@@ -92,6 +96,6 @@ public class AnimationData
 
 	public IBone getBone(String name)
 	{
-		return null;
+		return nameLookup.get(name);
 	}
 }

@@ -6,7 +6,7 @@ import software.bernie.geckolib3.core.controller.AnimationController;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class AnimationEvent<T extends IAnimated>
+public class AnimationEvent<T>
 {
 	private final T animatable;
 	public double animationTick;
