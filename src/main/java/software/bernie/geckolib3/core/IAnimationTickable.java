@@ -1,7 +1,7 @@
 package software.bernie.geckolib3.core;
 
 public interface IAnimationTickable {
-    public void tick();
+    void tick();
 
-    public int tickTimer();
+    int tickTimer();
 }

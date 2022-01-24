@@ -1,6 +1,5 @@
 package software.bernie.geckolib3.core;
 
-public enum PlayState
-{
-	CONTINUE, STOP
+public enum PlayState {
+    CONTINUE, STOP
 }

@@ -2,49 +2,68 @@ package software.bernie.geckolib3.core.processor;
 
 import software.bernie.geckolib3.core.snapshot.BoneSnapshot;
 
-public interface IBone
-{
-	float getRotationX();
-	float getRotationY();
-	float getRotationZ();
+public interface IBone {
+    float getRotationX();
 
-	float getPositionX();
-	float getPositionY();
-	float getPositionZ();
+    float getRotationY();
 
-	float getScaleX();
-	float getScaleY();
-	float getScaleZ();
+    float getRotationZ();
 
-	void setRotationX(float value);
-	void setRotationY(float value);
-	void setRotationZ(float value);
+    float getPositionX();
 
-	void setPositionX(float value);
-	void setPositionY(float value);
-	void setPositionZ(float value);
+    float getPositionY();
 
-	void setScaleX(float value);
-	void setScaleY(float value);
-	void setScaleZ(float value);
+    float getPositionZ();
 
-	void setPivotX(float value);
-	void setPivotY(float value);
-	void setPivotZ(float value);
+    float getScaleX();
 
-	float getPivotX();
-	float getPivotY();
-	float getPivotZ();
+    float getScaleY();
 
-	boolean isHidden();
-	void setHidden(boolean hidden);
-	void setModelRendererName(String modelRendererName);
+    float getScaleZ();
 
-	void saveInitialSnapshot();
-	BoneSnapshot getInitialSnapshot();
-	default BoneSnapshot saveSnapshot()
-	{
-		return new BoneSnapshot(this);
-	}
-	String getName();
+    void setRotationX(float value);
+
+    void setRotationY(float value);
+
+    void setRotationZ(float value);
+
+    void setPositionX(float value);
+
+    void setPositionY(float value);
+
+    void setPositionZ(float value);
+
+    void setScaleX(float value);
+
+    void setScaleY(float value);
+
+    void setScaleZ(float value);
+
+    void setPivotX(float value);
+
+    void setPivotY(float value);
+
+    void setPivotZ(float value);
+
+    float getPivotX();
+
+    float getPivotY();
+
+    float getPivotZ();
+
+    boolean isHidden();
+
+    void setHidden(boolean hidden);
+
+    void setModelRendererName(String modelRendererName);
+
+    void saveInitialSnapshot();
+
+    BoneSnapshot getInitialSnapshot();
+
+    default BoneSnapshot saveSnapshot() {
+        return new BoneSnapshot(this);
+    }
+
+    String getName();
 }
