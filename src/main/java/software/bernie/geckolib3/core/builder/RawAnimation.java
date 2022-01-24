@@ -5,15 +5,18 @@
 
 package software.bernie.geckolib3.core.builder;
 
+import lombok.Getter;
+
 import java.util.Objects;
 
+@Getter
 public class RawAnimation {
-    public String animationName;
+    private final String animationName;
 
     /**
      * If loop is null, the animation processor will use the loopByDefault boolean to decide if the animation should loop.
      */
-    public Boolean loop;
+    private final Boolean loop;
 
     /**
      * A raw animation only stores the animation name and if it should loop, nothing else

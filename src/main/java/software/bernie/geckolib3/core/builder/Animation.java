@@ -16,6 +16,9 @@ import java.util.List;
  * A specific animation instance
  */
 public class Animation {
+    public Animation() {
+    }
+
     public String animationName;
     public Double animationLength;
     public boolean loop = true;

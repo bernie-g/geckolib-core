@@ -5,37 +5,30 @@
 
 package software.bernie.geckolib3.core.controller;
 
+import com.eliotlash.mclib.math.Constant;
 import com.eliotlash.mclib.math.IValue;
 import com.eliotlash.molang.MolangParser;
 import org.apache.commons.lang3.tuple.Pair;
 import software.bernie.geckolib3.core.*;
 import software.bernie.geckolib3.core.builder.Animation;
 import software.bernie.geckolib3.core.builder.AnimationBuilder;
+import software.bernie.geckolib3.core.builder.RawAnimation;
 import software.bernie.geckolib3.core.easing.EasingType;
 import software.bernie.geckolib3.core.event.CustomInstructionKeyframeEvent;
 import software.bernie.geckolib3.core.event.ParticleKeyFrameEvent;
 import software.bernie.geckolib3.core.event.SoundKeyframeEvent;
 import software.bernie.geckolib3.core.event.predicate.AnimationEvent;
 import software.bernie.geckolib3.core.keyframe.*;
+import software.bernie.geckolib3.core.model.IAnimatableModel;
 import software.bernie.geckolib3.core.processor.IBone;
 import software.bernie.geckolib3.core.snapshot.BoneSnapshot;
 import software.bernie.geckolib3.core.util.Axis;
 
 import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
-/**
- * The type Animation controller.
- *
- * @param <T> the type parameter
- */
 public class AnimationController<T extends IAnimatable> {
-    static List<ModelFetcher<?>> modelFetchers = new ArrayList<>();
-    /**
-     * The Entity.
-     */
+
     protected T animatable;
     /**
      * The animation predicate, is tested in every process call (i.e. every frame)
@@ -71,11 +64,6 @@ public class AnimationController<T extends IAnimatable> {
     private ICustomInstructionListener<T> customInstructionListener;
 
     public boolean isJustStarting = false;
-
-    public static void addModelFetcher(ModelFetcher<?> fetcher) {
-        modelFetchers.add(fetcher);
-    }
-
 
     /**
      * An AnimationPredicate is run every render frame for ever AnimationController. The "test" method is where you should change animations, stop animations, restart, etc.
@@ -140,32 +128,35 @@ public class AnimationController<T extends IAnimatable> {
      * This method sets the current animation with an animation builder. You can run this method every frame, if you pass in the same animation builder every time, it won't restart. Additionally, it smoothly transitions between animation states.
      */
     public void setAnimation(AnimationBuilder builder) {
-        IAnimatableModel<T> model = getModel(this.animatable);
-        if (model != null) {
+        Optional<IAnimatableModel<T>> optionalModel = GeckolibCoreRegistry.getModel(this.animatable);
+        if (optionalModel.isPresent()) {
+            IAnimatableModel<T> model = optionalModel.get();
             if (builder == null || builder.getRawAnimationList().size() == 0) {
                 animationState = AnimationState.Stopped;
             } else if (!builder.getRawAnimationList()
                     .equals(currentAnimationBuilder.getRawAnimationList()) || needsAnimationReload) {
-                AtomicBoolean encounteredError = new AtomicBoolean(false);
-                // Convert the list of animation names to the actual list, keeping track of the loop boolean along the way
-                LinkedList<Animation> animations = builder.getRawAnimationList().stream().map((rawAnimation) ->
-                {
-                    Animation animation = model.getAnimation(rawAnimation.animationName, animatable);
-                    if (animation == null) {
-                        System.out.printf("Could not load animation: %s. Is it missing?", rawAnimation.animationName);
-                        encounteredError.set(true);
+                Queue<Animation> animations = new LinkedList<>();
+                for (RawAnimation rawAnimation : builder.getRawAnimationList()) {
+                    Optional<Animation> animationOptional = model.getAnimation(rawAnimation.getAnimationName(),
+                            animatable);
+                    if (animationOptional.isEmpty()) {
+                        GeckolibCore.getLogger()
+                                .error("Could not find animation with name {}", rawAnimation.getAnimationName());
+                    } else {
+                        Animation animation = animationOptional.get();
+                        animation.loop = rawAnimation.getLoop() == null ? animation.loop : rawAnimation.getLoop();
+                        animations.add(animation);
                     }
-                    if (animation != null && rawAnimation.loop != null) {
-                        animation.loop = rawAnimation.loop;
-                    }
-                    return animation;
-                }).collect(Collectors.toCollection(LinkedList::new));
+                }
 
-                if (encounteredError.get()) {
+                if (animations.size() == 0) {
+                    // no animations were valid
                     return;
                 } else {
                     animationQueue = animations;
                 }
+
+                //cache the animation builder
                 currentAnimationBuilder = builder;
 
                 // Reset the adjusted tick to 0 on next animation process call
@@ -308,12 +299,13 @@ public class AnimationController<T extends IAnimatable> {
                         HashMap<String, Pair<IBone, BoneSnapshot>> boneSnapshotCollection, MolangParser parser,
                         boolean crashWhenCantFindBone) {
         if (currentAnimation != null) {
-            IAnimatableModel<T> model = getModel(this.animatable);
-            if (model != null) {
-                Animation animation = model.getAnimation(currentAnimation.animationName, this.animatable);
-                if (animation != null) {
+            Optional<IAnimatableModel<T>> model = GeckolibCoreRegistry.getModel(this.animatable);
+            if (model.isPresent()) {
+                Optional<Animation> animation = model.get()
+                        .getAnimation(currentAnimation.animationName, this.animatable);
+                if (animation.isPresent()) {
                     boolean loop = currentAnimation.loop;
-                    currentAnimation = animation;
+                    currentAnimation = animation.get();
                     currentAnimation.loop = loop;
                 }
             }
@@ -442,20 +434,6 @@ public class AnimationController<T extends IAnimatable> {
     private void setAnimTime(MolangParser parser, double tick) {
         parser.setValue("query.anim_time", tick / 20);
         parser.setValue("query.life_time", tick / 20);
-    }
-
-    private IAnimatableModel<T> getModel(T animatable) {
-        for (ModelFetcher<?> modelFetcher : modelFetchers) {
-            // TODO: what the hell? - leocth
-            IAnimatableModel<T> model = (IAnimatableModel<T>) modelFetcher.apply(animatable);
-            if (model != null) {
-                return model;
-            }
-        }
-        System.out.printf(
-                "Could not find suitable model for animatable of type %s. Did you register a Model Fetcher?%n",
-                animatable.getClass());
-        return null;
     }
 
     protected PlayState testAnimationPredicate(AnimationEvent<T> event) {
@@ -615,13 +593,13 @@ public class AnimationController<T extends IAnimatable> {
         double endValue = currentFrame.getEndValue().get();
 
         if (isRotation) {
-            if (!(currentFrame.getStartValue() instanceof ConstantValue)) {
+            if (!(currentFrame.getStartValue() instanceof Constant)) {
                 startValue = Math.toRadians(startValue);
                 if (axis == Axis.X || axis == Axis.Y) {
                     startValue *= -1;
                 }
             }
-            if (!(currentFrame.getEndValue() instanceof ConstantValue)) {
+            if (!(currentFrame.getEndValue() instanceof Constant)) {
                 endValue = Math.toRadians(endValue);
                 if (axis == Axis.X || axis == Axis.Y) {
                     endValue *= -1;
@@ -674,8 +652,4 @@ public class AnimationController<T extends IAnimatable> {
         this.currentAnimationBuilder = new AnimationBuilder();
     }
 
-
-    @FunctionalInterface
-    public interface ModelFetcher<T> extends Function<IAnimatable, IAnimatableModel<T>> {
-    }
 }
