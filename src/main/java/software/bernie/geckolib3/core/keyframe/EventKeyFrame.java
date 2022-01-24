@@ -8,7 +8,6 @@ package software.bernie.geckolib3.core.keyframe;
 public class EventKeyFrame<T>
 {
 	private T eventData;
-	public boolean hasExecuted = false;
 	private Double startTick;
 
 	public EventKeyFrame(Double startTick, T eventData)
