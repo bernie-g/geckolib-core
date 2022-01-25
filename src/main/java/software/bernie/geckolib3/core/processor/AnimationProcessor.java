@@ -25,7 +25,7 @@ public class AnimationProcessor<T>
 		this.animatedModel = animatedModel;
 	}
 
-	public void tickAnimation(AnimationData manager, double seekTime, AnimationEvent<T> event, MolangParser parser, boolean crashWhenCantFindBone)
+	public void tickAnimation(AnimationData manager, double renderTime, AnimationEvent<T> event, MolangParser parser, boolean crashWhenCantFindBone)
 	{
 		// Store the current value of each bone rotation/position/scale
 		Map<IBone, BoneSnapshot> boneSnapshots = manager.updateBoneSnapshots();
@@ -46,7 +46,7 @@ public class AnimationProcessor<T>
 			event.setController(controller);
 
 			// Process animations and add new values to the point queues
-			controller.process(manager, seekTime, event, boneSnapshots, parser, crashWhenCantFindBone);
+			controller.process(manager, renderTime, event, boneSnapshots, parser, crashWhenCantFindBone);
 
 			// Loop through every single bone and lerp each property
 			for (BoneAnimationQueue boneAnimation : controller.getBoneAnimationQueues().values())
@@ -148,11 +148,11 @@ public class AnimationProcessor<T>
 			{
 				if (saveSnapshot.isCurrentlyRunningRotationAnimation)
 				{
-					saveSnapshot.mostRecentResetRotationTick = (float) seekTime;
+					saveSnapshot.mostRecentResetRotationTick = (float) renderTime;
 					saveSnapshot.isCurrentlyRunningRotationAnimation = false;
 				}
 
-				double percentageReset = Math.min((seekTime - saveSnapshot.mostRecentResetRotationTick) / resetTickLength, 1);
+				double percentageReset = Math.min((renderTime - saveSnapshot.mostRecentResetRotationTick) / resetTickLength, 1);
 
 				model.setRotationX(MathUtil.lerpValues(percentageReset, saveSnapshot.rotationValueX,
 						initialSnapshot.rotationValueX));
@@ -172,11 +172,11 @@ public class AnimationProcessor<T>
 			{
 				if (saveSnapshot.isCurrentlyRunningPositionAnimation)
 				{
-					saveSnapshot.mostRecentResetPositionTick = (float) seekTime;
+					saveSnapshot.mostRecentResetPositionTick = (float) renderTime;
 					saveSnapshot.isCurrentlyRunningPositionAnimation = false;
 				}
 
-				double percentageReset = Math.min((seekTime - saveSnapshot.mostRecentResetPositionTick) / resetTickLength, 1);
+				double percentageReset = Math.min((renderTime - saveSnapshot.mostRecentResetPositionTick) / resetTickLength, 1);
 
 				model.setPositionX(MathUtil.lerpValues(percentageReset, saveSnapshot.positionOffsetX,
 						initialSnapshot.positionOffsetX));
@@ -196,11 +196,11 @@ public class AnimationProcessor<T>
 			{
 				if (saveSnapshot.isCurrentlyRunningScaleAnimation)
 				{
-					saveSnapshot.mostRecentResetScaleTick = (float) seekTime;
+					saveSnapshot.mostRecentResetScaleTick = (float) renderTime;
 					saveSnapshot.isCurrentlyRunningScaleAnimation = false;
 				}
 
-				double percentageReset = Math.min((seekTime - saveSnapshot.mostRecentResetScaleTick) / resetTickLength, 1);
+				double percentageReset = Math.min((renderTime - saveSnapshot.mostRecentResetScaleTick) / resetTickLength, 1);
 
 				model.setScaleX(MathUtil.lerpValues(percentageReset, saveSnapshot.scaleValueX,
 						initialSnapshot.scaleValueX));
@@ -225,8 +225,8 @@ public class AnimationProcessor<T>
 		return true;
 	}
 
-	public void preAnimationSetup(T animatable, double seekTime)
+	public void preAnimationSetup(T animatable, double partialTicks)
 	{
-		this.animatedModel.setMolangQueries(animatable, seekTime);
+		this.animatedModel.setMolangQueries(animatable, partialTicks);
 	}
 }

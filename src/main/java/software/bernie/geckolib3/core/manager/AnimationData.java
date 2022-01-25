@@ -5,8 +5,8 @@
 
 package software.bernie.geckolib3.core.manager;
 
-import software.bernie.geckolib3.core.IAnimated;
 import software.bernie.geckolib3.core.controller.AnimationController;
+import software.bernie.geckolib3.core.keyframe.BoneAnimationQueue;
 import software.bernie.geckolib3.core.processor.IBone;
 import software.bernie.geckolib3.core.snapshot.BoneSnapshot;
 import software.bernie.geckolib3.core.snapshot.DirtyTracker;
@@ -22,10 +22,8 @@ public class AnimationData
 	private final Map<String, IBone> nameLookup = new HashMap<>();
 	private final Map<IBone, BoneSnapshot> boneSnapshotCollection = new HashMap<>();
 	private final Map<String, AnimationController> animationControllers = new HashMap<>();
-	public double tick;
 	public boolean isFirstTick = true;
 	private double resetTickLength = 1;
-	public Double startTick;
 	public Object ticker;
 	public boolean shouldPlayWhilePaused = false;
 
@@ -37,7 +35,8 @@ public class AnimationData
 	 */
 	public <T> AnimationController<T> addAnimationController(AnimationController<T> value)
 	{
-		return this.animationControllers.put(value.getName(), value);
+		this.animationControllers.put(value.getName(), value);
+		return value;
 	}
 
 	public double getResetSpeed()
@@ -57,7 +56,7 @@ public class AnimationData
 
 	public void setModelRendererList(List<IBone> modelRendererList)
 	{
-		if (modelRendererList.isEmpty())
+		if (this.modelRendererList.isEmpty())
 		{
 			this.modelRendererList.addAll(modelRendererList);
 			for (IBone iBone : this.modelRendererList) {
@@ -97,5 +96,12 @@ public class AnimationData
 	public IBone getBone(String name)
 	{
 		return nameLookup.get(name);
+	}
+
+	public void createBoneAnimationQueues(Map<String, BoneAnimationQueue> out) {
+		out.clear();
+		for (IBone bone : modelRendererList) {
+			out.put(bone.getName(), new BoneAnimationQueue(bone));
+		}
 	}
 }

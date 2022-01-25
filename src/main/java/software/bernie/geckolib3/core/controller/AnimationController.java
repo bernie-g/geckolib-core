@@ -328,11 +328,11 @@ public class AnimationController<T>
 	 * This method is called every frame in order to populate the animation point queues, and process animation state logic.
 	 *
 	 * @param manager
-	 * @param tick                   The current tick + partial tick
+	 * @param renderTime             The current tick + partial tick
 	 * @param event                  The animation test event
 	 * @param boneSnapshotCollection The bone snapshot collection
 	 */
-	public void process(AnimationData manager, double tick, AnimationEvent<T> event, Map<IBone, BoneSnapshot> boneSnapshotCollection, MolangParser parser, boolean crashWhenCantFindBone)
+	public void process(AnimationData manager, double renderTime, AnimationEvent<T> event, Map<IBone, BoneSnapshot> boneSnapshotCollection, MolangParser parser, boolean crashWhenCantFindBone)
 	{
 		if (currentAnimation != null)
 		{
@@ -349,18 +349,20 @@ public class AnimationController<T>
 			}
 		}
 
-		double actualTick = tick;
-		tick = adjustTick(tick);
+		manager.createBoneAnimationQueues(boneAnimationQueues);
+
+		double actualTick = renderTime;
 
 		// Transition period has ended, reset the tick and set the animation to running
-		if (animationState == AnimationState.Transitioning && tick >= transitionLengthTicks)
+		if (animationState == AnimationState.Transitioning && renderTime >= transitionLengthTicks)
 		{
 			this.shouldResetTick = true;
 			animationState = AnimationState.Running;
-			tick = adjustTick(actualTick);
 		}
 
-		assert tick >= 0 : "GeckoLib: Tick was less than zero";
+		renderTime = adjustTick(renderTime);
+
+		assert renderTime >= 0 : "GeckoLib: Render time was less than zero";
 
 		// This tests the animation predicate
 		PlayState playState = this.testAnimationPredicate(event);
@@ -374,7 +376,7 @@ public class AnimationController<T>
 		if (justStartedTransition && (shouldResetTick || justStopped))
 		{
 			justStopped = false;
-			tick = adjustTick(actualTick);
+			renderTime = adjustTick(actualTick);
 		}
 		else if (currentAnimation == null && this.animationQueue.size() != 0)
 		{
@@ -382,7 +384,7 @@ public class AnimationController<T>
 			this.animationState = AnimationState.Transitioning;
 			justStartedTransition = true;
 			needsAnimationReload = false;
-			tick = adjustTick(actualTick);
+			renderTime = adjustTick(actualTick);
 		}
 		else
 		{
@@ -396,7 +398,7 @@ public class AnimationController<T>
 		if (animationState == AnimationState.Transitioning)
 		{
 			// Just started transitioning, so set the current animation to the first one
-			if (tick == 0 || isJustStarting)
+			if (renderTime == 0 || isJustStarting)
 			{
 				justStartedTransition = false;
 				this.currentAnimation = animationQueue.poll();
@@ -436,9 +438,9 @@ public class AnimationController<T>
 						AnimationPoint xPoint = getAnimationPointAtTick(rotationKeyFrames.xKeyFrames, 0, true, Axis.X);
 						AnimationPoint yPoint = getAnimationPointAtTick(rotationKeyFrames.yKeyFrames, 0, true, Axis.Y);
 						AnimationPoint zPoint = getAnimationPointAtTick(rotationKeyFrames.zKeyFrames, 0, true, Axis.Z);
-						boneAnimationQueue.rotationXQueue.add(new AnimationPoint(null, tick, transitionLengthTicks, boneSnapshot.rotationValueX - initialSnapshot.rotationValueX, xPoint.animationStartValue));
-						boneAnimationQueue.rotationYQueue.add(new AnimationPoint(null, tick, transitionLengthTicks, boneSnapshot.rotationValueY - initialSnapshot.rotationValueY, yPoint.animationStartValue));
-						boneAnimationQueue.rotationZQueue.add(new AnimationPoint(null, tick, transitionLengthTicks, boneSnapshot.rotationValueZ - initialSnapshot.rotationValueZ, zPoint.animationStartValue));
+						boneAnimationQueue.rotationXQueue.add(new AnimationPoint(null, renderTime, transitionLengthTicks, boneSnapshot.rotationValueX - initialSnapshot.rotationValueX, xPoint.animationStartValue));
+						boneAnimationQueue.rotationYQueue.add(new AnimationPoint(null, renderTime, transitionLengthTicks, boneSnapshot.rotationValueY - initialSnapshot.rotationValueY, yPoint.animationStartValue));
+						boneAnimationQueue.rotationZQueue.add(new AnimationPoint(null, renderTime, transitionLengthTicks, boneSnapshot.rotationValueZ - initialSnapshot.rotationValueZ, zPoint.animationStartValue));
 					}
 
 					if (!positionKeyFrames.xKeyFrames.isEmpty())
@@ -446,9 +448,9 @@ public class AnimationController<T>
 						AnimationPoint xPoint = getAnimationPointAtTick(positionKeyFrames.xKeyFrames, 0, true, Axis.X);
 						AnimationPoint yPoint = getAnimationPointAtTick(positionKeyFrames.yKeyFrames, 0, true, Axis.Y);
 						AnimationPoint zPoint = getAnimationPointAtTick(positionKeyFrames.zKeyFrames, 0, true, Axis.Z);
-						boneAnimationQueue.positionXQueue.add(new AnimationPoint(null, tick, transitionLengthTicks, boneSnapshot.positionOffsetX, xPoint.animationStartValue));
-						boneAnimationQueue.positionYQueue.add(new AnimationPoint(null, tick, transitionLengthTicks, boneSnapshot.positionOffsetY, yPoint.animationStartValue));
-						boneAnimationQueue.positionZQueue.add(new AnimationPoint(null, tick, transitionLengthTicks, boneSnapshot.positionOffsetZ, zPoint.animationStartValue));
+						boneAnimationQueue.positionXQueue.add(new AnimationPoint(null, renderTime, transitionLengthTicks, boneSnapshot.positionOffsetX, xPoint.animationStartValue));
+						boneAnimationQueue.positionYQueue.add(new AnimationPoint(null, renderTime, transitionLengthTicks, boneSnapshot.positionOffsetY, yPoint.animationStartValue));
+						boneAnimationQueue.positionZQueue.add(new AnimationPoint(null, renderTime, transitionLengthTicks, boneSnapshot.positionOffsetZ, zPoint.animationStartValue));
 					}
 
 					if (!scaleKeyFrames.xKeyFrames.isEmpty())
@@ -456,9 +458,9 @@ public class AnimationController<T>
 						AnimationPoint xPoint = getAnimationPointAtTick(scaleKeyFrames.xKeyFrames, 0, true, Axis.X);
 						AnimationPoint yPoint = getAnimationPointAtTick(scaleKeyFrames.yKeyFrames, 0, true, Axis.Y);
 						AnimationPoint zPoint = getAnimationPointAtTick(scaleKeyFrames.zKeyFrames, 0, true, Axis.Z);
-						boneAnimationQueue.scaleXQueue.add(new AnimationPoint(null, tick, transitionLengthTicks, boneSnapshot.scaleValueX, xPoint.animationStartValue));
-						boneAnimationQueue.scaleYQueue.add(new AnimationPoint(null, tick, transitionLengthTicks, boneSnapshot.scaleValueY, yPoint.animationStartValue));
-						boneAnimationQueue.scaleZQueue.add(new AnimationPoint(null, tick, transitionLengthTicks, boneSnapshot.scaleValueZ, zPoint.animationStartValue));
+						boneAnimationQueue.scaleXQueue.add(new AnimationPoint(null, renderTime, transitionLengthTicks, boneSnapshot.scaleValueX, xPoint.animationStartValue));
+						boneAnimationQueue.scaleYQueue.add(new AnimationPoint(null, renderTime, transitionLengthTicks, boneSnapshot.scaleValueY, yPoint.animationStartValue));
+						boneAnimationQueue.scaleZQueue.add(new AnimationPoint(null, renderTime, transitionLengthTicks, boneSnapshot.scaleValueZ, zPoint.animationStartValue));
 					}
 				}
 			}
@@ -466,7 +468,7 @@ public class AnimationController<T>
 		else if (getAnimationState() == AnimationState.Running)
 		{
 			// Actually run the animation
-			processCurrentAnimation(tick, actualTick, parser, crashWhenCantFindBone);
+			processCurrentAnimation(renderTime, actualTick, parser, crashWhenCantFindBone);
 		}
 	}
 

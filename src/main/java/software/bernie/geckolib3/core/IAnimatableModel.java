@@ -7,11 +7,6 @@ import software.bernie.geckolib3.core.processor.AnimationProcessor;
 
 public interface IAnimatableModel<E>
 {
-	default double getCurrentTick()
-	{
-		return (System.nanoTime() / 1000000L / 50.0);
-	}
-
 	default void setLivingAnimations(E entity, AnimationData data)
 	{
 		this.setLivingAnimations(entity, data, null);
@@ -23,5 +18,5 @@ public interface IAnimatableModel<E>
 
 	Animation getAnimation(String name, E animatable);
 
-	void setMolangQueries(E animatable, double currentTick);
+	void setMolangQueries(E animatable, double partialTicks);
 }
