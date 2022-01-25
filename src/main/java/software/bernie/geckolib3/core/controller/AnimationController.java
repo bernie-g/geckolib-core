@@ -7,18 +7,20 @@ package software.bernie.geckolib3.core.controller;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Queue;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang3.tuple.Pair;
-
 import com.eliotlash.mclib.math.IValue;
 import com.eliotlash.molang.MolangParser;
+
+import org.apache.commons.lang3.tuple.Pair;
 
 import software.bernie.geckolib3.core.AnimationState;
 import software.bernie.geckolib3.core.ConstantValue;
@@ -168,6 +170,7 @@ public class AnimationController<T extends IAnimatable> {
 	public Function<Double, Double> customEasingMethod;
 	protected boolean needsAnimationReload = false;
 	public double animationSpeed = 1D;
+	private final Set<EventKeyFrame<?>> executedKeyFrames = new HashSet<>();
 
 	/**
 	 * This method sets the current animation with an animation builder. You can run
@@ -419,7 +422,7 @@ public class AnimationController<T extends IAnimatable> {
 			if (tick == 0 || isJustStarting) {
 				justStartedTransition = false;
 				this.currentAnimation = animationQueue.poll();
-				resetEventKeyFrames(currentAnimation);
+				resetEventKeyFrames();
 				saveSnapshotsForAnimation(currentAnimation, boneSnapshotCollection);
 			}
 			if (currentAnimation != null) {
@@ -533,7 +536,7 @@ public class AnimationController<T extends IAnimatable> {
 		assert currentAnimation != null;
 		// Animation has ended
 		if (tick >= currentAnimation.animationLength) {
-			resetEventKeyFrames(currentAnimation);
+			resetEventKeyFrames();
 			// If the current animation is set to loop, keep it as the current animation and
 			// just start over
 			if (!currentAnimation.loop) {
@@ -605,30 +608,33 @@ public class AnimationController<T extends IAnimatable> {
 
 		if (soundListener != null || particleListener != null || customInstructionListener != null) {
 			for (EventKeyFrame<String> soundKeyFrame : currentAnimation.soundKeyFrames) {
-				if (!soundKeyFrame.hasExecuted && tick >= soundKeyFrame.getStartTick()) {
+				if (!this.executedKeyFrames.contains(soundKeyFrame) && tick >= soundKeyFrame.getStartTick()) {
 					SoundKeyframeEvent<T> event = new SoundKeyframeEvent<>(this.animatable, tick,
 							soundKeyFrame.getEventData(), this);
 					soundListener.playSound(event);
-					soundKeyFrame.hasExecuted = true;
+					
+					this.executedKeyFrames.add(soundKeyFrame);
 				}
 			}
 
 			for (ParticleEventKeyFrame particleEventKeyFrame : currentAnimation.particleKeyFrames) {
-				if (!particleEventKeyFrame.hasExecuted && tick >= particleEventKeyFrame.getStartTick()) {
+				if (!this.executedKeyFrames.contains(particleEventKeyFrame) && tick >= particleEventKeyFrame.getStartTick()) {
 					ParticleKeyFrameEvent<T> event = new ParticleKeyFrameEvent<>(this.animatable, tick,
 							particleEventKeyFrame.effect, particleEventKeyFrame.locator, particleEventKeyFrame.script,
 							this);
 					particleListener.summonParticle(event);
-					particleEventKeyFrame.hasExecuted = true;
+
+					this.executedKeyFrames.add(particleEventKeyFrame);
 				}
 			}
 
 			for (EventKeyFrame<List<String>> customInstructionKeyFrame : currentAnimation.customInstructionKeyframes) {
-				if (!customInstructionKeyFrame.hasExecuted && tick >= customInstructionKeyFrame.getStartTick()) {
+				if (!this.executedKeyFrames.contains(customInstructionKeyFrame) && tick >= customInstructionKeyFrame.getStartTick()) {
 					CustomInstructionKeyframeEvent<T> event = new CustomInstructionKeyframeEvent<>(this.animatable,
 							tick, customInstructionKeyFrame.getEventData(), this);
 					customInstructionListener.executeInstruction(event);
-					customInstructionKeyFrame.hasExecuted = true;
+					
+					this.executedKeyFrames.add(customInstructionKeyFrame);
 				}
 			}
 		}
@@ -706,19 +712,8 @@ public class AnimationController<T extends IAnimatable> {
 		return new KeyFrameLocation<>(frames.get(frames.size() - 1), ageInTicks);
 	}
 
-	private void resetEventKeyFrames(Animation animation) {
-		if (animation == null) {
-			return;
-		}
-		for (EventKeyFrame<String> soundKeyFrame : animation.soundKeyFrames) {
-			soundKeyFrame.hasExecuted = false;
-		}
-		for (ParticleEventKeyFrame particleKeyFrame : animation.particleKeyFrames) {
-			particleKeyFrame.hasExecuted = false;
-		}
-		for (EventKeyFrame<List<String>> customInstructionKeyFrame : animation.customInstructionKeyframes) {
-			customInstructionKeyFrame.hasExecuted = false;
-		}
+	private void resetEventKeyFrames() {
+		this.executedKeyFrames.clear();
 	}
 
 	public void markNeedsReload() {
