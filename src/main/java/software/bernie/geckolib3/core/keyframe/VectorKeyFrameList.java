@@ -6,6 +6,7 @@
 package software.bernie.geckolib3.core.keyframe;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -47,9 +48,9 @@ public class VectorKeyFrameList<T>
 	 */
 	public VectorKeyFrameList()
 	{
-		xKeyFrames = new ArrayList<>();
-		yKeyFrames = new ArrayList<>();
-		zKeyFrames = new ArrayList<>();
+		xKeyFrames = Collections.emptyList();
+		yKeyFrames = Collections.emptyList();
+		zKeyFrames = Collections.emptyList();
 	}
 
 	public double getLastKeyframeTime()

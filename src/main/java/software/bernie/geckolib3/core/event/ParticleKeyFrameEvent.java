@@ -15,7 +15,7 @@ public class ParticleKeyFrameEvent<T> extends KeyframeEvent<T>
 	 * @param animationTick The amount of ticks that have passed in either the current transition or animation, depending on the controller's AnimationState.
 	 * @param controller    the controller
 	 */
-	public ParticleKeyFrameEvent(T entity, double animationTick, String effect, String locator, String script, AnimationController controller)
+	public ParticleKeyFrameEvent(T entity, double animationTick, String effect, String locator, String script, AnimationController<T> controller)
 	{
 		super(entity, animationTick, controller);
 		this.effect = effect;

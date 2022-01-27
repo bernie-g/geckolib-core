@@ -6,7 +6,7 @@ public class ParticleEventKeyFrame extends EventKeyFrame<String>
 	public final String locator;
 	public final String script;
 
-	public ParticleEventKeyFrame(Double startTick, String effect, String locator, String script)
+	public ParticleEventKeyFrame(double startTick, String effect, String locator, String script)
 	{
 		super(startTick, effect + "\n" + locator + "\n" + script);
 		this.script = script;

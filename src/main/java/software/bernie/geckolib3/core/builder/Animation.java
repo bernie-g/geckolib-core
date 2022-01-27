@@ -17,12 +17,21 @@ import java.util.List;
  */
 public class Animation
 {
-	public String animationName;
-	public Double animationLength;
-	public boolean loop = true;
-	public List<BoneAnimation> boneAnimations;
-	public List<EventKeyFrame<String>> soundKeyFrames = new ArrayList<>();
-	public List<ParticleEventKeyFrame> particleKeyFrames = new ArrayList<>();
-	public List<EventKeyFrame<List<String>>> customInstructionKeyframes = new ArrayList<>();
+	public final String animationName;
+	public final double animationLength;
+	public final boolean loop;
+	public final List<BoneAnimation> boneAnimations;
+	public final List<EventKeyFrame<String>> soundKeyFrames;
+	public final List<ParticleEventKeyFrame> particleKeyFrames;
+	public final List<EventKeyFrame<List<String>>> customInstructionKeyframes;
 
+	public Animation(String animationName, double animationLength, boolean loop, List<BoneAnimation> boneAnimations, List<EventKeyFrame<String>> soundKeyFrames, List<ParticleEventKeyFrame> particleKeyFrames, List<EventKeyFrame<List<String>>> customInstructionKeyframes) {
+		this.animationName = animationName;
+		this.animationLength = animationLength;
+		this.loop = loop;
+		this.boneAnimations = boneAnimations;
+		this.soundKeyFrames = soundKeyFrames;
+		this.particleKeyFrames = particleKeyFrames;
+		this.customInstructionKeyframes = customInstructionKeyframes;
+	}
 }

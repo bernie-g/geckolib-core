@@ -10,7 +10,7 @@ public abstract class KeyframeEvent<T>
 {
 	private final T entity;
 	private final double animationTick;
-	private final AnimationController controller;
+	private final AnimationController<T> controller;
 	/**
 	 * This stores all the fields that are needed in the AnimationTestEvent
 	 *
@@ -18,7 +18,7 @@ public abstract class KeyframeEvent<T>
 	 * @param animationTick   The amount of ticks that have passed in either the current transition or animation, depending on the controller's AnimationState.
 	 * @param controller      the controller
 	 */
-	public KeyframeEvent(T entity, double animationTick, AnimationController controller)
+	public KeyframeEvent(T entity, double animationTick, AnimationController<T> controller)
 	{
 		this.entity = entity;
 		this.animationTick = animationTick;
@@ -39,7 +39,7 @@ public abstract class KeyframeEvent<T>
 	{
 		return entity;
 	}
-	public AnimationController getController()
+	public AnimationController<T> getController()
 	{
 		return controller;
 	}

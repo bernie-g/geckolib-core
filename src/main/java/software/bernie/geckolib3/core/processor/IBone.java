@@ -1,21 +1,7 @@
 package software.bernie.geckolib3.core.processor;
 
-import software.bernie.geckolib3.core.snapshot.BoneSnapshot;
-
-public interface IBone
+public interface IBone extends ImmutableBone
 {
-	float getRotationX();
-	float getRotationY();
-	float getRotationZ();
-
-	float getPositionX();
-	float getPositionY();
-	float getPositionZ();
-
-	float getScaleX();
-	float getScaleY();
-	float getScaleZ();
-
 	void setRotationX(float value);
 	void setRotationY(float value);
 	void setRotationZ(float value);
@@ -32,19 +18,15 @@ public interface IBone
 	void setPivotY(float value);
 	void setPivotZ(float value);
 
-	float getPivotX();
-	float getPivotY();
-	float getPivotZ();
-
-	boolean isHidden();
 	void setHidden(boolean hidden);
-	void setModelRendererName(String modelRendererName);
 
-	void saveInitialSnapshot();
-	BoneSnapshot getInitialSnapshot();
-	default BoneSnapshot saveSnapshot()
-	{
-		return new BoneSnapshot(this);
-	}
-	String getName();
+	/**
+	 * Get the reference bone that this animatable bone is based on.
+	 * @return The reference bone.
+	 */
+	ImmutableBone getSourceBone();
+
+	DirtyTracker getDirtyTracker();
+
+	BoneTree<?> getBoneTree();
 }

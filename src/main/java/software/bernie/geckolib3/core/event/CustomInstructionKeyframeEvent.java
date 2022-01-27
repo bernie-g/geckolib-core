@@ -21,7 +21,7 @@ public class CustomInstructionKeyframeEvent<T> extends KeyframeEvent<T>
 	 * @param instructions  A list of all the custom instructions. In blockbench, each line in the custom instruction box is a separate instruction.
 	 * @param controller    the controller
 	 */
-	public CustomInstructionKeyframeEvent(T entity, double animationTick, List<String> instructions, AnimationController controller)
+	public CustomInstructionKeyframeEvent(T entity, double animationTick, List<String> instructions, AnimationController<T> controller)
 	{
 		super(entity, animationTick, controller);
 		this.instructions = instructions;

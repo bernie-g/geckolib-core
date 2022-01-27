@@ -8,36 +8,6 @@ import java.util.function.Function;
 
 public class MathUtil
 {
-	/**
-	 * Lerps an AnimationPoint
-	 *
-	 * @param animationPoint The animation point
-	 * @return the resulting lerped value
-	 */
-	public static float lerpValues(AnimationPoint animationPoint, EasingType easingType, Function<Double, Double> customEasingMethod)
-	{
-		if (animationPoint.currentTick >= animationPoint.animationEndTick)
-		{
-			return animationPoint.animationEndValue.floatValue();
-		}
-		if (animationPoint.currentTick == 0 && animationPoint.animationEndTick == 0)
-		{
-			return animationPoint.animationEndValue.floatValue();
-		}
-
-		if (easingType == EasingType.CUSTOM && customEasingMethod != null)
-		{
-			return lerpValues(customEasingMethod.apply(animationPoint.currentTick / animationPoint.animationEndTick),
-					animationPoint.animationStartValue, animationPoint.animationEndValue);
-		}
-		else if (easingType == EasingType.NONE && animationPoint.keyframe != null)
-		{
-			easingType = animationPoint.keyframe.easingType;
-		}
-		double ease = EasingManager.ease(animationPoint.currentTick / animationPoint.animationEndTick, easingType, animationPoint.keyframe == null ? null : animationPoint.keyframe.easingArgs);
-		return lerpValues(ease,
-				animationPoint.animationStartValue, animationPoint.animationEndValue);
-	}
 
 	/**
 	 * This is the actual function that smoothly interpolates (lerp) between keyframes

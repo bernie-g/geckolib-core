@@ -7,11 +7,11 @@ package software.bernie.geckolib3.core.keyframe;
 
 public class EventKeyFrame<T>
 {
-	private T eventData;
+	private final T eventData;
 	public boolean hasExecuted = false;
-	private Double startTick;
+	private final double startTick;
 
-	public EventKeyFrame(Double startTick, T eventData)
+	public EventKeyFrame(double startTick, T eventData)
 	{
 		this.startTick = startTick;
 		this.eventData = eventData;
@@ -22,7 +22,7 @@ public class EventKeyFrame<T>
 		return eventData;
 	}
 
-	public Double getStartTick()
+	public double getStartTick()
 	{
 		return startTick;
 	}

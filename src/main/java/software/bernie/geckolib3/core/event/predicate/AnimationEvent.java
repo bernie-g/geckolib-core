@@ -15,7 +15,6 @@ public class AnimationEvent<T>
 	private final float partialTick;
 	private final boolean isMoving;
 	private final List<Object> extraData;
-	protected AnimationController<T> controller;
 
 	public AnimationEvent(T animatable, float limbSwing, float limbSwingAmount, float partialTick, boolean isMoving, List<Object> extraData)
 	{
@@ -50,15 +49,6 @@ public class AnimationEvent<T>
 		return partialTick;
 	}
 	public boolean isMoving() { return isMoving; }
-	public AnimationController<T> getController()
-	{
-		return controller;
-	}
-
-	public void setController(AnimationController<T> controller)
-	{
-		this.controller = controller;
-	}
 
 	public List<Object> getExtraData()
 	{
