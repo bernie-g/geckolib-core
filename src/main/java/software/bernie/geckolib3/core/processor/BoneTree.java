@@ -4,9 +4,9 @@ import java.util.List;
 
 public interface BoneTree<B extends IBone> {
 
-    List<B> getAllBones();
+	List<B> getAllBones();
 
-    List<B> getTopLevelBones();
+	List<B> getTopLevelBones();
 
-    B getBoneByName(String name);
+	B getBoneByName(String name);
 }

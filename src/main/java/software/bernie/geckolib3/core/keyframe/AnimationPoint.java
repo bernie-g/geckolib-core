@@ -14,8 +14,7 @@ import software.bernie.geckolib3.core.easing.EasingType;
 import software.bernie.geckolib3.core.util.MathUtil;
 
 
-public class AnimationPoint
-{
+public class AnimationPoint {
 	/**
 	 * The current tick in the animation to lerp from
 	 */
@@ -38,8 +37,8 @@ public class AnimationPoint
 	 */
 	public final KeyFrame<IValue> keyframe;
 
-	public AnimationPoint( KeyFrame<IValue> keyframe, Double currentTick, Double animationEndTick, Double animationStartValue, Double animationEndValue)
-	{
+	public AnimationPoint(KeyFrame<IValue> keyframe, Double currentTick, Double animationEndTick,
+			Double animationStartValue, Double animationEndValue) {
 		this.keyframe = keyframe;
 		this.currentTick = currentTick;
 		this.animationEndTick = animationEndTick;
@@ -47,8 +46,8 @@ public class AnimationPoint
 		this.animationEndValue = animationEndValue;
 	}
 
-	public AnimationPoint(KeyFrame<IValue> keyframe, double tick, double animationEndTick, float animationStartValue, double animationEndValue)
-	{
+	public AnimationPoint(KeyFrame<IValue> keyframe, double tick, double animationEndTick, float animationStartValue,
+			double animationEndValue) {
 		this.keyframe = keyframe;
 		this.currentTick = tick;
 		this.animationEndTick = animationEndTick;
@@ -61,34 +60,25 @@ public class AnimationPoint
 	 *
 	 * @return the resulting lerped value
 	 */
-	public float lerpValues(EasingType easingType, Function<Double, Double> customEasingMethod)
-	{
-		if (currentTick >= animationEndTick)
-		{
+	public float lerpValues(EasingType easingType, Function<Double, Double> customEasingMethod) {
+		if (currentTick >= animationEndTick) {
 			return animationEndValue.floatValue();
 		}
-		if (currentTick == 0 && animationEndTick == 0)
-		{
+		if (currentTick == 0 && animationEndTick == 0) {
 			return animationEndValue.floatValue();
 		}
 
-		if (easingType == EasingType.CUSTOM && customEasingMethod != null)
-		{
-			return MathUtil.lerpValues(customEasingMethod.apply(currentTick / animationEndTick),
-					animationStartValue, animationEndValue);
-		}
-		else if (easingType == EasingType.NONE && keyframe != null)
-		{
+		if (easingType == EasingType.CUSTOM && customEasingMethod != null) {
+			return MathUtil.lerpValues(customEasingMethod.apply(currentTick / animationEndTick), animationStartValue, animationEndValue);
+		} else if (easingType == EasingType.NONE && keyframe != null) {
 			easingType = keyframe.easingType;
 		}
 		double ease = EasingManager.ease(currentTick / animationEndTick, easingType, keyframe == null ? null : keyframe.easingArgs);
-		return MathUtil.lerpValues(ease,
-				animationStartValue, animationEndValue);
+		return MathUtil.lerpValues(ease, animationStartValue, animationEndValue);
 	}
 
 	@Override
-	public String toString()
-	{
+	public String toString() {
 		return "Tick: " + currentTick + " | End Tick: " + animationEndTick + " | Start Value: " + animationStartValue + " | End Value: " + animationEndValue;
 	}
 }

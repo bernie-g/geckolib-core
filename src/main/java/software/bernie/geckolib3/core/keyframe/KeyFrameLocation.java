@@ -7,10 +7,8 @@ package software.bernie.geckolib3.core.keyframe;
 
 /**
  * This class stores a location in an animation, and returns the keyframe that should be executed.
- *
  */
-public class KeyFrameLocation<T>
-{
+public class KeyFrameLocation<T> {
 	/**
 	 * The curent frame.
 	 */
@@ -24,11 +22,10 @@ public class KeyFrameLocation<T>
 	/**
 	 * Instantiates a new Key frame location.
 	 *
-	 * @param currentFrame         the current frame
-	 * @param currentTick the current animation tick
+	 * @param currentFrame the current frame
+	 * @param currentTick  the current animation tick
 	 */
-	public KeyFrameLocation(KeyFrame<T> currentFrame, double currentTick)
-	{
+	public KeyFrameLocation(KeyFrame<T> currentFrame, double currentTick) {
 		this.currentFrame = currentFrame;
 		this.currentTick = currentTick;
 	}

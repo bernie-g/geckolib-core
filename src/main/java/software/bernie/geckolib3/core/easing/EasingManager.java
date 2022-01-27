@@ -1,20 +1,19 @@
 package software.bernie.geckolib3.core.easing;
 
-import software.bernie.geckolib3.core.util.Memoizer;
-
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.DoubleStream;
 
-public class EasingManager
-{
+import software.bernie.geckolib3.core.util.Memoizer;
+
+public class EasingManager {
 	static class EasingFunctionArgs {
 		public final EasingType easingType;
 		public final Double arg0;
 
-		public EasingFunctionArgs(EasingType easingType,  Double arg0) {
+		public EasingFunctionArgs(EasingType easingType, Double arg0) {
 			this.easingType = easingType;
 			this.arg0 = arg0;
 		}
@@ -24,8 +23,7 @@ public class EasingManager
 			if (this == o) return true;
 			if (o == null || getClass() != o.getClass()) return false;
 			EasingFunctionArgs that = (EasingFunctionArgs) o;
-			return easingType == that.easingType &&
-					Objects.equals(arg0, that.arg0);
+			return easingType == that.easingType && Objects.equals(arg0, that.arg0);
 		}
 
 		@Override
@@ -34,8 +32,7 @@ public class EasingManager
 		}
 	}
 
-	public static double ease(double number, EasingType easingType,  List<Double> easingArgs)
-	{
+	public static double ease(double number, EasingType easingType, List<Double> easingArgs) {
 		Double firstArg = easingArgs == null || easingArgs.size() < 1 ? null : easingArgs.get(0);
 		return getEasingFunction.apply(new EasingFunctionArgs(easingType, firstArg)).apply(number);
 	}
@@ -43,78 +40,76 @@ public class EasingManager
 	// Memoize easing functions so we don't need to create new ones from HOFs every frame
 	static Function<Double, Double> quart = poly(4);
 	static Function<Double, Double> quint = poly(5);
-	static Function<EasingFunctionArgs, Function<Double, Double>> getEasingFunction =
-			Memoizer.memoize(EasingManager::getEasingFuncImpl);
+	static Function<EasingFunctionArgs, Function<Double, Double>> getEasingFunction = Memoizer.memoize(EasingManager::getEasingFuncImpl);
 
 	// Don't call this, use getEasingFunction instead as that function is the memoized version
 	static Function<Double, Double> getEasingFuncImpl(EasingFunctionArgs args) {
-		switch (args.easingType)
-		{
-			default:
-			case Linear:
-				return in(EasingManager::linear);
-			case Step:
-				return in(step(args.arg0));
-			case EaseInSine:
-				return in(EasingManager::sin);
-			case EaseOutSine:
-				return out(EasingManager::sin);
-			case EaseInOutSine:
-				return inOut(EasingManager::sin);
-			case EaseInQuad:
-				return in(EasingManager::quad);
-			case EaseOutQuad:
-				return out(EasingManager::quad);
-			case EaseInOutQuad:
-				return inOut(EasingManager::quad);
-			case EaseInCubic:
-				return in(EasingManager::cubic);
-			case EaseOutCubic:
-				return out(EasingManager::cubic);
-			case EaseInOutCubic:
-				return inOut(EasingManager::cubic);
-			case EaseInExpo:
-				return in(EasingManager::exp);
-			case EaseOutExpo:
-				return out(EasingManager::exp);
-			case EaseInOutExpo:
-				return inOut(EasingManager::exp);
-			case EaseInCirc:
-				return in(EasingManager::circle);
-			case EaseOutCirc:
-				return out(EasingManager::circle);
-			case EaseInOutCirc:
-				return inOut(EasingManager::circle);
-			case EaseInQuart:
-				return in(quart);
-			case EaseOutQuart:
-				return out(quart);
-			case EaseInOutQuart:
-				return inOut(quart);
-			case EaseInQuint:
-				return in(quint);
-			case EaseOutQuint:
-				return out(quint);
-			case EaseInOutQuint:
-				return inOut(quint);
-			case EaseInBack:
-				return in(back(args.arg0));
-			case EaseOutBack:
-				return out(back(args.arg0));
-			case EaseInOutBack:
-				return inOut(back(args.arg0));
-			case EaseInElastic:
-				return in(elastic(args.arg0));
-			case EaseOutElastic:
-				return out(elastic(args.arg0));
-			case EaseInOutElastic:
-				return inOut(elastic(args.arg0));
-			case EaseInBounce:
-				return in(bounce(args.arg0));
-			case EaseOutBounce:
-				return out(bounce(args.arg0));
-			case EaseInOutBounce:
-				return inOut(bounce(args.arg0));
+		switch (args.easingType) {
+		default:
+		case Linear:
+			return in(EasingManager::linear);
+		case Step:
+			return in(step(args.arg0));
+		case EaseInSine:
+			return in(EasingManager::sin);
+		case EaseOutSine:
+			return out(EasingManager::sin);
+		case EaseInOutSine:
+			return inOut(EasingManager::sin);
+		case EaseInQuad:
+			return in(EasingManager::quad);
+		case EaseOutQuad:
+			return out(EasingManager::quad);
+		case EaseInOutQuad:
+			return inOut(EasingManager::quad);
+		case EaseInCubic:
+			return in(EasingManager::cubic);
+		case EaseOutCubic:
+			return out(EasingManager::cubic);
+		case EaseInOutCubic:
+			return inOut(EasingManager::cubic);
+		case EaseInExpo:
+			return in(EasingManager::exp);
+		case EaseOutExpo:
+			return out(EasingManager::exp);
+		case EaseInOutExpo:
+			return inOut(EasingManager::exp);
+		case EaseInCirc:
+			return in(EasingManager::circle);
+		case EaseOutCirc:
+			return out(EasingManager::circle);
+		case EaseInOutCirc:
+			return inOut(EasingManager::circle);
+		case EaseInQuart:
+			return in(quart);
+		case EaseOutQuart:
+			return out(quart);
+		case EaseInOutQuart:
+			return inOut(quart);
+		case EaseInQuint:
+			return in(quint);
+		case EaseOutQuint:
+			return out(quint);
+		case EaseInOutQuint:
+			return inOut(quint);
+		case EaseInBack:
+			return in(back(args.arg0));
+		case EaseOutBack:
+			return out(back(args.arg0));
+		case EaseInOutBack:
+			return inOut(back(args.arg0));
+		case EaseInElastic:
+			return in(elastic(args.arg0));
+		case EaseOutElastic:
+			return out(elastic(args.arg0));
+		case EaseInOutElastic:
+			return inOut(elastic(args.arg0));
+		case EaseInBounce:
+			return in(bounce(args.arg0));
+		case EaseOutBounce:
+			return out(bounce(args.arg0));
+		case EaseInOutBounce:
+			return inOut(bounce(args.arg0));
 		}
 	}
 
@@ -129,16 +124,14 @@ public class EasingManager
 	/**
 	 * Runs an easing function forwards.
 	 */
-	static Function<Double, Double> in(Function<Double, Double> easing)
-	{
+	static Function<Double, Double> in(Function<Double, Double> easing) {
 		return easing;
 	}
 
 	/**
 	 * Runs an easing function backwards.
 	 */
-	static Function<Double, Double> out(Function<Double, Double> easing)
-	{
+	static Function<Double, Double> out(Function<Double, Double> easing) {
 		return t -> 1 - easing.apply(1 - t);
 	}
 
@@ -147,12 +140,9 @@ public class EasingManager
 	 * forwards for half of the duration, then backwards for the rest of the
 	 * duration.
 	 */
-	static Function<Double, Double> inOut(Function<Double, Double> easing)
-	{
-		return t ->
-		{
-			if (t < 0.5)
-			{
+	static Function<Double, Double> inOut(Function<Double, Double> easing) {
+		return t -> {
+			if (t < 0.5) {
 				return easing.apply(t * 2) / 2;
 			}
 			return 1 - easing.apply((1 - t) * 2) / 2;
@@ -162,16 +152,14 @@ public class EasingManager
 	/**
 	 * A stepping function, returns 1 for any positive value of `n`.
 	 */
-	static Function<Double, Double> step0()
-	{
+	static Function<Double, Double> step0() {
 		return n -> n > 0 ? 1D : 0;
 	}
 
 	/**
 	 * A stepping function, returns 1 if `n` is greater than or equal to 1.
 	 */
-	static Function<Double, Double> step1()
-	{
+	static Function<Double, Double> step1() {
 		return n -> n >= 1D ? 1D : 0;
 	}
 
@@ -181,8 +169,7 @@ public class EasingManager
 	 * <p>
 	 * http://cubic-bezier.com/#0,0,1,1
 	 */
-	static double linear(double t)
-	{
+	static double linear(double t) {
 		return t;
 	}
 
@@ -205,8 +192,7 @@ public class EasingManager
 	 * <p>
 	 * http://easings.net/#easeInQuad
 	 */
-	static double quad(double t)
-	{
+	static double quad(double t) {
 		return t * t;
 	}
 
@@ -216,8 +202,7 @@ public class EasingManager
 	 * <p>
 	 * http://easings.net/#easeInCubic
 	 */
-	static double cubic(double t)
-	{
+	static double cubic(double t) {
 		return t * t * t;
 	}
 
@@ -227,8 +212,7 @@ public class EasingManager
 	 * n = 4: http://easings.net/#easeInQuart
 	 * n = 5: http://easings.net/#easeInQuint
 	 */
-	static Function<Double, Double> poly(double n)
-	{
+	static Function<Double, Double> poly(double n) {
 		return (t) -> Math.pow(t, n);
 	}
 
@@ -237,8 +221,7 @@ public class EasingManager
 	 * <p>
 	 * http://easings.net/#easeInSine
 	 */
-	static double sin(double t)
-	{
+	static double sin(double t) {
 		return 1 - Math.cos((float) ((t * Math.PI) / 2));
 	}
 
@@ -247,8 +230,7 @@ public class EasingManager
 	 * <p>
 	 * http://easings.net/#easeInCirc
 	 */
-	static double circle(double t)
-	{
+	static double circle(double t) {
 		return 1 - Math.sqrt(1 - t * t);
 	}
 
@@ -257,8 +239,7 @@ public class EasingManager
 	 * <p>
 	 * http://easings.net/#easeInExpo
 	 */
-	static double exp(double t)
-	{
+	static double exp(double t) {
 		return Math.pow(2, 10 * (t - 1));
 	}
 
@@ -272,8 +253,7 @@ public class EasingManager
 	 * <p>
 	 * http://easings.net/#easeInElastic
 	 */
-	static Function<Double, Double> elastic(Double bounciness)
-	{
+	static Function<Double, Double> elastic(Double bounciness) {
 		double p = (bounciness == null ? 1 : bounciness) * Math.PI;
 		return t -> 1 - Math.pow(Math.cos((float) ((t * Math.PI) / 2)), 3) * Math.cos((float) (t * p));
 	}
@@ -287,8 +267,7 @@ public class EasingManager
 	 * <p>
 	 * - http://tiny.cc/back_default (s = 1.70158, default)
 	 */
-	static Function<Double, Double> back(Double s)
-	{
+	static Function<Double, Double> back(Double s) {
 		double p = s == null ? 1.70158 : s * 1.70158;
 		return t -> t * t * ((p + 1) * t - p);
 	}
@@ -300,8 +279,7 @@ public class EasingManager
 	 * using min instead of ternaries
 	 * http://easings.net/#easeInBounce
 	 */
-	public static Function<Double, Double> bounce(Double s)
-	{
+	public static Function<Double, Double> bounce(Double s) {
 		double k = s == null ? 0.5 : s;
 		Function<Double, Double> q = x -> (121.0 / 16.0) * x * x;
 		Function<Double, Double> w = x -> ((121.0 / 4.0) * k) * Math.pow(x - (6.0 / 11.0), 2) + 1 - k;
@@ -316,8 +294,7 @@ public class EasingManager
 		return t -> intervals[findIntervalBorderIndex(t, intervals, false)];
 	}
 
-	static double min(double a, double b, double c, double d)
-	{
+	static double min(double a, double b, double c, double d) {
 		return Math.min(Math.min(a, b), Math.min(c, d));
 	}
 
@@ -356,10 +333,8 @@ public class EasingManager
 	 */
 	static int findIntervalBorderIndex(double point, double[] intervals, boolean useRightBorder) {
 		//If point is beyond given intervals
-		if (point < intervals[0])
-			return 0;
-		if (point > intervals[intervals.length - 1])
-			return intervals.length - 1;
+		if (point < intervals[0]) return 0;
+		if (point > intervals[intervals.length - 1]) return intervals.length - 1;
 		//If point is inside interval
 		//Start searching on a full range of intervals
 		int indexOfNumberToCompare = 0;
@@ -380,11 +355,11 @@ public class EasingManager
 	static double[] stepRange(int steps) {
 		final double stop = 1;
 		if (steps < 2) throw new IllegalArgumentException("steps must be > 2, got:" + steps);
-		double stepLength = stop / (double)steps;
+		double stepLength = stop / (double) steps;
 		// There must be an easier way of doing this but I just don't care
 		AtomicInteger i = new AtomicInteger();
-		return DoubleStream.generate(() -> i.getAndIncrement() * stepLength)
-				.limit(steps)
-				.toArray();
-	};
+		return DoubleStream.generate(() -> i.getAndIncrement() * stepLength).limit(steps).toArray();
+	}
+
+	;
 }

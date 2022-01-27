@@ -5,12 +5,9 @@
 
 package software.bernie.geckolib3.core.processor;
 
-import software.bernie.geckolib3.core.processor.IBone;
-import software.bernie.geckolib3.core.processor.ImmutableBone;
 import software.bernie.geckolib3.core.util.MathUtil;
 
-public class DirtyTracker
-{
+public class DirtyTracker {
 	private final ResetVector position;
 	private final ResetVector rotation;
 	private final ResetVector scale;
@@ -65,7 +62,8 @@ public class DirtyTracker
 		boolean changedLastFrame = false;
 		double stopTime = Double.NaN;
 
-		public ResetVector(FloatSetter setX, FloatSetter setY, FloatSetter setZ, FloatGetter getX, FloatGetter getY, FloatGetter getZ, float xReset, float yReset, float zReset) {
+		public ResetVector(FloatSetter setX, FloatSetter setY, FloatSetter setZ, FloatGetter getX, FloatGetter getY,
+				FloatGetter getZ, float xReset, float yReset, float zReset) {
 			this.setX = setX;
 			this.setY = setY;
 			this.setZ = setZ;

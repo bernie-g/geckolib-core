@@ -5,7 +5,6 @@
 
 package software.bernie.geckolib3.core.keyframe;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -14,8 +13,7 @@ import java.util.List;
  *
  * @param <T> the type parameter
  */
-public class VectorKeyFrameList<T>
-{
+public class VectorKeyFrameList<T> {
 	/**
 	 * The X key frames.
 	 */
@@ -36,8 +34,8 @@ public class VectorKeyFrameList<T>
 	 * @param YKeyFrames the y key frames
 	 * @param ZKeyFrames the z key frames
 	 */
-	public VectorKeyFrameList(List<KeyFrame<T>> XKeyFrames, List<KeyFrame<T>> YKeyFrames, List<KeyFrame<T>> ZKeyFrames)
-	{
+	public VectorKeyFrameList(List<KeyFrame<T>> XKeyFrames, List<KeyFrame<T>> YKeyFrames,
+			List<KeyFrame<T>> ZKeyFrames) {
 		xKeyFrames = XKeyFrames;
 		yKeyFrames = YKeyFrames;
 		zKeyFrames = ZKeyFrames;
@@ -46,30 +44,25 @@ public class VectorKeyFrameList<T>
 	/**
 	 * Instantiates a new blank key frame list
 	 */
-	public VectorKeyFrameList()
-	{
+	public VectorKeyFrameList() {
 		xKeyFrames = Collections.emptyList();
 		yKeyFrames = Collections.emptyList();
 		zKeyFrames = Collections.emptyList();
 	}
 
-	public double getLastKeyframeTime()
-	{
+	public double getLastKeyframeTime() {
 		double xTime = 0;
-		for (KeyFrame<T> frame : xKeyFrames)
-		{
+		for (KeyFrame<T> frame : xKeyFrames) {
 			xTime += frame.getLength();
 		}
 
 		double yTime = 0;
-		for (KeyFrame<T> frame : yKeyFrames)
-		{
+		for (KeyFrame<T> frame : yKeyFrames) {
 			yTime += frame.getLength();
 		}
 
 		double zTime = 0;
-		for (KeyFrame<T> frame : zKeyFrames)
-		{
+		for (KeyFrame<T> frame : zKeyFrames) {
 			zTime += frame.getLength();
 		}
 
