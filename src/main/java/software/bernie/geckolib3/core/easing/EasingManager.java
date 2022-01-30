@@ -32,9 +32,12 @@ public class EasingManager {
 		}
 	}
 
-	public static double ease(double number, EasingType easingType, List<Double> easingArgs) {
-		Double firstArg = easingArgs == null || easingArgs.size() < 1 ? null : easingArgs.get(0);
-		return getEasingFunction.apply(new EasingFunctionArgs(easingType, firstArg)).apply(number);
+	public static double ease(double number, EasingType easingType, double[] easingArgs) {
+		if (easingArgs == null || easingArgs.length < 1) {
+			return getEasingFunction.apply(new EasingFunctionArgs(easingType, null)).apply(number);
+		} else {
+			return getEasingFunction.apply(new EasingFunctionArgs(easingType, easingArgs[0])).apply(number);
+		}
 	}
 
 	// Memoize easing functions so we don't need to create new ones from HOFs every frame

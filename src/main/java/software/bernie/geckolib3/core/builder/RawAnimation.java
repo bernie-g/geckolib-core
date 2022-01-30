@@ -8,12 +8,12 @@ package software.bernie.geckolib3.core.builder;
 import java.util.Objects;
 
 public class RawAnimation {
-	public String animationName;
+	public final String animationName;
 
 	/**
 	 * If loop is null, the animation processor will use the loopByDefault boolean to decide if the animation should loop.
 	 */
-	public Boolean loop;
+	public final Boolean loop;
 
 	/**
 	 * A raw animation only stores the animation name and if it should loop, nothing else

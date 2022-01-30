@@ -12,7 +12,7 @@ import java.util.List;
  * This class follows the builder pattern, which means that every method returns an instance of this class. You can stack method calls, like this: <code>new AnimationBuilder().addAnimation("jump").addRepeatingAnimation("run", 5");</code>
  */
 public class AnimationBuilder {
-	private List<RawAnimation> animationList = new ArrayList<>();
+	private final List<RawAnimation> animationList = new ArrayList<>();
 
 	/**
 	 * Add a single animation to the queue and overrides the loop setting

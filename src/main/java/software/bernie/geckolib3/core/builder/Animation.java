@@ -21,17 +21,17 @@ public class Animation {
 	public final List<BoneAnimation> boneAnimations;
 	public final List<EventKeyFrame<String>> soundKeyFrames;
 	public final List<ParticleEventKeyFrame> particleKeyFrames;
-	public final List<EventKeyFrame<List<String>>> customInstructionKeyframes;
+	public final List<EventKeyFrame<List<String>>> customInstructionKeyFrames;
 
 	public Animation(String animationName, double animationLength, boolean loop, List<BoneAnimation> boneAnimations,
 			List<EventKeyFrame<String>> soundKeyFrames, List<ParticleEventKeyFrame> particleKeyFrames,
-			List<EventKeyFrame<List<String>>> customInstructionKeyframes) {
+			List<EventKeyFrame<List<String>>> customInstructionKeyFrames) {
 		this.animationName = animationName;
 		this.animationLength = animationLength;
 		this.loop = loop;
 		this.boneAnimations = boneAnimations;
 		this.soundKeyFrames = soundKeyFrames;
 		this.particleKeyFrames = particleKeyFrames;
-		this.customInstructionKeyframes = customInstructionKeyframes;
+		this.customInstructionKeyFrames = customInstructionKeyFrames;
 	}
 }

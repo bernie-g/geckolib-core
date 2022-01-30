@@ -55,10 +55,6 @@ public class AnimationData {
 		return animationControllers.get(name);
 	}
 
-	public BoneTree<?> getBoneTree() {
-		return boneTree;
-	}
-
 	public IBone getBone(String name) {
 		return boneTree.getBoneByName(name);
 	}
@@ -71,7 +67,6 @@ public class AnimationData {
 
 		for (AnimationController<T> controller : animationControllers.values()) {
 
-			controller.isJustStarting = isFirstTick;
 			controller.animationPage = animationPage;
 
 			// Process animations and add new values to the point queues

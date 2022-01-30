@@ -6,32 +6,30 @@
 package software.bernie.geckolib3.core.keyframe;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
 import software.bernie.geckolib3.core.easing.EasingType;
 
 public class KeyFrame<T> {
-	private Double length;
-	private T startValue;
-	private T endValue;
-	public EasingType easingType = EasingType.Linear;
-	public List<Double> easingArgs = new ArrayList<>();
+	private static final double[] EMPTY_ARGS = new double[0];
 
-	public KeyFrame(Double length, T startValue, T endValue) {
-		this.length = length;
-		this.startValue = startValue;
-		this.endValue = endValue;
+	private final double length;
+	private final T startValue;
+	private final T endValue;
+	public final EasingType easingType;
+	public final double[] easingArgs;
+
+	public KeyFrame(double length, T startValue, T endValue) {
+		this(length, startValue, endValue, EasingType.Linear, EMPTY_ARGS);
 	}
 
-	public KeyFrame(Double length, T startValue, T endValue, EasingType easingType) {
-		this.length = length;
-		this.startValue = startValue;
-		this.endValue = endValue;
-		this.easingType = easingType;
+	public KeyFrame(double length, T startValue, T endValue, EasingType easingType) {
+		this(length, startValue, endValue, easingType, EMPTY_ARGS);
 	}
 
-	public KeyFrame(Double length, T startValue, T endValue, EasingType easingType, List<Double> easingArgs) {
+	public KeyFrame(double length, T startValue, T endValue, EasingType easingType, double[] easingArgs) {
 		this.length = length;
 		this.startValue = startValue;
 		this.endValue = endValue;
@@ -39,28 +37,16 @@ public class KeyFrame<T> {
 		this.easingArgs = easingArgs;
 	}
 
-	public Double getLength() {
+	public double getLength() {
 		return length;
-	}
-
-	public void setLength(Double length) {
-		this.length = length;
 	}
 
 	public T getStartValue() {
 		return startValue;
 	}
 
-	public void setStartValue(T startValue) {
-		this.startValue = startValue;
-	}
-
 	public T getEndValue() {
 		return endValue;
-	}
-
-	public void setEndValue(T endValue) {
-		this.endValue = endValue;
 	}
 
 	@Override

@@ -1,12 +1,14 @@
 package software.bernie.geckolib3.core.controller;
 
-import java.util.HashMap;
+import java.util.ArrayDeque;
 import java.util.List;
-import java.util.Map;
+import java.util.Queue;
 
 import com.eliotlash.mclib.math.IValue;
 
+import software.bernie.geckolib3.core.ConstantValue;
 import software.bernie.geckolib3.core.builder.Animation;
+import software.bernie.geckolib3.core.builder.AnimationQueue;
 import software.bernie.geckolib3.core.event.CustomInstructionKeyframeEvent;
 import software.bernie.geckolib3.core.event.ParticleKeyFrameEvent;
 import software.bernie.geckolib3.core.event.SoundKeyframeEvent;
@@ -20,39 +22,67 @@ import software.bernie.geckolib3.core.util.Axis;
 public class RunningAnimation {
 	public final Animation animation;
 	public final boolean loop;
+	public final double startTime;
+	private final BoneTree<?> boneTree;
 
-	public final Map<IBone, ImmutableBone> initialValues = new HashMap<>();
-	public double startTime;
-	private double transitionTime;
-	private BoneTree<?> boneTree;
+	private final Queue<EventKeyFrame<String>> soundKeyFrames;
+	private final Queue<ParticleEventKeyFrame> particleKeyFrames;
+	private final Queue<EventKeyFrame<List<String>>> customInstructionKeyFrames;
 
-	public RunningAnimation(Animation animation, boolean loop) {
-		this.animation = animation;
-		this.loop = loop;
-	}
-
-	public void begin(BoneTree<?> boneTree, double renderTime, double transitionTime) {
+	public RunningAnimation(AnimationQueue.QueuedAnimation next, BoneTree<?> boneTree, double renderTime) {
+		this.animation = next.animation;
+		this.loop = next.loop;
 		this.boneTree = boneTree;
-		this.transitionTime = transitionTime;
 		this.startTime = renderTime;
-		for (IBone bone : boneTree.getAllBones()) {
-			initialValues.put(bone, bone.saveView());
-		}
+
+		this.soundKeyFrames = new ArrayDeque<>(next.animation.soundKeyFrames);
+		this.particleKeyFrames = new ArrayDeque<>(next.animation.particleKeyFrames);
+		this.customInstructionKeyFrames = new ArrayDeque<>(next.animation.customInstructionKeyFrames);
 	}
 
-	void resetEventKeyFrames() {
-		for (EventKeyFrame<String> soundKeyFrame : animation.soundKeyFrames) {
-			soundKeyFrame.hasExecuted = false;
+	//Helper method to transform a KeyFrameLocation to an AnimationPoint
+	public static AnimationPoint getAnimationPointAtTick(List<KeyFrame<IValue>> frames, double tick, boolean isRotation,
+			Axis axis) {
+		KeyFrameLocation<IValue> location = getCurrentKeyFrameLocation(frames, tick);
+		KeyFrame<IValue> currentFrame = location.currentFrame;
+		double startValue = currentFrame.getStartValue().get();
+		double endValue = currentFrame.getEndValue().get();
+
+		if (isRotation) {
+			if (!(currentFrame.getStartValue() instanceof ConstantValue)) {
+				startValue = Math.toRadians(startValue);
+				if (axis == Axis.X || axis == Axis.Y) {
+					startValue *= -1;
+				}
+			}
+			if (!(currentFrame.getEndValue() instanceof ConstantValue)) {
+				endValue = Math.toRadians(endValue);
+				if (axis == Axis.X || axis == Axis.Y) {
+					endValue *= -1;
+				}
+			}
 		}
-		for (ParticleEventKeyFrame particleKeyFrame : animation.particleKeyFrames) {
-			particleKeyFrame.hasExecuted = false;
-		}
-		for (EventKeyFrame<List<String>> customInstructionKeyFrame : animation.customInstructionKeyframes) {
-			customInstructionKeyFrame.hasExecuted = false;
-		}
+
+		return new AnimationPoint(currentFrame, location.currentTick, currentFrame.getLength(), startValue, endValue);
 	}
 
-	public <T> void processCurrentAnimation(double renderTime, AnimationController<T> controller) {
+	/**
+	 * Returns the current keyframe object, plus how long the previous keyframes have taken (aka elapsed animation time)
+	 **/
+	private static KeyFrameLocation<IValue> getCurrentKeyFrameLocation(List<KeyFrame<IValue>> frames,
+			double ageInTicks) {
+		double totalTimeTracker = 0;
+		for (KeyFrame<IValue> frame : frames) {
+			totalTimeTracker += frame.getLength();
+			if (totalTimeTracker > ageInTicks) {
+				double tick = (ageInTicks - (totalTimeTracker - frame.getLength()));
+				return new KeyFrameLocation<>(frame, tick);
+			}
+		}
+		return new KeyFrameLocation<>(frames.get(frames.size() - 1), ageInTicks);
+	}
+
+	public <T> void process(double renderTime, AnimationController<T> controller) {
 		double animationTime = renderTime - startTime;
 		// Loop through every boneanimation in the current animation and process the values
 		List<BoneAnimation> boneAnimations = animation.boneAnimations;
@@ -67,9 +97,9 @@ public class RunningAnimation {
 			VectorKeyFrameList<IValue> scaleKeyFrames = boneAnimation.scaleKeyFrames;
 
 			if (!rotationKeyFrames.xKeyFrames.isEmpty()) {
-				AnimationPoint x = AnimationController.getAnimationPointAtTick(rotationKeyFrames.xKeyFrames, animationTime, true, Axis.X);
-				AnimationPoint y = AnimationController.getAnimationPointAtTick(rotationKeyFrames.yKeyFrames, animationTime, true, Axis.Y);
-				AnimationPoint z = AnimationController.getAnimationPointAtTick(rotationKeyFrames.zKeyFrames, animationTime, true, Axis.Z);
+				AnimationPoint x = getAnimationPointAtTick(rotationKeyFrames.xKeyFrames, animationTime, true, Axis.X);
+				AnimationPoint y = getAnimationPointAtTick(rotationKeyFrames.yKeyFrames, animationTime, true, Axis.Y);
+				AnimationPoint z = getAnimationPointAtTick(rotationKeyFrames.zKeyFrames, animationTime, true, Axis.Z);
 				bone.setRotationX(x.lerpValues(controller.easingType, controller.customEasingMethod) + initialSnapshot.getRotationX());
 				bone.setRotationY(y.lerpValues(controller.easingType, controller.customEasingMethod) + initialSnapshot.getRotationY());
 				bone.setRotationZ(z.lerpValues(controller.easingType, controller.customEasingMethod) + initialSnapshot.getRotationZ());
@@ -77,9 +107,9 @@ public class RunningAnimation {
 			}
 
 			if (!positionKeyFrames.xKeyFrames.isEmpty()) {
-				AnimationPoint x = AnimationController.getAnimationPointAtTick(positionKeyFrames.xKeyFrames, animationTime, false, Axis.X);
-				AnimationPoint y = AnimationController.getAnimationPointAtTick(positionKeyFrames.yKeyFrames, animationTime, false, Axis.Y);
-				AnimationPoint z = AnimationController.getAnimationPointAtTick(positionKeyFrames.zKeyFrames, animationTime, false, Axis.Z);
+				AnimationPoint x = getAnimationPointAtTick(positionKeyFrames.xKeyFrames, animationTime, false, Axis.X);
+				AnimationPoint y = getAnimationPointAtTick(positionKeyFrames.yKeyFrames, animationTime, false, Axis.Y);
+				AnimationPoint z = getAnimationPointAtTick(positionKeyFrames.zKeyFrames, animationTime, false, Axis.Z);
 				bone.setPositionX(x.lerpValues(controller.easingType, controller.customEasingMethod));
 				bone.setPositionY(y.lerpValues(controller.easingType, controller.customEasingMethod));
 				bone.setPositionZ(z.lerpValues(controller.easingType, controller.customEasingMethod));
@@ -87,9 +117,9 @@ public class RunningAnimation {
 			}
 
 			if (!scaleKeyFrames.xKeyFrames.isEmpty()) {
-				AnimationPoint x = AnimationController.getAnimationPointAtTick(scaleKeyFrames.xKeyFrames, animationTime, false, Axis.X);
-				AnimationPoint y = AnimationController.getAnimationPointAtTick(scaleKeyFrames.yKeyFrames, animationTime, false, Axis.Y);
-				AnimationPoint z = AnimationController.getAnimationPointAtTick(scaleKeyFrames.zKeyFrames, animationTime, false, Axis.Z);
+				AnimationPoint x = getAnimationPointAtTick(scaleKeyFrames.xKeyFrames, animationTime, false, Axis.X);
+				AnimationPoint y = getAnimationPointAtTick(scaleKeyFrames.yKeyFrames, animationTime, false, Axis.Y);
+				AnimationPoint z = getAnimationPointAtTick(scaleKeyFrames.zKeyFrames, animationTime, false, Axis.Z);
 				bone.setScaleX(x.lerpValues(controller.easingType, controller.customEasingMethod));
 				bone.setScaleY(y.lerpValues(controller.easingType, controller.customEasingMethod));
 				bone.setScaleZ(z.lerpValues(controller.easingType, controller.customEasingMethod));
@@ -97,90 +127,54 @@ public class RunningAnimation {
 			}
 		}
 
-		if (controller.soundListener != null || controller.particleListener != null || controller.customInstructionListener != null) {
-			for (EventKeyFrame<String> soundKeyFrame : animation.soundKeyFrames) {
-				if (!soundKeyFrame.hasExecuted && animationTime >= soundKeyFrame.getStartTick()) {
-					SoundKeyframeEvent<T> event = new SoundKeyframeEvent<>(controller.animatable, animationTime, soundKeyFrame.getEventData(), controller);
-					controller.soundListener.playSound(event);
-					soundKeyFrame.hasExecuted = true;
-				}
-			}
+		processKeyFrames(controller, animationTime);
+	}
 
-			for (ParticleEventKeyFrame particleEventKeyFrame : animation.particleKeyFrames) {
-				if (!particleEventKeyFrame.hasExecuted && animationTime >= particleEventKeyFrame.getStartTick()) {
-					ParticleKeyFrameEvent<T> event = new ParticleKeyFrameEvent<>(controller.animatable, animationTime, particleEventKeyFrame.effect, particleEventKeyFrame.locator, particleEventKeyFrame.script, controller);
-					controller.particleListener.summonParticle(event);
-					particleEventKeyFrame.hasExecuted = true;
-				}
-			}
+	private <T> void processKeyFrames(AnimationController<T> controller, double animationTime) {
+		processSoundKeyFrames(controller, animationTime);
 
-			for (EventKeyFrame<List<String>> customInstructionKeyFrame : animation.customInstructionKeyframes) {
-				if (!customInstructionKeyFrame.hasExecuted && animationTime >= customInstructionKeyFrame.getStartTick()) {
-					CustomInstructionKeyframeEvent<T> event = new CustomInstructionKeyframeEvent<>(controller.animatable, animationTime, customInstructionKeyFrame.getEventData(), controller);
-					controller.customInstructionListener.executeInstruction(event);
-					customInstructionKeyFrame.hasExecuted = true;
-				}
-			}
+		processParticleKeyFrames(controller, animationTime);
+
+		processEventKeyFrames(controller, animationTime);
+	}
+
+	private <T> void processSoundKeyFrames(AnimationController<T> controller, double animationTime) {
+		if (controller.soundListener == null) return;
+
+		EventKeyFrame<String> soundKeyFrame = soundKeyFrames.peek();
+		if (soundKeyFrame != null && animationTime >= soundKeyFrame.getStartTick()) {
+			SoundKeyframeEvent<T> event = new SoundKeyframeEvent<>(controller.animatable, animationTime, soundKeyFrame.getEventData(), controller);
+			controller.soundListener.playSound(event);
+			// Remove the sound keyframe from the queue
+			soundKeyFrames.poll();
 		}
 	}
 
-	void runTransition(double renderTime, AnimationController<?> controller) {
-		double tick = renderTime - startTime;
+	private <T> void processParticleKeyFrames(AnimationController<T> controller, double animationTime) {
+		if (controller.particleListener == null) return;
 
-		for (BoneAnimation boneAnimation : animation.boneAnimations) {
-			IBone bone = boneTree.getBoneByName(boneAnimation.boneName);
-			if (bone == null) {
-				continue;
-			}
-			ImmutableBone boneSnapshot = initialValues.get(bone);
-
-			ImmutableBone initialSnapshot = bone.getSourceBone();
-
-			VectorKeyFrameList<IValue> rotationKeyFrames = boneAnimation.rotationKeyFrames;
-			VectorKeyFrameList<IValue> positionKeyFrames = boneAnimation.positionKeyFrames;
-			VectorKeyFrameList<IValue> scaleKeyFrames = boneAnimation.scaleKeyFrames;
-
-			DirtyTracker dirtyTracker = bone.getDirtyTracker();
-
-			// Adding the initial positions of the upcoming animation, so the model transitions to the initial state of the new animation
-			if (!rotationKeyFrames.xKeyFrames.isEmpty()) {
-				AnimationPoint xPoint = AnimationController.getAnimationPointAtTick(rotationKeyFrames.xKeyFrames, 0, true, Axis.X);
-				AnimationPoint yPoint = AnimationController.getAnimationPointAtTick(rotationKeyFrames.yKeyFrames, 0, true, Axis.Y);
-				AnimationPoint zPoint = AnimationController.getAnimationPointAtTick(rotationKeyFrames.zKeyFrames, 0, true, Axis.Z);
-				AnimationPoint x = new AnimationPoint(null, tick, transitionTime, boneSnapshot.getRotationX() - initialSnapshot.getRotationX(), xPoint.animationStartValue);
-				AnimationPoint y = new AnimationPoint(null, tick, transitionTime, boneSnapshot.getRotationY() - initialSnapshot.getRotationY(), yPoint.animationStartValue);
-				AnimationPoint z = new AnimationPoint(null, tick, transitionTime, boneSnapshot.getRotationZ() - initialSnapshot.getRotationZ(), zPoint.animationStartValue);
-				bone.setRotationX(x.lerpValues(controller.easingType, controller.customEasingMethod) + initialSnapshot.getRotationX());
-				bone.setRotationY(y.lerpValues(controller.easingType, controller.customEasingMethod) + initialSnapshot.getRotationY());
-				bone.setRotationZ(z.lerpValues(controller.easingType, controller.customEasingMethod) + initialSnapshot.getRotationZ());
-				dirtyTracker.notifyRotationChange();
-			}
-
-			if (!positionKeyFrames.xKeyFrames.isEmpty()) {
-				AnimationPoint xPoint = AnimationController.getAnimationPointAtTick(positionKeyFrames.xKeyFrames, 0, true, Axis.X);
-				AnimationPoint yPoint = AnimationController.getAnimationPointAtTick(positionKeyFrames.yKeyFrames, 0, true, Axis.Y);
-				AnimationPoint zPoint = AnimationController.getAnimationPointAtTick(positionKeyFrames.zKeyFrames, 0, true, Axis.Z);
-				AnimationPoint x = new AnimationPoint(null, tick, transitionTime, boneSnapshot.getPositionX(), xPoint.animationStartValue);
-				AnimationPoint y = new AnimationPoint(null, tick, transitionTime, boneSnapshot.getPositionY(), yPoint.animationStartValue);
-				AnimationPoint z = new AnimationPoint(null, tick, transitionTime, boneSnapshot.getPositionZ(), zPoint.animationStartValue);
-				bone.setPositionX(x.lerpValues(controller.easingType, controller.customEasingMethod));
-				bone.setPositionY(y.lerpValues(controller.easingType, controller.customEasingMethod));
-				bone.setPositionZ(z.lerpValues(controller.easingType, controller.customEasingMethod));
-				dirtyTracker.notifyPositionChange();
-			}
-
-			if (!scaleKeyFrames.xKeyFrames.isEmpty()) {
-				AnimationPoint xPoint = AnimationController.getAnimationPointAtTick(scaleKeyFrames.xKeyFrames, 0, true, Axis.X);
-				AnimationPoint yPoint = AnimationController.getAnimationPointAtTick(scaleKeyFrames.yKeyFrames, 0, true, Axis.Y);
-				AnimationPoint zPoint = AnimationController.getAnimationPointAtTick(scaleKeyFrames.zKeyFrames, 0, true, Axis.Z);
-				AnimationPoint x = new AnimationPoint(null, tick, transitionTime, boneSnapshot.getScaleX(), xPoint.animationStartValue);
-				AnimationPoint y = new AnimationPoint(null, tick, transitionTime, boneSnapshot.getScaleY(), yPoint.animationStartValue);
-				AnimationPoint z = new AnimationPoint(null, tick, transitionTime, boneSnapshot.getScaleZ(), zPoint.animationStartValue);
-				bone.setScaleX(x.lerpValues(controller.easingType, controller.customEasingMethod));
-				bone.setScaleY(y.lerpValues(controller.easingType, controller.customEasingMethod));
-				bone.setScaleZ(z.lerpValues(controller.easingType, controller.customEasingMethod));
-				dirtyTracker.notifyScaleChange();
-			}
+		ParticleEventKeyFrame particleEventKeyFrame = particleKeyFrames.peek();
+		if (particleEventKeyFrame != null && animationTime >= particleEventKeyFrame.getStartTick()) {
+			ParticleKeyFrameEvent<T> event = new ParticleKeyFrameEvent<>(controller.animatable, animationTime, particleEventKeyFrame.effect, particleEventKeyFrame.locator, particleEventKeyFrame.script, controller);
+			controller.particleListener.summonParticle(event);
+			// Remove the particle keyframe from the queue
+			particleKeyFrames.poll();
 		}
+	}
+
+	private <T> void processEventKeyFrames(AnimationController<T> controller, double animationTime) {
+		if (controller.customInstructionListener == null) return;
+
+		EventKeyFrame<List<String>> customInstructionKeyFrame = customInstructionKeyFrames.peek();
+		if (customInstructionKeyFrame != null && animationTime >= customInstructionKeyFrame.getStartTick()) {
+			CustomInstructionKeyframeEvent<T> event = new CustomInstructionKeyframeEvent<>(controller.animatable, animationTime, customInstructionKeyFrame.getEventData(), controller);
+			controller.customInstructionListener.executeInstruction(event);
+			// Remove the custom instruction keyframe from the queue
+			customInstructionKeyFrames.poll();
+		}
+	}
+
+	public boolean isFinished(double renderTime) {
+		return false;
 	}
 }
