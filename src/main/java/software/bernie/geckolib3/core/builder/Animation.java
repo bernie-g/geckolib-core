@@ -23,6 +23,6 @@ public class Animation
 	public List<BoneAnimation> boneAnimations;
 	public List<EventKeyFrame<String>> soundKeyFrames = new ArrayList<>();
 	public List<ParticleEventKeyFrame> particleKeyFrames = new ArrayList<>();
-	public List<EventKeyFrame<List<String>>> customInstructionKeyframes = new ArrayList<>();
+	public List<EventKeyFrame<String>> customInstructionKeyframes = new ArrayList<>();
 
 }
