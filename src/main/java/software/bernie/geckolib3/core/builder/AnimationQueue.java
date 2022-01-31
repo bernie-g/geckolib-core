@@ -24,6 +24,10 @@ public class AnimationQueue {
 		return queue.isEmpty();
 	}
 
+	public QueuedAnimation peek() {
+		return queue.peek();
+	}
+
 	public static class QueuedAnimation {
 		public final Animation animation;
 		public final boolean loop;

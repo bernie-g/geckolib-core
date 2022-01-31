@@ -300,9 +300,13 @@ public class AnimationController<T> {
 		if (animationQueue.isEmpty()) {
 			return true;
 		} else {
-			AnimationQueue.QueuedAnimation next = animationQueue.poll();
+			AnimationQueue.QueuedAnimation next = animationQueue.peek();
 
-			currentAnimation = new RunningAnimation(next, boneTree, renderTime);
+			currentAnimation = new RunningAnimation(next.animation, boneTree, renderTime);
+
+			if (!next.loop) {
+				animationQueue.poll();
+			}
 		}
 		return false;
 	}

@@ -3,12 +3,14 @@ package software.bernie.geckolib3.core.controller;
 import java.util.ArrayDeque;
 import java.util.List;
 import java.util.Queue;
+import java.util.function.Function;
 
 import com.eliotlash.mclib.math.IValue;
 
 import software.bernie.geckolib3.core.ConstantValue;
 import software.bernie.geckolib3.core.builder.Animation;
-import software.bernie.geckolib3.core.builder.AnimationQueue;
+import software.bernie.geckolib3.core.easing.EasingManager;
+import software.bernie.geckolib3.core.easing.EasingType;
 import software.bernie.geckolib3.core.event.CustomInstructionKeyframeEvent;
 import software.bernie.geckolib3.core.event.ParticleKeyFrameEvent;
 import software.bernie.geckolib3.core.event.SoundKeyframeEvent;
@@ -18,10 +20,10 @@ import software.bernie.geckolib3.core.processor.DirtyTracker;
 import software.bernie.geckolib3.core.processor.IBone;
 import software.bernie.geckolib3.core.processor.ImmutableBone;
 import software.bernie.geckolib3.core.util.Axis;
+import software.bernie.geckolib3.core.util.MathUtil;
 
 public class RunningAnimation {
 	public final Animation animation;
-	public final boolean loop;
 	public final double startTime;
 	private final BoneTree<?> boneTree;
 
@@ -29,33 +31,32 @@ public class RunningAnimation {
 	private final Queue<ParticleEventKeyFrame> particleKeyFrames;
 	private final Queue<EventKeyFrame<List<String>>> customInstructionKeyFrames;
 
-	public RunningAnimation(AnimationQueue.QueuedAnimation next, BoneTree<?> boneTree, double renderTime) {
-		this.animation = next.animation;
-		this.loop = next.loop;
+	public RunningAnimation(Animation animation, BoneTree<?> boneTree, double renderTime) {
+		this.animation = animation;
 		this.boneTree = boneTree;
 		this.startTime = renderTime;
 
-		this.soundKeyFrames = new ArrayDeque<>(next.animation.soundKeyFrames);
-		this.particleKeyFrames = new ArrayDeque<>(next.animation.particleKeyFrames);
-		this.customInstructionKeyFrames = new ArrayDeque<>(next.animation.customInstructionKeyFrames);
+		this.soundKeyFrames = new ArrayDeque<>(animation.soundKeyFrames);
+		this.particleKeyFrames = new ArrayDeque<>(animation.particleKeyFrames);
+		this.customInstructionKeyFrames = new ArrayDeque<>(animation.customInstructionKeyFrames);
 	}
 
 	//Helper method to transform a KeyFrameLocation to an AnimationPoint
-	public static AnimationPoint getAnimationPointAtTick(List<KeyFrame<IValue>> frames, double tick, boolean isRotation,
-			Axis axis) {
+	public static double getAnimationPointAtTick(List<KeyFrame<IValue>> frames, double tick, boolean isRotation,
+			Axis axis, EasingType easingType, Function<Double, Double> customEasingMethod) {
 		KeyFrameLocation<IValue> location = getCurrentKeyFrameLocation(frames, tick);
-		KeyFrame<IValue> currentFrame = location.currentFrame;
-		double startValue = currentFrame.getStartValue().get();
-		double endValue = currentFrame.getEndValue().get();
+		KeyFrame<IValue> keyFrame = location.currentFrame;
+		double startValue = keyFrame.getStartValue().get();
+		double endValue = keyFrame.getEndValue().get();
 
 		if (isRotation) {
-			if (!(currentFrame.getStartValue() instanceof ConstantValue)) {
+			if (!(keyFrame.getStartValue() instanceof ConstantValue)) {
 				startValue = Math.toRadians(startValue);
 				if (axis == Axis.X || axis == Axis.Y) {
 					startValue *= -1;
 				}
 			}
-			if (!(currentFrame.getEndValue() instanceof ConstantValue)) {
+			if (!(keyFrame.getEndValue() instanceof ConstantValue)) {
 				endValue = Math.toRadians(endValue);
 				if (axis == Axis.X || axis == Axis.Y) {
 					endValue *= -1;
@@ -63,7 +64,20 @@ public class RunningAnimation {
 			}
 		}
 
-		return new AnimationPoint(currentFrame, location.currentTick, currentFrame.getLength(), startValue, endValue);
+		if (location.currentTick >= keyFrame.getLength()) {
+			return endValue;
+		}
+		if (location.currentTick == 0 && keyFrame.getLength() == 0) {
+			return endValue;
+		}
+
+		if (easingType == EasingType.CUSTOM && customEasingMethod != null) {
+			return MathUtil.lerp(customEasingMethod.apply(location.currentTick / keyFrame.getLength()), startValue, endValue);
+		} else if (easingType == EasingType.NONE) {
+			easingType = keyFrame.easingType;
+		}
+		double ease = EasingManager.ease(location.currentTick / keyFrame.getLength(), easingType, keyFrame.easingArgs);
+		return MathUtil.lerp(ease, startValue, endValue);
 	}
 
 	/**
@@ -97,32 +111,32 @@ public class RunningAnimation {
 			VectorKeyFrameList<IValue> scaleKeyFrames = boneAnimation.scaleKeyFrames;
 
 			if (!rotationKeyFrames.xKeyFrames.isEmpty()) {
-				AnimationPoint x = getAnimationPointAtTick(rotationKeyFrames.xKeyFrames, animationTime, true, Axis.X);
-				AnimationPoint y = getAnimationPointAtTick(rotationKeyFrames.yKeyFrames, animationTime, true, Axis.Y);
-				AnimationPoint z = getAnimationPointAtTick(rotationKeyFrames.zKeyFrames, animationTime, true, Axis.Z);
-				bone.setRotationX(x.lerpValues(controller.easingType, controller.customEasingMethod) + initialSnapshot.getRotationX());
-				bone.setRotationY(y.lerpValues(controller.easingType, controller.customEasingMethod) + initialSnapshot.getRotationY());
-				bone.setRotationZ(z.lerpValues(controller.easingType, controller.customEasingMethod) + initialSnapshot.getRotationZ());
+				double x = getAnimationPointAtTick(rotationKeyFrames.xKeyFrames, animationTime, true, Axis.X, controller.easingType, controller.customEasingMethod);
+				double y = getAnimationPointAtTick(rotationKeyFrames.yKeyFrames, animationTime, true, Axis.Y, controller.easingType, controller.customEasingMethod);
+				double z = getAnimationPointAtTick(rotationKeyFrames.zKeyFrames, animationTime, true, Axis.Z, controller.easingType, controller.customEasingMethod);
+				bone.setRotationX((float) (x + initialSnapshot.getRotationX()));
+				bone.setRotationY((float) (y + initialSnapshot.getRotationY()));
+				bone.setRotationZ((float) (z + initialSnapshot.getRotationZ()));
 				dirtyTracker.notifyRotationChange();
 			}
 
 			if (!positionKeyFrames.xKeyFrames.isEmpty()) {
-				AnimationPoint x = getAnimationPointAtTick(positionKeyFrames.xKeyFrames, animationTime, false, Axis.X);
-				AnimationPoint y = getAnimationPointAtTick(positionKeyFrames.yKeyFrames, animationTime, false, Axis.Y);
-				AnimationPoint z = getAnimationPointAtTick(positionKeyFrames.zKeyFrames, animationTime, false, Axis.Z);
-				bone.setPositionX(x.lerpValues(controller.easingType, controller.customEasingMethod));
-				bone.setPositionY(y.lerpValues(controller.easingType, controller.customEasingMethod));
-				bone.setPositionZ(z.lerpValues(controller.easingType, controller.customEasingMethod));
+				double x = getAnimationPointAtTick(positionKeyFrames.xKeyFrames, animationTime, false, Axis.X, controller.easingType, controller.customEasingMethod);
+				double y = getAnimationPointAtTick(positionKeyFrames.yKeyFrames, animationTime, false, Axis.Y, controller.easingType, controller.customEasingMethod);
+				double z = getAnimationPointAtTick(positionKeyFrames.zKeyFrames, animationTime, false, Axis.Z, controller.easingType, controller.customEasingMethod);
+				bone.setPositionX((float) (x));
+				bone.setPositionY((float) (y));
+				bone.setPositionZ((float) (z));
 				dirtyTracker.notifyPositionChange();
 			}
 
 			if (!scaleKeyFrames.xKeyFrames.isEmpty()) {
-				AnimationPoint x = getAnimationPointAtTick(scaleKeyFrames.xKeyFrames, animationTime, false, Axis.X);
-				AnimationPoint y = getAnimationPointAtTick(scaleKeyFrames.yKeyFrames, animationTime, false, Axis.Y);
-				AnimationPoint z = getAnimationPointAtTick(scaleKeyFrames.zKeyFrames, animationTime, false, Axis.Z);
-				bone.setScaleX(x.lerpValues(controller.easingType, controller.customEasingMethod));
-				bone.setScaleY(y.lerpValues(controller.easingType, controller.customEasingMethod));
-				bone.setScaleZ(z.lerpValues(controller.easingType, controller.customEasingMethod));
+				double x = getAnimationPointAtTick(scaleKeyFrames.xKeyFrames, animationTime, false, Axis.X, controller.easingType, controller.customEasingMethod);
+				double y = getAnimationPointAtTick(scaleKeyFrames.yKeyFrames, animationTime, false, Axis.Y, controller.easingType, controller.customEasingMethod);
+				double z = getAnimationPointAtTick(scaleKeyFrames.zKeyFrames, animationTime, false, Axis.Z, controller.easingType, controller.customEasingMethod);
+				bone.setScaleX((float) (x));
+				bone.setScaleY((float) (y));
+				bone.setScaleZ((float) (z));
 				dirtyTracker.notifyScaleChange();
 			}
 		}
@@ -175,6 +189,6 @@ public class RunningAnimation {
 	}
 
 	public boolean isFinished(double renderTime) {
-		return false;
+		return renderTime > startTime + animation.animationLength;
 	}
 }
