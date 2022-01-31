@@ -41,12 +41,12 @@ public class EasingManager {
 	}
 
 	// Memoize easing functions so we don't need to create new ones from HOFs every frame
-	static Function<Double, Double> quart = poly(4);
-	static Function<Double, Double> quint = poly(5);
-	static Function<EasingFunctionArgs, Function<Double, Double>> getEasingFunction = Memoizer.memoize(EasingManager::getEasingFuncImpl);
+	static EaseFunc quart = poly(4);
+	static EaseFunc quint = poly(5);
+	static Function<EasingFunctionArgs, EaseFunc> getEasingFunction = Memoizer.memoize(EasingManager::getEasingFuncImpl);
 
 	// Don't call this, use getEasingFunction instead as that function is the memoized version
-	static Function<Double, Double> getEasingFuncImpl(EasingFunctionArgs args) {
+	static EaseFunc getEasingFuncImpl(EasingFunctionArgs args) {
 		switch (args.easingType) {
 		default:
 		case Linear:
@@ -127,14 +127,14 @@ public class EasingManager {
 	/**
 	 * Runs an easing function forwards.
 	 */
-	static Function<Double, Double> in(Function<Double, Double> easing) {
+	static EaseFunc in(EaseFunc easing) {
 		return easing;
 	}
 
 	/**
 	 * Runs an easing function backwards.
 	 */
-	static Function<Double, Double> out(Function<Double, Double> easing) {
+	static EaseFunc out(EaseFunc easing) {
 		return t -> 1 - easing.apply(1 - t);
 	}
 
@@ -143,7 +143,7 @@ public class EasingManager {
 	 * forwards for half of the duration, then backwards for the rest of the
 	 * duration.
 	 */
-	static Function<Double, Double> inOut(Function<Double, Double> easing) {
+	static EaseFunc inOut(EaseFunc easing) {
 		return t -> {
 			if (t < 0.5) {
 				return easing.apply(t * 2) / 2;
@@ -155,14 +155,14 @@ public class EasingManager {
 	/**
 	 * A stepping function, returns 1 for any positive value of `n`.
 	 */
-	static Function<Double, Double> step0() {
+	static EaseFunc step0() {
 		return n -> n > 0 ? 1D : 0;
 	}
 
 	/**
 	 * A stepping function, returns 1 if `n` is greater than or equal to 1.
 	 */
-	static Function<Double, Double> step1() {
+	static EaseFunc step1() {
 		return n -> n >= 1D ? 1D : 0;
 	}
 
@@ -215,7 +215,7 @@ public class EasingManager {
 	 * n = 4: http://easings.net/#easeInQuart
 	 * n = 5: http://easings.net/#easeInQuint
 	 */
-	static Function<Double, Double> poly(double n) {
+	static EaseFunc poly(double n) {
 		return (t) -> Math.pow(t, n);
 	}
 
@@ -256,7 +256,7 @@ public class EasingManager {
 	 * <p>
 	 * http://easings.net/#easeInElastic
 	 */
-	static Function<Double, Double> elastic(Double bounciness) {
+	static EaseFunc elastic(Double bounciness) {
 		double p = (bounciness == null ? 1 : bounciness) * Math.PI;
 		return t -> 1 - Math.pow(Math.cos((float) ((t * Math.PI) / 2)), 3) * Math.cos((float) (t * p));
 	}
@@ -270,7 +270,7 @@ public class EasingManager {
 	 * <p>
 	 * - http://tiny.cc/back_default (s = 1.70158, default)
 	 */
-	static Function<Double, Double> back(Double s) {
+	static EaseFunc back(Double s) {
 		double p = s == null ? 1.70158 : s * 1.70158;
 		return t -> t * t * ((p + 1) * t - p);
 	}
@@ -282,16 +282,16 @@ public class EasingManager {
 	 * using min instead of ternaries
 	 * http://easings.net/#easeInBounce
 	 */
-	public static Function<Double, Double> bounce(Double s) {
+	public static EaseFunc bounce(Double s) {
 		double k = s == null ? 0.5 : s;
-		Function<Double, Double> q = x -> (121.0 / 16.0) * x * x;
-		Function<Double, Double> w = x -> ((121.0 / 4.0) * k) * Math.pow(x - (6.0 / 11.0), 2) + 1 - k;
-		Function<Double, Double> r = x -> 121 * k * k * Math.pow(x - (9.0 / 11.0), 2) + 1 - k * k;
-		Function<Double, Double> t = x -> 484 * k * k * k * Math.pow(x - (10.5 / 11.0), 2) + 1 - k * k * k;
+		EaseFunc q = x -> (121.0 / 16.0) * x * x;
+		EaseFunc w = x -> ((121.0 / 4.0) * k) * Math.pow(x - (6.0 / 11.0), 2) + 1 - k;
+		EaseFunc r = x -> 121 * k * k * Math.pow(x - (9.0 / 11.0), 2) + 1 - k * k;
+		EaseFunc t = x -> 484 * k * k * k * Math.pow(x - (10.5 / 11.0), 2) + 1 - k * k * k;
 		return x -> min(q.apply(x), w.apply(x), r.apply(x), t.apply(x));
 	}
 
-	static Function<Double, Double> step(Double stepArg) {
+	static EaseFunc step(Double stepArg) {
 		int steps = stepArg != null ? stepArg.intValue() : 2;
 		double[] intervals = stepRange(steps);
 		return t -> intervals[findIntervalBorderIndex(t, intervals, false)];

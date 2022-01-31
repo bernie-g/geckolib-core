@@ -17,6 +17,7 @@ import software.bernie.geckolib3.core.builder.Animation;
 import software.bernie.geckolib3.core.builder.AnimationBuilder;
 import software.bernie.geckolib3.core.builder.AnimationQueue;
 import software.bernie.geckolib3.core.builder.RawAnimation;
+import software.bernie.geckolib3.core.easing.EaseFunc;
 import software.bernie.geckolib3.core.easing.EasingType;
 import software.bernie.geckolib3.core.event.CustomInstructionKeyframeEvent;
 import software.bernie.geckolib3.core.event.ParticleKeyFrameEvent;
@@ -163,7 +164,7 @@ public class AnimationController<T> {
 	 * By default Geckolib uses the easing types of every keyframe. If you want to override that for an entire AnimationController, change this value.
 	 */
 	public final EasingType easingType;
-	public final Function<Double, Double> customEasingMethod;
+	public final EaseFunc customEasingMethod;
 
 	/**
 	 * Instantiates a new Animation controller. Each animation controller can run one animation at a time. You can have several animation controllers for each entity, i.e. one animation to control the entity's size, one to control movement, attacks, etc.
@@ -210,7 +211,7 @@ public class AnimationController<T> {
 	 * @param customEasingMethod    If you want to use an easing method that's not included in the EasingType enum, pass your method into here. The parameter that's passed in will be a number between 0 and 1. Return a number also within 0 and 1. Take a look at {@link software.bernie.geckolib3.core.easing.EasingManager}
 	 */
 	public AnimationController(T animatable, String name, float transitionLengthTicks,
-			Function<Double, Double> customEasingMethod, IAnimationPredicate<T> animationPredicate) {
+			EaseFunc customEasingMethod, IAnimationPredicate<T> animationPredicate) {
 		this.animatable = animatable;
 		this.name = name;
 		this.transitionLengthTicks = transitionLengthTicks;

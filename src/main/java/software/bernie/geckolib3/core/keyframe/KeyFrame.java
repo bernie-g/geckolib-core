@@ -5,31 +5,30 @@
 
 package software.bernie.geckolib3.core.keyframe;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import java.util.Objects;
+
+import com.eliotlash.mclib.math.IValue;
 
 import software.bernie.geckolib3.core.easing.EasingType;
 
-public class KeyFrame<T> {
+public class KeyFrame {
 	private static final double[] EMPTY_ARGS = new double[0];
 
 	private final double length;
-	private final T startValue;
-	private final T endValue;
+	private final IValue startValue;
+	private final IValue endValue;
 	public final EasingType easingType;
 	public final double[] easingArgs;
 
-	public KeyFrame(double length, T startValue, T endValue) {
+	public KeyFrame(double length, IValue startValue, IValue endValue) {
 		this(length, startValue, endValue, EasingType.Linear, EMPTY_ARGS);
 	}
 
-	public KeyFrame(double length, T startValue, T endValue, EasingType easingType) {
+	public KeyFrame(double length, IValue startValue, IValue endValue, EasingType easingType) {
 		this(length, startValue, endValue, easingType, EMPTY_ARGS);
 	}
 
-	public KeyFrame(double length, T startValue, T endValue, EasingType easingType, double[] easingArgs) {
+	public KeyFrame(double length, IValue startValue, IValue endValue, EasingType easingType, double[] easingArgs) {
 		this.length = length;
 		this.startValue = startValue;
 		this.endValue = endValue;
@@ -41,11 +40,11 @@ public class KeyFrame<T> {
 		return length;
 	}
 
-	public T getStartValue() {
+	public IValue getStartValue() {
 		return startValue;
 	}
 
-	public T getEndValue() {
+	public IValue getEndValue() {
 		return endValue;
 	}
 

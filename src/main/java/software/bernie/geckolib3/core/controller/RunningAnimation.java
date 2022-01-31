@@ -1,16 +1,11 @@
 package software.bernie.geckolib3.core.controller;
 
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
-import java.util.function.Function;
 
-import com.eliotlash.mclib.math.IValue;
-
-import software.bernie.geckolib3.core.ConstantValue;
 import software.bernie.geckolib3.core.builder.Animation;
-import software.bernie.geckolib3.core.easing.EasingManager;
-import software.bernie.geckolib3.core.easing.EasingType;
 import software.bernie.geckolib3.core.event.CustomInstructionKeyframeEvent;
 import software.bernie.geckolib3.core.event.ParticleKeyFrameEvent;
 import software.bernie.geckolib3.core.event.SoundKeyframeEvent;
@@ -20,7 +15,6 @@ import software.bernie.geckolib3.core.processor.DirtyTracker;
 import software.bernie.geckolib3.core.processor.IBone;
 import software.bernie.geckolib3.core.processor.ImmutableBone;
 import software.bernie.geckolib3.core.util.Axis;
-import software.bernie.geckolib3.core.util.MathUtil;
 
 public class RunningAnimation {
 	public final Animation animation;
@@ -30,6 +24,7 @@ public class RunningAnimation {
 	private final Queue<EventKeyFrame<String>> soundKeyFrames;
 	private final Queue<ParticleEventKeyFrame> particleKeyFrames;
 	private final Queue<EventKeyFrame<List<String>>> customInstructionKeyFrames;
+	private final ArrayList<RunningBone> boneAnimations;
 
 	public RunningAnimation(Animation animation, BoneTree<?> boneTree, double renderTime) {
 		this.animation = animation;
@@ -39,101 +34,55 @@ public class RunningAnimation {
 		this.soundKeyFrames = new ArrayDeque<>(animation.soundKeyFrames);
 		this.particleKeyFrames = new ArrayDeque<>(animation.particleKeyFrames);
 		this.customInstructionKeyFrames = new ArrayDeque<>(animation.customInstructionKeyFrames);
-	}
 
-	//Helper method to transform a KeyFrameLocation to an AnimationPoint
-	public static double getAnimationPointAtTick(List<KeyFrame<IValue>> frames, double tick, boolean isRotation,
-			Axis axis, EasingType easingType, Function<Double, Double> customEasingMethod) {
-		KeyFrameLocation<IValue> location = getCurrentKeyFrameLocation(frames, tick);
-		KeyFrame<IValue> keyFrame = location.currentFrame;
-		double startValue = keyFrame.getStartValue().get();
-		double endValue = keyFrame.getEndValue().get();
+		boneAnimations = new ArrayList<>();
+		for (BoneAnimation boneAnimation : animation.boneAnimations) {
+			IBone bone = boneTree.getBoneByName(boneAnimation.boneName);
 
-		if (isRotation) {
-			if (!(keyFrame.getStartValue() instanceof ConstantValue)) {
-				startValue = Math.toRadians(startValue);
-				if (axis == Axis.X || axis == Axis.Y) {
-					startValue *= -1;
-				}
+			if (bone == null) {
+				throw new IllegalArgumentException("Bone " + boneAnimation.boneName + " does not exist in the bone tree");
 			}
-			if (!(keyFrame.getEndValue() instanceof ConstantValue)) {
-				endValue = Math.toRadians(endValue);
-				if (axis == Axis.X || axis == Axis.Y) {
-					endValue *= -1;
-				}
-			}
-		}
 
-		if (location.currentTick >= keyFrame.getLength()) {
-			return endValue;
+			boneAnimations.add(new RunningBone(bone, boneAnimation.rotationKeyFrames, boneAnimation.positionKeyFrames, boneAnimation.scaleKeyFrames));
 		}
-		if (location.currentTick == 0 && keyFrame.getLength() == 0) {
-			return endValue;
-		}
-
-		if (easingType == EasingType.CUSTOM && customEasingMethod != null) {
-			return MathUtil.lerp(customEasingMethod.apply(location.currentTick / keyFrame.getLength()), startValue, endValue);
-		} else if (easingType == EasingType.NONE) {
-			easingType = keyFrame.easingType;
-		}
-		double ease = EasingManager.ease(location.currentTick / keyFrame.getLength(), easingType, keyFrame.easingArgs);
-		return MathUtil.lerp(ease, startValue, endValue);
-	}
-
-	/**
-	 * Returns the current keyframe object, plus how long the previous keyframes have taken (aka elapsed animation time)
-	 **/
-	private static KeyFrameLocation<IValue> getCurrentKeyFrameLocation(List<KeyFrame<IValue>> frames,
-			double ageInTicks) {
-		double totalTimeTracker = 0;
-		for (KeyFrame<IValue> frame : frames) {
-			totalTimeTracker += frame.getLength();
-			if (totalTimeTracker > ageInTicks) {
-				double tick = (ageInTicks - (totalTimeTracker - frame.getLength()));
-				return new KeyFrameLocation<>(frame, tick);
-			}
-		}
-		return new KeyFrameLocation<>(frames.get(frames.size() - 1), ageInTicks);
 	}
 
 	public <T> void process(double renderTime, AnimationController<T> controller) {
 		double animationTime = renderTime - startTime;
-		// Loop through every boneanimation in the current animation and process the values
-		List<BoneAnimation> boneAnimations = animation.boneAnimations;
-		for (BoneAnimation boneAnimation : boneAnimations) {
-			IBone bone = boneTree.getBoneByName(boneAnimation.boneName);
+		for (RunningBone boneAnimation : boneAnimations) {
+			IBone bone = boneAnimation.bone;
 
 			ImmutableBone initialSnapshot = bone.getSourceBone();
 			DirtyTracker dirtyTracker = bone.getDirtyTracker();
 
-			VectorKeyFrameList<IValue> rotationKeyFrames = boneAnimation.rotationKeyFrames;
-			VectorKeyFrameList<IValue> positionKeyFrames = boneAnimation.positionKeyFrames;
-			VectorKeyFrameList<IValue> scaleKeyFrames = boneAnimation.scaleKeyFrames;
+			VectorTimeline rotationKeyFrames = boneAnimation.rotationKeyFrames;
+			VectorTimeline positionKeyFrames = boneAnimation.positionKeyFrames;
+			VectorTimeline scaleKeyFrames = boneAnimation.scaleKeyFrames;
 
-			if (!rotationKeyFrames.xKeyFrames.isEmpty()) {
-				double x = getAnimationPointAtTick(rotationKeyFrames.xKeyFrames, animationTime, true, Axis.X, controller.easingType, controller.customEasingMethod);
-				double y = getAnimationPointAtTick(rotationKeyFrames.yKeyFrames, animationTime, true, Axis.Y, controller.easingType, controller.customEasingMethod);
-				double z = getAnimationPointAtTick(rotationKeyFrames.zKeyFrames, animationTime, true, Axis.Z, controller.easingType, controller.customEasingMethod);
+			if (rotationKeyFrames.xKeyFrames.hasKeyFrames()) {
+				double x = rotationKeyFrames.xKeyFrames.getValueAt(animationTime, true, Axis.X, controller.easingType, controller.customEasingMethod);
+				double y = rotationKeyFrames.yKeyFrames.getValueAt(animationTime, true, Axis.Y, controller.easingType, controller.customEasingMethod);
+				double z = rotationKeyFrames.zKeyFrames.getValueAt(animationTime, true, Axis.Z, controller.easingType, controller.customEasingMethod);
 				bone.setRotationX((float) (x + initialSnapshot.getRotationX()));
 				bone.setRotationY((float) (y + initialSnapshot.getRotationY()));
 				bone.setRotationZ((float) (z + initialSnapshot.getRotationZ()));
 				dirtyTracker.notifyRotationChange();
 			}
 
-			if (!positionKeyFrames.xKeyFrames.isEmpty()) {
-				double x = getAnimationPointAtTick(positionKeyFrames.xKeyFrames, animationTime, false, Axis.X, controller.easingType, controller.customEasingMethod);
-				double y = getAnimationPointAtTick(positionKeyFrames.yKeyFrames, animationTime, false, Axis.Y, controller.easingType, controller.customEasingMethod);
-				double z = getAnimationPointAtTick(positionKeyFrames.zKeyFrames, animationTime, false, Axis.Z, controller.easingType, controller.customEasingMethod);
+			if (positionKeyFrames.xKeyFrames.hasKeyFrames()) {
+				double x = positionKeyFrames.xKeyFrames.getValueAt(animationTime, false, Axis.X, controller.easingType, controller.customEasingMethod);
+				double y = positionKeyFrames.yKeyFrames.getValueAt(animationTime, false, Axis.Y, controller.easingType, controller.customEasingMethod);
+				double z = positionKeyFrames.zKeyFrames.getValueAt(animationTime, false, Axis.Z, controller.easingType, controller.customEasingMethod);
 				bone.setPositionX((float) (x));
 				bone.setPositionY((float) (y));
 				bone.setPositionZ((float) (z));
 				dirtyTracker.notifyPositionChange();
 			}
 
-			if (!scaleKeyFrames.xKeyFrames.isEmpty()) {
-				double x = getAnimationPointAtTick(scaleKeyFrames.xKeyFrames, animationTime, false, Axis.X, controller.easingType, controller.customEasingMethod);
-				double y = getAnimationPointAtTick(scaleKeyFrames.yKeyFrames, animationTime, false, Axis.Y, controller.easingType, controller.customEasingMethod);
-				double z = getAnimationPointAtTick(scaleKeyFrames.zKeyFrames, animationTime, false, Axis.Z, controller.easingType, controller.customEasingMethod);
+			if (scaleKeyFrames.xKeyFrames.hasKeyFrames()) {
+				double x = scaleKeyFrames.xKeyFrames.getValueAt(animationTime, false, Axis.X, controller.easingType, controller.customEasingMethod);
+				double y = scaleKeyFrames.yKeyFrames.getValueAt(animationTime, false, Axis.Y, controller.easingType, controller.customEasingMethod);
+				double z = scaleKeyFrames.zKeyFrames.getValueAt(animationTime, false, Axis.Z, controller.easingType, controller.customEasingMethod);
 				bone.setScaleX((float) (x));
 				bone.setScaleY((float) (y));
 				bone.setScaleZ((float) (z));
@@ -190,5 +139,21 @@ public class RunningAnimation {
 
 	public boolean isFinished(double renderTime) {
 		return renderTime > startTime + animation.animationLength;
+	}
+
+	private static class RunningBone {
+
+		private final IBone bone;
+		private final VectorTimeline rotationKeyFrames;
+		private final VectorTimeline positionKeyFrames;
+		private final VectorTimeline scaleKeyFrames;
+
+		public RunningBone(IBone bone, VectorTimeline rotationKeyFrames, VectorTimeline positionKeyFrames,
+				VectorTimeline scaleKeyFrames) {
+			this.bone = bone;
+			this.rotationKeyFrames = rotationKeyFrames;
+			this.positionKeyFrames = positionKeyFrames;
+			this.scaleKeyFrames = scaleKeyFrames;
+		}
 	}
 }
