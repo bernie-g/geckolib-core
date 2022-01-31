@@ -1,10 +1,13 @@
 package software.bernie.geckolib3.core.easing;
 
+/**
+ * A function that maps a linear {@code t} value in the range [0, 1] to an eased value in the range [0, 1].
+ */
 @FunctionalInterface
 public interface EaseFunc {
 	/**
-	 * @param t Value between 0 and 1.
-	 * @return Value between 0 and 1.
+	 * @param t Linear input value in the range [0, 1].
+	 * @return Eased output value in the range [0, 1].
 	 */
 	double apply(double t);
 }

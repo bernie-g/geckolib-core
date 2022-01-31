@@ -14,12 +14,10 @@ import software.bernie.geckolib3.core.processor.BoneTree;
 import software.bernie.geckolib3.core.processor.DirtyTracker;
 import software.bernie.geckolib3.core.processor.IBone;
 import software.bernie.geckolib3.core.processor.ImmutableBone;
-import software.bernie.geckolib3.core.util.Axis;
 
 public class RunningAnimation {
 	public final Animation animation;
 	public final double startTime;
-	private final BoneTree<?> boneTree;
 
 	private final Queue<EventKeyFrame<String>> soundKeyFrames;
 	private final Queue<ParticleEventKeyFrame> particleKeyFrames;
@@ -28,7 +26,6 @@ public class RunningAnimation {
 
 	public RunningAnimation(Animation animation, BoneTree<?> boneTree, double renderTime) {
 		this.animation = animation;
-		this.boneTree = boneTree;
 		this.startTime = renderTime;
 
 		this.soundKeyFrames = new ArrayDeque<>(animation.soundKeyFrames);
@@ -49,6 +46,7 @@ public class RunningAnimation {
 
 	public <T> void process(double renderTime, AnimationController<T> controller) {
 		double animationTime = renderTime - startTime;
+
 		for (RunningBone boneAnimation : boneAnimations) {
 			IBone bone = boneAnimation.bone;
 
@@ -59,30 +57,30 @@ public class RunningAnimation {
 			VectorTimeline positionKeyFrames = boneAnimation.positionKeyFrames;
 			VectorTimeline scaleKeyFrames = boneAnimation.scaleKeyFrames;
 
-			if (rotationKeyFrames.xKeyFrames.hasKeyFrames()) {
-				double x = rotationKeyFrames.xKeyFrames.getValueAt(animationTime, true, Axis.X, controller.easingType, controller.customEasingMethod);
-				double y = rotationKeyFrames.yKeyFrames.getValueAt(animationTime, true, Axis.Y, controller.easingType, controller.customEasingMethod);
-				double z = rotationKeyFrames.zKeyFrames.getValueAt(animationTime, true, Axis.Z, controller.easingType, controller.customEasingMethod);
+			if (rotationKeyFrames.hasKeyFrames()) {
+				double x = rotationKeyFrames.x.getValueAt(animationTime, controller.easeOverride);
+				double y = rotationKeyFrames.y.getValueAt(animationTime, controller.easeOverride);
+				double z = rotationKeyFrames.z.getValueAt(animationTime, controller.easeOverride);
 				bone.setRotationX((float) (x + initialSnapshot.getRotationX()));
 				bone.setRotationY((float) (y + initialSnapshot.getRotationY()));
 				bone.setRotationZ((float) (z + initialSnapshot.getRotationZ()));
 				dirtyTracker.notifyRotationChange();
 			}
 
-			if (positionKeyFrames.xKeyFrames.hasKeyFrames()) {
-				double x = positionKeyFrames.xKeyFrames.getValueAt(animationTime, false, Axis.X, controller.easingType, controller.customEasingMethod);
-				double y = positionKeyFrames.yKeyFrames.getValueAt(animationTime, false, Axis.Y, controller.easingType, controller.customEasingMethod);
-				double z = positionKeyFrames.zKeyFrames.getValueAt(animationTime, false, Axis.Z, controller.easingType, controller.customEasingMethod);
+			if (positionKeyFrames.hasKeyFrames()) {
+				double x = positionKeyFrames.x.getValueAt(animationTime, controller.easeOverride);
+				double y = positionKeyFrames.y.getValueAt(animationTime, controller.easeOverride);
+				double z = positionKeyFrames.z.getValueAt(animationTime, controller.easeOverride);
 				bone.setPositionX((float) (x));
 				bone.setPositionY((float) (y));
 				bone.setPositionZ((float) (z));
 				dirtyTracker.notifyPositionChange();
 			}
 
-			if (scaleKeyFrames.xKeyFrames.hasKeyFrames()) {
-				double x = scaleKeyFrames.xKeyFrames.getValueAt(animationTime, false, Axis.X, controller.easingType, controller.customEasingMethod);
-				double y = scaleKeyFrames.yKeyFrames.getValueAt(animationTime, false, Axis.Y, controller.easingType, controller.customEasingMethod);
-				double z = scaleKeyFrames.zKeyFrames.getValueAt(animationTime, false, Axis.Z, controller.easingType, controller.customEasingMethod);
+			if (scaleKeyFrames.hasKeyFrames()) {
+				double x = scaleKeyFrames.x.getValueAt(animationTime, controller.easeOverride);
+				double y = scaleKeyFrames.y.getValueAt(animationTime, controller.easeOverride);
+				double z = scaleKeyFrames.z.getValueAt(animationTime, controller.easeOverride);
 				bone.setScaleX((float) (x));
 				bone.setScaleY((float) (y));
 				bone.setScaleZ((float) (z));

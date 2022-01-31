@@ -10,9 +10,9 @@ import software.bernie.geckolib3.core.util.Memoizer;
 
 public class EasingManager {
 	static class EasingFunctionArgs {
+
 		public final EasingType easingType;
 		public final Double arg0;
-
 		public EasingFunctionArgs(EasingType easingType, Double arg0) {
 			this.easingType = easingType;
 			this.arg0 = arg0;
@@ -30,6 +30,11 @@ public class EasingManager {
 		public int hashCode() {
 			return Objects.hash(easingType, arg0);
 		}
+
+	}
+
+	public static EaseFunc getEasingFunc(EasingType easingType, Double easingArgs) {
+		return getEasingFunction.apply(new EasingFunctionArgs(easingType, easingArgs));
 	}
 
 	public static double ease(double number, EasingType easingType, double[] easingArgs) {

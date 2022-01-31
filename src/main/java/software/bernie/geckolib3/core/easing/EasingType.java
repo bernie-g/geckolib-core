@@ -1,8 +1,6 @@
 package software.bernie.geckolib3.core.easing;
 
 public enum EasingType {
-	NONE,
-	CUSTOM,
 	Linear,
 	Step,
 	EaseInSine,
