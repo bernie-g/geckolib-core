@@ -8,3 +8,5 @@
  */
 
 rootProject.name = 'geckolib-core'
+include ':molang'
+project(':molang').projectDir = new File('./molang')

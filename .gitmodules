@@ -1,0 +1,4 @@
+[submodule "molang"]
+	path = molang
+	url = https://github.com/fadookie/particleman.git
+	branch = just-molang
