@@ -6,6 +6,8 @@ def snapshotVersion = System.getenv("GITHUB_RUN_NUMBER")
 version = snapshotVersion == null ? project.version : "SNAPSHOT-" + snapshotVersion
 archivesBaseName = project.archivesBaseName
 
+java.toolchain.languageVersion = JavaLanguageVersion.of(17)
+
 repositories {
 	mavenCentral()
 	maven { url 'https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/' }

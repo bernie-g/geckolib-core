@@ -63,7 +63,7 @@ public class Timeline implements Iterable<KeyFrame> {
 			}
 		}
 
-		return getLast().getEndValue().get();
+		return getLast().getEndValue();
 	}
 
 	@Override

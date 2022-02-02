@@ -18,7 +18,7 @@ public class KeyFrame {
 	private final double length;
 	private final IValue startValue;
 	private final IValue endValue;
-	public final EaseFunc easeFunc;
+	private final EaseFunc easeFunc;
 
 	public KeyFrame(double length, IValue startValue, IValue endValue) {
 		this(length, startValue, endValue, EasingType.Linear, null);
@@ -39,12 +39,12 @@ public class KeyFrame {
 		return length;
 	}
 
-	public IValue getStartValue() {
-		return startValue;
+	public double getStartValue() {
+		return startValue.get();
 	}
 
-	public IValue getEndValue() {
-		return endValue;
+	public double getEndValue() {
+		return endValue.get();
 	}
 
 	@Override
@@ -70,13 +70,13 @@ public class KeyFrame {
 	public double getValueAt(double t, EaseFunc override) {
 
 		if (t >= getLength()) {
-			return getEndValue().get();
+			return getEndValue();
 		}
 		if (t == 0 && getLength() == 0) {
-			return getEndValue().get();
+			return getEndValue();
 		}
 
 		EaseFunc f = override == null ? easeFunc : override;
-		return MathUtil.lerp(f.apply(t / getLength()), getStartValue().get(), getEndValue().get());
+		return MathUtil.lerp(f.apply(t / getLength()), getStartValue(), getEndValue());
 	}
 }
