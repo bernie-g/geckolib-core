@@ -7,7 +7,7 @@ package software.bernie.geckolib3.core.keyframe;
 
 import java.util.Objects;
 
-import com.eliotlash.mclib.math.IValue;
+import com.eliotlash.molang.math.IValue;
 
 import software.bernie.geckolib3.core.easing.EaseFunc;
 import software.bernie.geckolib3.core.easing.EasingManager;
