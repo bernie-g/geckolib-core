@@ -44,11 +44,6 @@ public class AnimationController<T> {
 	protected final IAnimationPredicate<T> animationPredicate;
 
 	/**
-	 * The name of the animation controller
-	 */
-	private final String name;
-
-	/**
 	 * How long it takes to transition between animations
 	 */
 	public double transitionLengthTicks;
@@ -169,13 +164,10 @@ public class AnimationController<T> {
 	 * Instantiates a new Animation controller. Each animation controller can run one animation at a time. You can have several animation controllers for each entity, i.e. one animation to control the entity's size, one to control movement, attacks, etc.
 	 *
 	 * @param animatable            The entity
-	 * @param name                  Name of the animation controller (move_controller, size_controller, attack_controller, etc.)
 	 * @param transitionLengthTicks How long it takes to transition between animations (IN TICKS!!)
 	 */
-	public AnimationController(T animatable, String name, float transitionLengthTicks,
-			IAnimationPredicate<T> animationPredicate) {
+	public AnimationController(T animatable, float transitionLengthTicks, IAnimationPredicate<T> animationPredicate) {
 		this.animatable = animatable;
-		this.name = name;
 		this.transitionLengthTicks = transitionLengthTicks;
 		this.animationPredicate = animationPredicate;
 		this.easeOverride = null;
@@ -186,14 +178,12 @@ public class AnimationController<T> {
 	 * Instantiates a new Animation controller. Each animation controller can run one animation at a time. You can have several animation controllers for each entity, i.e. one animation to control the entity's size, one to control movement, attacks, etc.
 	 *
 	 * @param animatable            The entity
-	 * @param name                  Name of the animation controller (move_controller, size_controller, attack_controller, etc.)
 	 * @param transitionLengthTicks How long it takes to transition between animations (IN TICKS!!)
 	 * @param easingType            The method of easing to use. The other constructor defaults to no easing.
 	 */
-	public AnimationController(T animatable, String name, float transitionLengthTicks, EasingType easingType,
+	public AnimationController(T animatable, float transitionLengthTicks, EasingType easingType,
 			IAnimationPredicate<T> animationPredicate) {
 		this.animatable = animatable;
-		this.name = name;
 		this.transitionLengthTicks = transitionLengthTicks;
 		this.animationPredicate = animationPredicate;
 		this.easeOverride = EasingManager.getEasingFunc(easingType, null);
@@ -203,26 +193,14 @@ public class AnimationController<T> {
 	 * Instantiates a new Animation controller. Each animation controller can run one animation at a time. You can have several animation controllers for each entity, i.e. one animation to control the entity's size, one to control movement, attacks, etc.
 	 *
 	 * @param animatable            The entity
-	 * @param name                  Name of the animation controller (move_controller, size_controller, attack_controller, etc.)
 	 * @param transitionLengthTicks How long it takes to transition between animations (IN TICKS!!)
 	 * @param easeOverride    If you want to use an easing method that's not included in the EasingType enum, pass your method into here. The parameter that's passed in will be a number between 0 and 1. Return a number also within 0 and 1. Take a look at {@link software.bernie.geckolib3.core.easing.EasingManager}
 	 */
-	public AnimationController(T animatable, String name, float transitionLengthTicks,
-			EaseFunc easeOverride, IAnimationPredicate<T> animationPredicate) {
+	public AnimationController(T animatable, float transitionLengthTicks, EaseFunc easeOverride, IAnimationPredicate<T> animationPredicate) {
 		this.animatable = animatable;
-		this.name = name;
 		this.transitionLengthTicks = transitionLengthTicks;
 		this.easeOverride = easeOverride;
 		this.animationPredicate = animationPredicate;
-	}
-
-	/**
-	 * Gets the controller's name.
-	 *
-	 * @return the name
-	 */
-	public String getName() {
-		return name;
 	}
 
 	/**
@@ -232,13 +210,6 @@ public class AnimationController<T> {
 	 */
 	public RunningAnimation getCurrentAnimation() {
 		return currentAnimation;
-	}
-
-	/**
-	 * Returns the current state of this animation controller.
-	 */
-	public AnimationState getAnimationState() {
-		return AnimationState.Running;
 	}
 
 	/**

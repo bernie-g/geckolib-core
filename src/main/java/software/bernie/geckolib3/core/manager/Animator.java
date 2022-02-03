@@ -5,7 +5,9 @@
 
 package software.bernie.geckolib3.core.manager;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.eliotlash.molang.MolangParser;
@@ -17,7 +19,7 @@ import software.bernie.geckolib3.core.processor.BoneTree;
 import software.bernie.geckolib3.core.processor.IBone;
 
 public class Animator<T> {
-	private final Map<String, AnimationController<T>> animationControllers = new HashMap<>();
+	private final List<AnimationController<T>> animationControllers = new ArrayList<>();
 	private double resetTickLength = 1;
 	public final BoneTree<?> boneTree;
 	public final ModelType<T> modelType;
@@ -35,7 +37,7 @@ public class Animator<T> {
 	 */
 	public AnimationController<T> addAnimationController(AnimationController<T> value) {
 		value.modelType = modelType;
-		this.animationControllers.put(value.getName(), value);
+		this.animationControllers.add(value);
 		return value;
 	}
 
@@ -52,10 +54,6 @@ public class Animator<T> {
 		this.resetTickLength = Math.max(0, resetTickLength);
 	}
 
-	public AnimationController<T> getAnimationController(String name) {
-		return animationControllers.get(name);
-	}
-
 	public IBone getBone(String name) {
 		return boneTree.getBoneByName(name);
 	}
@@ -66,7 +64,7 @@ public class Animator<T> {
 
 		beginFrame();
 
-		for (AnimationController<T> controller : animationControllers.values()) {
+		for (AnimationController<T> controller : animationControllers) {
 
 			// Process animations and add new values to the point queues
 			controller.process(boneTree, renderTime, event, parser);

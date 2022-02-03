@@ -1,6 +1,5 @@
 package software.bernie.geckolib3.core.easing;
 
-import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
@@ -9,14 +8,7 @@ import java.util.stream.DoubleStream;
 import software.bernie.geckolib3.core.util.Memoizer;
 
 public class EasingManager {
-	static class EasingFunctionArgs {
-
-		public final EasingType easingType;
-		public final Double arg0;
-		public EasingFunctionArgs(EasingType easingType, Double arg0) {
-			this.easingType = easingType;
-			this.arg0 = arg0;
-		}
+	private record EasingFunctionArgs(EasingType easingType, Double arg0) {
 
 		@Override
 		public boolean equals(Object o) {
@@ -37,89 +29,54 @@ public class EasingManager {
 		return getEasingFunction.apply(new EasingFunctionArgs(easingType, easingArgs));
 	}
 
-	public static double ease(double number, EasingType easingType, double[] easingArgs) {
-		if (easingArgs == null || easingArgs.length < 1) {
-			return getEasingFunction.apply(new EasingFunctionArgs(easingType, null)).apply(number);
-		} else {
-			return getEasingFunction.apply(new EasingFunctionArgs(easingType, easingArgs[0])).apply(number);
-		}
-	}
-
-	// Memoize easing functions so we don't need to create new ones from HOFs every frame
-	static EaseFunc quart = poly(4);
-	static EaseFunc quint = poly(5);
 	static Function<EasingFunctionArgs, EaseFunc> getEasingFunction = Memoizer.memoize(EasingManager::getEasingFuncImpl);
 
 	// Don't call this, use getEasingFunction instead as that function is the memoized version
 	static EaseFunc getEasingFuncImpl(EasingFunctionArgs args) {
-		switch (args.easingType) {
-		default:
-		case Linear:
-			return in(EasingManager::linear);
-		case Step:
-			return in(step(args.arg0));
-		case EaseInSine:
-			return in(EasingManager::sin);
-		case EaseOutSine:
-			return out(EasingManager::sin);
-		case EaseInOutSine:
-			return inOut(EasingManager::sin);
-		case EaseInQuad:
-			return in(EasingManager::quad);
-		case EaseOutQuad:
-			return out(EasingManager::quad);
-		case EaseInOutQuad:
-			return inOut(EasingManager::quad);
-		case EaseInCubic:
-			return in(EasingManager::cubic);
-		case EaseOutCubic:
-			return out(EasingManager::cubic);
-		case EaseInOutCubic:
-			return inOut(EasingManager::cubic);
-		case EaseInExpo:
-			return in(EasingManager::exp);
-		case EaseOutExpo:
-			return out(EasingManager::exp);
-		case EaseInOutExpo:
-			return inOut(EasingManager::exp);
-		case EaseInCirc:
-			return in(EasingManager::circle);
-		case EaseOutCirc:
-			return out(EasingManager::circle);
-		case EaseInOutCirc:
-			return inOut(EasingManager::circle);
-		case EaseInQuart:
-			return in(quart);
-		case EaseOutQuart:
-			return out(quart);
-		case EaseInOutQuart:
-			return inOut(quart);
-		case EaseInQuint:
-			return in(quint);
-		case EaseOutQuint:
-			return out(quint);
-		case EaseInOutQuint:
-			return inOut(quint);
-		case EaseInBack:
-			return in(back(args.arg0));
-		case EaseOutBack:
-			return out(back(args.arg0));
-		case EaseInOutBack:
-			return inOut(back(args.arg0));
-		case EaseInElastic:
-			return in(elastic(args.arg0));
-		case EaseOutElastic:
-			return out(elastic(args.arg0));
-		case EaseInOutElastic:
-			return inOut(elastic(args.arg0));
-		case EaseInBounce:
-			return in(bounce(args.arg0));
-		case EaseOutBounce:
-			return out(bounce(args.arg0));
-		case EaseInOutBounce:
-			return inOut(bounce(args.arg0));
-		}
+		return switch (args.easingType) {
+			case Linear -> in(EasingManager::linear);
+			case Step -> in(step(args.arg0));
+			case EaseInSine -> in(EasingManager::sin);
+			case EaseOutSine -> out(EasingManager::sin);
+			case EaseInOutSine -> inOut(EasingManager::sin);
+			case EaseInQuad -> in(EasingManager::quad);
+			case EaseOutQuad -> out(EasingManager::quad);
+			case EaseInOutQuad -> inOut(EasingManager::quad);
+			case EaseInCubic -> in(EasingManager::cubic);
+			case EaseOutCubic -> out(EasingManager::cubic);
+			case EaseInOutCubic -> inOut(EasingManager::cubic);
+			case EaseInExpo -> in(EasingManager::exp);
+			case EaseOutExpo -> out(EasingManager::exp);
+			case EaseInOutExpo -> inOut(EasingManager::exp);
+			case EaseInCirc -> in(EasingManager::circle);
+			case EaseOutCirc -> out(EasingManager::circle);
+			case EaseInOutCirc -> inOut(EasingManager::circle);
+			case EaseInQuart -> in(EasingManager::quart);
+			case EaseOutQuart -> out(EasingManager::quart);
+			case EaseInOutQuart -> inOut(EasingManager::quart);
+			case EaseInQuint -> in(EasingManager::quint);
+			case EaseOutQuint -> out(EasingManager::quint);
+			case EaseInOutQuint -> inOut(EasingManager::quint);
+			case EaseInBack -> in(back(args.arg0));
+			case EaseOutBack -> out(back(args.arg0));
+			case EaseInOutBack -> inOut(back(args.arg0));
+			case EaseInElastic -> in(elastic(args.arg0));
+			case EaseOutElastic -> out(elastic(args.arg0));
+			case EaseInOutElastic -> inOut(elastic(args.arg0));
+			case EaseInBounce -> in(bounce(args.arg0));
+			case EaseOutBounce -> out(bounce(args.arg0));
+			case EaseInOutBounce -> inOut(bounce(args.arg0));
+		};
 	}
+
+	static double quart(double t) {
+		return Math.pow(t, 4);
+	}
+
+	static double quint(double t) {
+		return Math.pow(t, 5);
+	}
+
 
 	// The MIT license notice below applies to the easing functions below except for bounce and step
 	/**
