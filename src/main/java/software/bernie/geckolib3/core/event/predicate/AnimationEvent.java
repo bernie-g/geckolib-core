@@ -1,16 +1,20 @@
 package software.bernie.geckolib3.core.event.predicate;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class AnimationEvent<T> {
 	private final T animatable;
-	public double animationTick;
 	private final float limbSwing;
 	private final float limbSwingAmount;
 	private final float partialTick;
 	private final boolean isMoving;
 	private final List<Object> extraData;
+
+	public AnimationEvent(T animatable) {
+		this(animatable, 0, 0, 0, false, Collections.emptyList());
+	}
 
 	public AnimationEvent(T animatable, float limbSwing, float limbSwingAmount, float partialTick, boolean isMoving,
 			List<Object> extraData) {
@@ -20,15 +24,6 @@ public class AnimationEvent<T> {
 		this.partialTick = partialTick;
 		this.isMoving = isMoving;
 		this.extraData = extraData;
-	}
-
-	/**
-	 * Gets the amount of ticks that have passed in either the current transition or animation, depending on the controller's AnimationState.
-	 *
-	 * @return the animation tick
-	 */
-	public double getAnimationTick() {
-		return animationTick;
 	}
 
 	public T getAnimatable() {
@@ -55,8 +50,8 @@ public class AnimationEvent<T> {
 		return extraData;
 	}
 
-	public <T> List<T> getExtraDataOfType(Class<T> type) {
-		return extraData.stream().filter(x -> type.isAssignableFrom(x.getClass())).map(x -> type.cast(x))
+	public <Data> List<Data> getExtraDataOfType(Class<Data> type) {
+		return extraData.stream().filter(x -> type.isAssignableFrom(x.getClass())).map(type::cast)
 				.collect(Collectors.toList());
 	}
 }

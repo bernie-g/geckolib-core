@@ -10,7 +10,7 @@ import java.util.List;
 
 import com.eliotlash.molang.MolangParser;
 
-import software.bernie.geckolib3.core.AnimationPage;
+import software.bernie.geckolib3.core.ModelType;
 import software.bernie.geckolib3.core.AnimationState;
 import software.bernie.geckolib3.core.builder.Animation;
 import software.bernie.geckolib3.core.builder.AnimationBuilder;
@@ -31,7 +31,7 @@ import software.bernie.geckolib3.core.processor.BoneTree;
  * @param <T> the type parameter
  */
 public class AnimationController<T> {
-	public AnimationPage<T> animationPage;
+	public ModelType<T> modelType;
 
 	/**
 	 * The Entity.
@@ -138,7 +138,7 @@ public class AnimationController<T> {
 		boolean errored = false;
 
 		for (RawAnimation rawAnimation : animationList) {
-			Animation animation = animationPage.getAnimation(animatable, rawAnimation.animationName);
+			Animation animation = modelType.getAnimation(animatable, rawAnimation.animationName);
 			if (animation == null) {
 				System.out.printf("Could not load animation: %s. Is it missing?", rawAnimation.animationName);
 				errored = true;

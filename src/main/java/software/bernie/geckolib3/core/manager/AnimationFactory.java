@@ -2,14 +2,13 @@ package software.bernie.geckolib3.core.manager;
 
 import java.util.Map;
 import java.util.WeakHashMap;
-import java.util.function.BiConsumer;
 import java.util.function.Function;
 
 public class AnimationFactory<T> {
-	private final Function<T, AnimationData> initializer;
-	private final Map<T, AnimationData> animationDataMap = new WeakHashMap<>();
+	private final Function<T, Animator<T>> initializer;
+	private final Map<T, Animator<T>> animationDataMap = new WeakHashMap<>();
 
-	public AnimationFactory(Function<T, AnimationData> initializer) {
+	public AnimationFactory(Function<T, Animator<T>> initializer) {
 		this.initializer = initializer;
 	}
 
@@ -21,7 +20,7 @@ public class AnimationFactory<T> {
 	 * @param key A unique integer ID. For every ID the same animation manager will be returned.
 	 * @return the animatable manager
 	 */
-	public AnimationData getOrCreateAnimationData(T key) {
+	public Animator<T> getOrCreateAnimator(T key) {
 		return animationDataMap.computeIfAbsent(key, initializer);
 	}
 }

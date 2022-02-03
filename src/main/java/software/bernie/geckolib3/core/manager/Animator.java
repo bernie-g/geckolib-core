@@ -10,18 +10,22 @@ import java.util.Map;
 
 import com.eliotlash.molang.MolangParser;
 
-import software.bernie.geckolib3.core.AnimationPage;
+import software.bernie.geckolib3.core.ModelType;
 import software.bernie.geckolib3.core.controller.AnimationController;
 import software.bernie.geckolib3.core.event.predicate.AnimationEvent;
 import software.bernie.geckolib3.core.processor.BoneTree;
 import software.bernie.geckolib3.core.processor.IBone;
 
-public class AnimationData {
-	private final Map<String, AnimationController> animationControllers = new HashMap<>();
-	public boolean isFirstTick = true;
+public class Animator<T> {
+	private final Map<String, AnimationController<T>> animationControllers = new HashMap<>();
 	private double resetTickLength = 1;
-	public boolean shouldPlayWhilePaused = false;
-	private BoneTree<?> boneTree;
+	public final BoneTree<?> boneTree;
+	public final ModelType<T> modelType;
+
+	public Animator(T object, ModelType<T> modelType) {
+		this.modelType = modelType;
+		boneTree = modelType.getOrCreateBoneTree(object);
+	}
 
 	/**
 	 * This method is how you register animation controllers, without this, your AnimationPredicate method will never be called
@@ -29,7 +33,8 @@ public class AnimationData {
 	 * @param value The value
 	 * @return the animation controller
 	 */
-	public <T> AnimationController<T> addAnimationController(AnimationController<T> value) {
+	public AnimationController<T> addAnimationController(AnimationController<T> value) {
+		value.modelType = modelType;
 		this.animationControllers.put(value.getName(), value);
 		return value;
 	}
@@ -44,14 +49,10 @@ public class AnimationData {
 	 * @param resetTickLength The amount of ticks it takes to reset. Cannot be negative.
 	 */
 	public void setResetSpeedInTicks(double resetTickLength) {
-		this.resetTickLength = resetTickLength < 0 ? 0 : resetTickLength;
+		this.resetTickLength = Math.max(0, resetTickLength);
 	}
 
-	public void setBoneTree(BoneTree<?> boneTree) {
-		this.boneTree = boneTree;
-	}
-
-	public AnimationController getAnimationController(String name) {
+	public AnimationController<T> getAnimationController(String name) {
 		return animationControllers.get(name);
 	}
 
@@ -59,24 +60,31 @@ public class AnimationData {
 		return boneTree.getBoneByName(name);
 	}
 
-	public <T> void tickAnimation(AnimationEvent<T> event, AnimationPage<T> animationPage, MolangParser parser,
-			double renderTime) {
-		for (IBone bone : boneTree.getAllBones()) {
-			bone.getDirtyTracker().beginFrame();
-		}
+	public void tickAnimation(AnimationEvent<T> event, MolangParser parser, double renderTime) {
+
+		modelType.setMolangQueries(event.getAnimatable(), parser, renderTime);
+
+		beginFrame();
 
 		for (AnimationController<T> controller : animationControllers.values()) {
-
-			controller.animationPage = animationPage;
 
 			// Process animations and add new values to the point queues
 			controller.process(boneTree, renderTime, event, parser);
 		}
 
-		//        for (IBone bone : boneTree.getAllBones()) {
-		//            bone.getDirtyTracker().endFrame(renderTime);
-		//        }
-		isFirstTick = false;
+		endFrame(renderTime);
+	}
+
+	private void beginFrame() {
+		for (IBone bone : boneTree.getAllBones()) {
+			bone.getDirtyTracker().beginFrame();
+		}
+	}
+
+	private void endFrame(double renderTime) {
+		for (IBone bone : boneTree.getAllBones()) {
+			bone.getDirtyTracker().endFrame(renderTime);
+		}
 	}
 
 }
