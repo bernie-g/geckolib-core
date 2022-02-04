@@ -3,42 +3,52 @@
  * Author: Bernie G. (Gecko)
  */
 
-package software.bernie.geckolib3.core.manager;
+package software.bernie.geckolib3.core.engine;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import com.eliotlash.molang.MolangParser;
 
 import software.bernie.geckolib3.core.ModelType;
-import software.bernie.geckolib3.core.controller.AnimationController;
 import software.bernie.geckolib3.core.event.predicate.AnimationEvent;
-import software.bernie.geckolib3.core.processor.BoneTree;
-import software.bernie.geckolib3.core.processor.IBone;
+import software.bernie.geckolib3.core.bone.BoneTree;
+import software.bernie.geckolib3.core.bone.IBone;
 
 public class Animator<T> {
-	private final List<AnimationController<T>> animationControllers = new ArrayList<>();
+	private final List<AnimationChannel<T>> channels = new ArrayList<>();
 	private double resetTickLength = 1;
 	public final BoneTree<?> boneTree;
 	public final ModelType<T> modelType;
+	public final T object;
 
 	public Animator(T object, ModelType<T> modelType) {
 		this.modelType = modelType;
-		boneTree = modelType.getOrCreateBoneTree(object);
+		this.boneTree = modelType.getOrCreateBoneTree(object);
+		this.object = object;
 	}
 
 	/**
-	 * This method is how you register animation controllers, without this, your AnimationPredicate method will never be called
+	 * Helper method to build a new animation channel for this animator.
 	 *
-	 * @param value The value
-	 * @return the animation controller
+	 * <p>
+	 *     Once you have finished configuring the channel,
+	 *     you must call {@link AnimationChannel.Builder#build()} to add it to the animator.
+	 * </p>
+	 *
+	 * @return An object to configure and register a new animation channel.
 	 */
-	public AnimationController<T> addAnimationController(AnimationController<T> value) {
-		value.modelType = modelType;
-		this.animationControllers.add(value);
-		return value;
+	public AnimationChannel.Builder<T> createChannel() {
+		return new AnimationChannel.Builder<>(this);
+	}
+
+	/**
+	 * Add a custom animation channel.
+	 *
+	 * @param value An externally built animation channel.
+	 */
+	public void addChannel(AnimationChannel<T> value) {
+		this.channels.add(value);
 	}
 
 	public double getResetSpeed() {
@@ -64,13 +74,11 @@ public class Animator<T> {
 
 		beginFrame();
 
-		for (AnimationController<T> controller : animationControllers) {
-
-			// Process animations and add new values to the point queues
-			controller.process(boneTree, renderTime, event, parser);
+		for (AnimationChannel<T> channel : channels) {
+			channel.process(renderTime, event, parser);
 		}
 
-		endFrame(renderTime);
+		//endFrame(renderTime);
 	}
 
 	private void beginFrame() {
@@ -84,5 +92,4 @@ public class Animator<T> {
 			bone.getDirtyTracker().endFrame(renderTime);
 		}
 	}
-
 }

@@ -3,7 +3,7 @@
  * Author: Bernie G. (Gecko)
  */
 
-package software.bernie.geckolib3.core.processor;
+package software.bernie.geckolib3.core.bone;
 
 import software.bernie.geckolib3.core.util.MathUtil;
 

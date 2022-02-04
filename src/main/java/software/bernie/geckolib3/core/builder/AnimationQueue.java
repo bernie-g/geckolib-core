@@ -3,8 +3,6 @@ package software.bernie.geckolib3.core.builder;
 import java.util.ArrayDeque;
 import java.util.Queue;
 
-import software.bernie.geckolib3.core.controller.RunningAnimation;
-
 public class AnimationQueue {
 	private final Queue<QueuedAnimation> queue = new ArrayDeque<>();
 

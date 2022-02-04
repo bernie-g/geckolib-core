@@ -1,4 +1,4 @@
-package software.bernie.geckolib3.core.processor;
+package software.bernie.geckolib3.core.bone;
 
 import java.util.List;
 

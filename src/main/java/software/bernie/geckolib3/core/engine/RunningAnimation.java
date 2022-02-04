@@ -1,4 +1,4 @@
-package software.bernie.geckolib3.core.controller;
+package software.bernie.geckolib3.core.engine;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -10,10 +10,10 @@ import software.bernie.geckolib3.core.event.CustomInstructionKeyframeEvent;
 import software.bernie.geckolib3.core.event.ParticleKeyFrameEvent;
 import software.bernie.geckolib3.core.event.SoundKeyframeEvent;
 import software.bernie.geckolib3.core.keyframe.*;
-import software.bernie.geckolib3.core.processor.BoneTree;
-import software.bernie.geckolib3.core.processor.DirtyTracker;
-import software.bernie.geckolib3.core.processor.IBone;
-import software.bernie.geckolib3.core.processor.ImmutableBone;
+import software.bernie.geckolib3.core.bone.BoneTree;
+import software.bernie.geckolib3.core.bone.DirtyTracker;
+import software.bernie.geckolib3.core.bone.IBone;
+import software.bernie.geckolib3.core.bone.ImmutableBone;
 
 public class RunningAnimation {
 	public final Animation animation;
@@ -44,7 +44,7 @@ public class RunningAnimation {
 		}
 	}
 
-	public <T> void process(double renderTime, AnimationController<T> controller) {
+	public <T> void process(double renderTime, AnimationChannel<T> controller) {
 		double animationTime = renderTime - startTime;
 
 		for (RunningBone boneAnimation : boneAnimations) {
@@ -91,7 +91,7 @@ public class RunningAnimation {
 		processKeyFrames(controller, animationTime);
 	}
 
-	private <T> void processKeyFrames(AnimationController<T> controller, double animationTime) {
+	private <T> void processKeyFrames(AnimationChannel<T> controller, double animationTime) {
 		processSoundKeyFrames(controller, animationTime);
 
 		processParticleKeyFrames(controller, animationTime);
@@ -99,36 +99,36 @@ public class RunningAnimation {
 		processEventKeyFrames(controller, animationTime);
 	}
 
-	private <T> void processSoundKeyFrames(AnimationController<T> controller, double animationTime) {
+	private <T> void processSoundKeyFrames(AnimationChannel<T> controller, double animationTime) {
 		if (controller.soundListener == null) return;
 
 		EventKeyFrame<String> soundKeyFrame = soundKeyFrames.peek();
 		if (soundKeyFrame != null && animationTime >= soundKeyFrame.getStartTick()) {
-			SoundKeyframeEvent<T> event = new SoundKeyframeEvent<>(controller.animatable, animationTime, soundKeyFrame.getEventData(), controller);
+			SoundKeyframeEvent<T> event = new SoundKeyframeEvent<>(animationTime, soundKeyFrame.getEventData(), controller);
 			controller.soundListener.playSound(event);
 			// Remove the sound keyframe from the queue
 			soundKeyFrames.poll();
 		}
 	}
 
-	private <T> void processParticleKeyFrames(AnimationController<T> controller, double animationTime) {
+	private <T> void processParticleKeyFrames(AnimationChannel<T> controller, double animationTime) {
 		if (controller.particleListener == null) return;
 
 		ParticleEventKeyFrame particleEventKeyFrame = particleKeyFrames.peek();
 		if (particleEventKeyFrame != null && animationTime >= particleEventKeyFrame.getStartTick()) {
-			ParticleKeyFrameEvent<T> event = new ParticleKeyFrameEvent<>(controller.animatable, animationTime, particleEventKeyFrame.effect, particleEventKeyFrame.locator, particleEventKeyFrame.script, controller);
+			ParticleKeyFrameEvent<T> event = new ParticleKeyFrameEvent<>(animationTime, particleEventKeyFrame.effect, particleEventKeyFrame.locator, particleEventKeyFrame.script, controller);
 			controller.particleListener.summonParticle(event);
 			// Remove the particle keyframe from the queue
 			particleKeyFrames.poll();
 		}
 	}
 
-	private <T> void processEventKeyFrames(AnimationController<T> controller, double animationTime) {
+	private <T> void processEventKeyFrames(AnimationChannel<T> controller, double animationTime) {
 		if (controller.customInstructionListener == null) return;
 
 		EventKeyFrame<List<String>> customInstructionKeyFrame = customInstructionKeyFrames.peek();
 		if (customInstructionKeyFrame != null && animationTime >= customInstructionKeyFrame.getStartTick()) {
-			CustomInstructionKeyframeEvent<T> event = new CustomInstructionKeyframeEvent<>(controller.animatable, animationTime, customInstructionKeyFrame.getEventData(), controller);
+			CustomInstructionKeyframeEvent<T> event = new CustomInstructionKeyframeEvent<>(animationTime, customInstructionKeyFrame.getEventData(), controller);
 			controller.customInstructionListener.executeInstruction(event);
 			// Remove the custom instruction keyframe from the queue
 			customInstructionKeyFrames.poll();
