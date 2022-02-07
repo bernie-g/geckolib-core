@@ -245,14 +245,14 @@ public class AnimationChannel<T> {
 	private boolean queueNextAnimation(double renderTime) {
 		if (animationQueue.isEmpty()) {
 			return true;
-		} else {
-			AnimationQueue.QueuedAnimation next = animationQueue.peek();
+		}
 
-			currentAnimation = new RunningAnimation(next.animation, parent.boneTree, renderTime);
+		AnimationQueue.QueuedAnimation next = animationQueue.peek();
 
-			if (!next.loop) {
-				animationQueue.poll();
-			}
+		currentAnimation = new RunningAnimation(next.animation, parent.boneTree, renderTime);
+
+		if (!next.loop) {
+			animationQueue.poll();
 		}
 		return false;
 	}
