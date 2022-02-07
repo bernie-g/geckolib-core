@@ -11,9 +11,7 @@ import software.bernie.geckolib3.core.event.ParticleKeyFrameEvent;
 import software.bernie.geckolib3.core.event.SoundKeyframeEvent;
 import software.bernie.geckolib3.core.keyframe.*;
 import software.bernie.geckolib3.core.bone.BoneTree;
-import software.bernie.geckolib3.core.bone.DirtyTracker;
 import software.bernie.geckolib3.core.bone.IBone;
-import software.bernie.geckolib3.core.bone.ImmutableBone;
 
 public class RunningAnimation {
 	public final Animation animation;
@@ -22,9 +20,9 @@ public class RunningAnimation {
 	private final Queue<EventKeyFrame<String>> soundKeyFrames;
 	private final Queue<ParticleEventKeyFrame> particleKeyFrames;
 	private final Queue<EventKeyFrame<List<String>>> customInstructionKeyFrames;
-	private final ArrayList<RunningBone> boneAnimations;
+	private final ArrayList<RunningBoneAnimation> boneAnimations;
 
-	public RunningAnimation(Animation animation, BoneTree<?> boneTree, double renderTime) {
+	public RunningAnimation(Animation animation, BoneTree boneTree, double renderTime) {
 		this.animation = animation;
 		this.startTime = renderTime;
 
@@ -40,52 +38,15 @@ public class RunningAnimation {
 				throw new IllegalArgumentException("Bone " + boneAnimation.boneName + " does not exist in the bone tree");
 			}
 
-			boneAnimations.add(new RunningBone(bone, boneAnimation.rotationKeyFrames, boneAnimation.positionKeyFrames, boneAnimation.scaleKeyFrames));
+			boneAnimations.add(new RunningBoneAnimation(bone, boneAnimation, 0));
 		}
 	}
 
 	public <T> void process(double renderTime, AnimationChannel<T> controller) {
 		double animationTime = renderTime - startTime;
 
-		for (RunningBone boneAnimation : boneAnimations) {
-			IBone bone = boneAnimation.bone;
-
-			ImmutableBone initialSnapshot = bone.getSourceBone();
-			DirtyTracker dirtyTracker = bone.getDirtyTracker();
-
-			VectorTimeline rotationKeyFrames = boneAnimation.rotationKeyFrames;
-			VectorTimeline positionKeyFrames = boneAnimation.positionKeyFrames;
-			VectorTimeline scaleKeyFrames = boneAnimation.scaleKeyFrames;
-
-			if (rotationKeyFrames.hasKeyFrames()) {
-				double x = rotationKeyFrames.x.getValueAt(animationTime, controller.easeOverride);
-				double y = rotationKeyFrames.y.getValueAt(animationTime, controller.easeOverride);
-				double z = rotationKeyFrames.z.getValueAt(animationTime, controller.easeOverride);
-				bone.setRotationX((float) (x + initialSnapshot.getRotationX()));
-				bone.setRotationY((float) (y + initialSnapshot.getRotationY()));
-				bone.setRotationZ((float) (z + initialSnapshot.getRotationZ()));
-				dirtyTracker.notifyRotationChange();
-			}
-
-			if (positionKeyFrames.hasKeyFrames()) {
-				double x = positionKeyFrames.x.getValueAt(animationTime, controller.easeOverride);
-				double y = positionKeyFrames.y.getValueAt(animationTime, controller.easeOverride);
-				double z = positionKeyFrames.z.getValueAt(animationTime, controller.easeOverride);
-				bone.setPositionX((float) (x));
-				bone.setPositionY((float) (y));
-				bone.setPositionZ((float) (z));
-				dirtyTracker.notifyPositionChange();
-			}
-
-			if (scaleKeyFrames.hasKeyFrames()) {
-				double x = scaleKeyFrames.x.getValueAt(animationTime, controller.easeOverride);
-				double y = scaleKeyFrames.y.getValueAt(animationTime, controller.easeOverride);
-				double z = scaleKeyFrames.z.getValueAt(animationTime, controller.easeOverride);
-				bone.setScaleX((float) (x));
-				bone.setScaleY((float) (y));
-				bone.setScaleZ((float) (z));
-				dirtyTracker.notifyScaleChange();
-			}
+		for (RunningBoneAnimation boneAnimation : boneAnimations) {
+			boneAnimation.process(animationTime, controller.easeOverride);
 		}
 
 		processKeyFrames(controller, animationTime);
@@ -139,19 +100,4 @@ public class RunningAnimation {
 		return renderTime > startTime + animation.animationLength;
 	}
 
-	private static class RunningBone {
-
-		private final IBone bone;
-		private final VectorTimeline rotationKeyFrames;
-		private final VectorTimeline positionKeyFrames;
-		private final VectorTimeline scaleKeyFrames;
-
-		public RunningBone(IBone bone, VectorTimeline rotationKeyFrames, VectorTimeline positionKeyFrames,
-				VectorTimeline scaleKeyFrames) {
-			this.bone = bone;
-			this.rotationKeyFrames = rotationKeyFrames;
-			this.positionKeyFrames = positionKeyFrames;
-			this.scaleKeyFrames = scaleKeyFrames;
-		}
-	}
 }

@@ -4,21 +4,23 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-import software.bernie.geckolib3.core.easing.EaseFunc;
+import software.bernie.geckolib3.core.easing.EasingFunction;
 
 /**
  * A class that represents a timeline of keyframes.
  */
-public class Timeline implements Iterable<KeyFrame> {
+public class Timeline implements TimelineValue, Iterable<KeyFrame> {
 
 	public static final Timeline EMPTY = new Timeline(Collections.emptyList());
 
 	private final List<KeyFrame> keyFrames;
 	private final double totalTime;
+	private final boolean hasKeyFrames;
 
 	public Timeline(List<KeyFrame> keyFrames) {
 		this.keyFrames = keyFrames;
 		this.totalTime = calculateTotalTime(keyFrames);
+		this.hasKeyFrames = !keyFrames.isEmpty();
 	}
 
 	/**
@@ -39,7 +41,7 @@ public class Timeline implements Iterable<KeyFrame> {
 	 * @return {@code true} if this timeline has keyframes, {@code false} otherwise.
 	 */
 	public boolean hasKeyFrames() {
-		return !keyFrames.isEmpty();
+		return hasKeyFrames;
 	}
 
 	/**
@@ -48,22 +50,32 @@ public class Timeline implements Iterable<KeyFrame> {
 	 * @param override An optional override easing function to use in place of the keyframes' easing functions.
 	 * @return The interpolated value.
 	 */
-	public double getValueAt(double t, EaseFunc override) {
+	public double get(double t, EasingFunction override) {
 
 		if (t < totalTime) {
-			double keyFrameStartTime = 0;
 			for (KeyFrame frame : keyFrames) {
-				double keyFrameLength = frame.getLength();
-
-				if (keyFrameStartTime + keyFrameLength > t) {
-					double keyFrameLocalTime = t - keyFrameStartTime;
+				if (frame.startTime + frame.length > t) {
+					double keyFrameLocalTime = t - frame.startTime;
 					return frame.getValueAt(keyFrameLocalTime, override);
 				}
-				keyFrameStartTime += keyFrameLength;
 			}
 		}
 
 		return getLast().getEndValue();
+	}
+
+	public TimelineValue seek(double t) {
+		if (t < totalTime) {
+			for (int i = 0, keyFramesSize = keyFrames.size(); i < keyFramesSize; i++) {
+				KeyFrame frame = keyFrames.get(i);
+
+				if (frame.startTime + frame.length > t) {
+					return new Scrubber(frame, i);
+				}
+			}
+		}
+
+		return new Constant(getLast().getEndValue());
 	}
 
 	@Override
@@ -77,5 +89,48 @@ public class Timeline implements Iterable<KeyFrame> {
 			totalTime += keyFrame.getLength();
 		}
 		return totalTime;
+	}
+
+	public static class Constant implements TimelineValue {
+		private final double value;
+
+		public Constant(double value) {
+			this.value = value;
+		}
+
+		@Override
+		public double get(double animationTime, EasingFunction easeOverride) {
+			return value;
+		}
+	}
+
+	public class Scrubber implements TimelineValue {
+
+		private KeyFrame currentKeyFrame;
+		private int currentIndex;
+
+		public Scrubber(KeyFrame frame, int keyFrameIndex) {
+			this.currentKeyFrame = frame;
+			this.currentIndex = keyFrameIndex;
+		}
+
+		@Override
+		public double get(double animationTime, EasingFunction easeOverride) {
+			advanceToTime(animationTime);
+
+			double keyFrameLocalTime = animationTime - currentKeyFrame.startTime;
+			return currentKeyFrame.getValueAt(keyFrameLocalTime, easeOverride);
+		}
+
+		private void advanceToTime(double animationTime) {
+			while (hasNextKeyFrame() && !currentKeyFrame.isCompletedAfter(animationTime)) {
+				currentIndex++;
+				currentKeyFrame = keyFrames.get(currentIndex);
+			}
+		}
+
+		private boolean hasNextKeyFrame() {
+			return currentIndex < keyFrames.size() - 1;
+		}
 	}
 }

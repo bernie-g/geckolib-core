@@ -1,6 +1,7 @@
 package software.bernie.geckolib3.core.bone;
 
 public interface IBone extends ImmutableBone {
+
 	void setRotationX(float value);
 
 	void setRotationY(float value);
@@ -34,7 +35,4 @@ public interface IBone extends ImmutableBone {
 	 */
 	ImmutableBone getSourceBone();
 
-	DirtyTracker getDirtyTracker();
-
-	BoneTree<?> getBoneTree();
 }

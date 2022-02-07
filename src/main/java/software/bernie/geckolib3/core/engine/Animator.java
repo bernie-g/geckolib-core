@@ -5,6 +5,7 @@
 
 package software.bernie.geckolib3.core.engine;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,14 +19,16 @@ import software.bernie.geckolib3.core.bone.IBone;
 public class Animator<T> {
 	private final List<AnimationChannel<T>> channels = new ArrayList<>();
 	private double resetTickLength = 1;
-	public final BoneTree<?> boneTree;
+	public final BoneTree boneTree;
 	public final ModelType<T> modelType;
-	public final T object;
 
-	public Animator(T object, ModelType<T> modelType) {
+	// Store the animating object in a weak reference to allow it to be GC'd if it is no longer in use
+	private final WeakReference<T> object;
+
+	public Animator(T object, BoneTree model, ModelType<T> modelType) {
 		this.modelType = modelType;
-		this.boneTree = modelType.getOrCreateBoneTree(object);
-		this.object = object;
+		this.boneTree = model;
+		this.object = new WeakReference<>(object);
 	}
 
 	/**
@@ -72,24 +75,12 @@ public class Animator<T> {
 
 		modelType.setMolangQueries(event.getAnimatable(), parser, renderTime);
 
-		beginFrame();
-
 		for (AnimationChannel<T> channel : channels) {
 			channel.process(renderTime, event, parser);
 		}
-
-		//endFrame(renderTime);
 	}
 
-	private void beginFrame() {
-		for (IBone bone : boneTree.getAllBones()) {
-			bone.getDirtyTracker().beginFrame();
-		}
-	}
-
-	private void endFrame(double renderTime) {
-		for (IBone bone : boneTree.getAllBones()) {
-			bone.getDirtyTracker().endFrame(renderTime);
-		}
+	public T getObject() {
+		return object.get();
 	}
 }

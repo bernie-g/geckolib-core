@@ -22,6 +22,8 @@ public class VectorTimeline {
 	 */
 	public final Timeline z;
 
+	private final boolean hasKeyFrames;
+
 	/**
 	 * Instantiates a new vector key frame list from 3 lists of keyframes
 	 *
@@ -33,15 +35,14 @@ public class VectorTimeline {
 		x = XKeyFrames;
 		y = YKeyFrames;
 		z = ZKeyFrames;
+		hasKeyFrames = x.hasKeyFrames() || y.hasKeyFrames() || z.hasKeyFrames();
 	}
 
 	/**
 	 * Instantiates a new blank key frame list
 	 */
-	public VectorTimeline() {
-		x = Timeline.EMPTY;
-		y = Timeline.EMPTY;
-		z = Timeline.EMPTY;
+	public VectorTimeline()  {
+		this(Timeline.EMPTY, Timeline.EMPTY, Timeline.EMPTY);
 	}
 
 	public double getLastKeyframeTime() {
@@ -55,6 +56,6 @@ public class VectorTimeline {
 	}
 
 	public boolean hasKeyFrames() {
-		return x.hasKeyFrames() || y.hasKeyFrames() || z.hasKeyFrames();
+		return hasKeyFrames;
 	}
 }

@@ -25,14 +25,14 @@ public class EasingManager {
 
 	}
 
-	public static EaseFunc getEasingFunc(EasingType easingType, Double easingArgs) {
+	public static EasingFunction getEasingFunc(EasingType easingType, Double easingArgs) {
 		return getEasingFunction.apply(new EasingFunctionArgs(easingType, easingArgs));
 	}
 
-	static Function<EasingFunctionArgs, EaseFunc> getEasingFunction = Memoizer.memoize(EasingManager::getEasingFuncImpl);
+	static Function<EasingFunctionArgs, EasingFunction> getEasingFunction = Memoizer.memoize(EasingManager::getEasingFuncImpl);
 
 	// Don't call this, use getEasingFunction instead as that function is the memoized version
-	static EaseFunc getEasingFuncImpl(EasingFunctionArgs args) {
+	static EasingFunction getEasingFuncImpl(EasingFunctionArgs args) {
 		return switch (args.easingType) {
 			case Linear -> in(EasingManager::linear);
 			case Step -> in(step(args.arg0));
@@ -89,14 +89,14 @@ public class EasingManager {
 	/**
 	 * Runs an easing function forwards.
 	 */
-	static EaseFunc in(EaseFunc easing) {
+	static EasingFunction in(EasingFunction easing) {
 		return easing;
 	}
 
 	/**
 	 * Runs an easing function backwards.
 	 */
-	static EaseFunc out(EaseFunc easing) {
+	static EasingFunction out(EasingFunction easing) {
 		return t -> 1 - easing.apply(1 - t);
 	}
 
@@ -105,7 +105,7 @@ public class EasingManager {
 	 * forwards for half of the duration, then backwards for the rest of the
 	 * duration.
 	 */
-	static EaseFunc inOut(EaseFunc easing) {
+	static EasingFunction inOut(EasingFunction easing) {
 		return t -> {
 			if (t < 0.5) {
 				return easing.apply(t * 2) / 2;
@@ -117,14 +117,14 @@ public class EasingManager {
 	/**
 	 * A stepping function, returns 1 for any positive value of `n`.
 	 */
-	static EaseFunc step0() {
+	static EasingFunction step0() {
 		return n -> n > 0 ? 1D : 0;
 	}
 
 	/**
 	 * A stepping function, returns 1 if `n` is greater than or equal to 1.
 	 */
-	static EaseFunc step1() {
+	static EasingFunction step1() {
 		return n -> n >= 1D ? 1D : 0;
 	}
 
@@ -177,7 +177,7 @@ public class EasingManager {
 	 * n = 4: http://easings.net/#easeInQuart
 	 * n = 5: http://easings.net/#easeInQuint
 	 */
-	static EaseFunc poly(double n) {
+	static EasingFunction poly(double n) {
 		return (t) -> Math.pow(t, n);
 	}
 
@@ -218,7 +218,7 @@ public class EasingManager {
 	 * <p>
 	 * http://easings.net/#easeInElastic
 	 */
-	static EaseFunc elastic(Double bounciness) {
+	static EasingFunction elastic(Double bounciness) {
 		double p = (bounciness == null ? 1 : bounciness) * Math.PI;
 		return t -> 1 - Math.pow(Math.cos((float) ((t * Math.PI) / 2)), 3) * Math.cos((float) (t * p));
 	}
@@ -232,7 +232,7 @@ public class EasingManager {
 	 * <p>
 	 * - http://tiny.cc/back_default (s = 1.70158, default)
 	 */
-	static EaseFunc back(Double s) {
+	static EasingFunction back(Double s) {
 		double p = s == null ? 1.70158 : s * 1.70158;
 		return t -> t * t * ((p + 1) * t - p);
 	}
@@ -244,16 +244,16 @@ public class EasingManager {
 	 * using min instead of ternaries
 	 * http://easings.net/#easeInBounce
 	 */
-	public static EaseFunc bounce(Double s) {
+	public static EasingFunction bounce(Double s) {
 		double k = s == null ? 0.5 : s;
-		EaseFunc q = x -> (121.0 / 16.0) * x * x;
-		EaseFunc w = x -> ((121.0 / 4.0) * k) * Math.pow(x - (6.0 / 11.0), 2) + 1 - k;
-		EaseFunc r = x -> 121 * k * k * Math.pow(x - (9.0 / 11.0), 2) + 1 - k * k;
-		EaseFunc t = x -> 484 * k * k * k * Math.pow(x - (10.5 / 11.0), 2) + 1 - k * k * k;
+		EasingFunction q = x -> (121.0 / 16.0) * x * x;
+		EasingFunction w = x -> ((121.0 / 4.0) * k) * Math.pow(x - (6.0 / 11.0), 2) + 1 - k;
+		EasingFunction r = x -> 121 * k * k * Math.pow(x - (9.0 / 11.0), 2) + 1 - k * k;
+		EasingFunction t = x -> 484 * k * k * k * Math.pow(x - (10.5 / 11.0), 2) + 1 - k * k * k;
 		return x -> min(q.apply(x), w.apply(x), r.apply(x), t.apply(x));
 	}
 
-	static EaseFunc step(Double stepArg) {
+	static EasingFunction step(Double stepArg) {
 		int steps = stepArg != null ? stepArg.intValue() : 2;
 		double[] intervals = stepRange(steps);
 		return t -> intervals[findIntervalBorderIndex(t, intervals, false)];

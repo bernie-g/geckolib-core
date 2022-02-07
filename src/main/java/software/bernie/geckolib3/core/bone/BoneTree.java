@@ -2,11 +2,11 @@ package software.bernie.geckolib3.core.bone;
 
 import java.util.List;
 
-public interface BoneTree<B extends IBone> {
+public interface BoneTree {
 
-	List<B> getAllBones();
+	List<? extends IBone> getAllBones();
 
-	List<B> getTopLevelBones();
+	List<? extends IBone> getTopLevelBones();
 
-	B getBoneByName(String name);
+	IBone getBoneByName(String name);
 }

@@ -14,7 +14,7 @@ import software.bernie.geckolib3.core.builder.Animation;
 import software.bernie.geckolib3.core.builder.AnimationBuilder;
 import software.bernie.geckolib3.core.builder.AnimationQueue;
 import software.bernie.geckolib3.core.builder.RawAnimation;
-import software.bernie.geckolib3.core.easing.EaseFunc;
+import software.bernie.geckolib3.core.easing.EasingFunction;
 import software.bernie.geckolib3.core.event.predicate.AnimationEvent;
 import software.bernie.geckolib3.core.keyframe.ICustomInstructionListener;
 import software.bernie.geckolib3.core.keyframe.IParticleListener;
@@ -39,7 +39,7 @@ public class AnimationChannel<T> {
 		IParticleListener<T> particleListener;
 		ICustomInstructionListener<T> customInstructionListener;
 
-		EaseFunc easeOverride;
+		EasingFunction easeOverride;
 
 		public Builder(Animator<T> parent) {
 			this.parent = parent;
@@ -54,7 +54,7 @@ public class AnimationChannel<T> {
 		 * @param easeOverride An override for the ease functions.
 		 * @return {@code this}
 		 */
-		public Builder<T> setEaseOverride(EaseFunc easeOverride) {
+		public Builder<T> setEaseOverride(EasingFunction easeOverride) {
 			this.easeOverride = easeOverride;
 			return this;
 		}
@@ -135,7 +135,7 @@ public class AnimationChannel<T> {
 	/**
 	 * By default Geckolib uses the easing types of every keyframe. If you want to override that for an entire AnimationController, change this value.
 	 */
-	public final EaseFunc easeOverride;
+	public final EasingFunction easeOverride;
 
 	protected AnimationQueue animationQueue = new AnimationQueue();
 	protected List<RawAnimation> rawAnimations = Collections.emptyList();
@@ -160,7 +160,7 @@ public class AnimationChannel<T> {
 	}
 
 	public T getEntity() {
-		return parent.object;
+		return parent.getObject();
 	}
 
 	/**
