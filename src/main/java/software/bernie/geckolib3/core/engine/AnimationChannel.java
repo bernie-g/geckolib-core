@@ -221,8 +221,6 @@ public class AnimationChannel<T> {
 	 * @param event      The animation test event
 	 */
 	public void process(double renderTime, AnimationEvent<T> event, MolangParser parser) {
-		setAnimTime(parser, 0);
-
 		checkForNewAnimation(event);
 
 		if (currentAnimation == null) {
@@ -230,6 +228,7 @@ public class AnimationChannel<T> {
 		}
 
 		if (currentAnimation != null) {
+			setAnimTime(parser, renderTime - currentAnimation.startTime);
 			currentAnimation.process(renderTime, this);
 
 			if (currentAnimation.isFinished(renderTime)) {

@@ -75,7 +75,7 @@ public class Timeline implements TimelineValue, Iterable<KeyFrame> {
 			}
 		}
 
-		return new Constant(getLast().getEndValue());
+		return new Scrubber(getLast(), keyFrames.size() - 1);
 	}
 
 	@Override
