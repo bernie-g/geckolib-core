@@ -5,6 +5,32 @@ package software.bernie.geckolib3.core.util;
 
 public final class Color {
 	private final int color;
+	
+	public static final Color WHITE = new Color(0xFFFFFFFF);
+	
+	public static final Color LIGHT_GRAY = new Color(0xFFC0C0C0);
+	
+	public static final Color GRAY = new Color(0xFF808080);
+	
+	public static final Color DARK_GRAY = new Color(0xFF404040);
+	
+	public static final Color BLACK = new Color(0xFF000000);
+	
+	public static final Color RED = new Color(0xFFFF0000);
+	
+	public static final Color PINK = new Color(0xFFFFAFAF);
+	
+	public static final Color ORANGE = new Color(0xFFFFC800);
+	
+	public static final Color YELLOW = new Color(0xFFFFFF00);
+	
+	public static final Color GREEN = new Color(0xFF00FF00);
+	
+	public static final Color MAGENTA = new Color(0xFFFF00FF);
+	
+	public static final Color CYAN = new Color(0xFF00FFFF);
+	
+	public static final Color BLUE = new Color(0xFF0000FF);
 
 	private Color(int color) {
 		this.color = color;
