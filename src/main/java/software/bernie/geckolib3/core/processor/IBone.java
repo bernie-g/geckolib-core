@@ -37,7 +37,11 @@ public interface IBone
 	float getPivotZ();
 
 	boolean isHidden();
+	boolean cubesAreHidden();
+	boolean childBonesAreHiddenToo();
 	void setHidden(boolean hidden);
+	void setCubesHidden(boolean hidden);
+	void setHidden(boolean selfHidden, boolean skipChildRendering);
 	void setModelRendererName(String modelRendererName);
 
 	void saveInitialSnapshot();
