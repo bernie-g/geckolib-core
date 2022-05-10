@@ -5,15 +5,13 @@ import software.bernie.geckolib3.core.event.predicate.AnimationEvent;
 import software.bernie.geckolib3.core.processor.AnimationProcessor;
 import software.bernie.geckolib3.core.processor.IBone;
 
-public interface IAnimatableModel<E>
-{
-	default double getCurrentTick()
-	{
+@SuppressWarnings("rawtypes")
+public interface IAnimatableModel<E> {
+	default double getCurrentTick() {
 		return (System.nanoTime() / 1000000L / 50.0);
 	}
 
-	default void setLivingAnimations(E entity, Integer uniqueID)
-	{
+	default void setLivingAnimations(E entity, Integer uniqueID) {
 		this.setLivingAnimations(entity, uniqueID, null);
 	}
 
@@ -29,11 +27,9 @@ public interface IAnimatableModel<E>
 	 * @param boneName The bone name
 	 * @return the bone
 	 */
-	default IBone getBone(String boneName)
-	{
+	default IBone getBone(String boneName) {
 		IBone bone = this.getAnimationProcessor().getBone(boneName);
-		if(bone == null)
-		{
+		if (bone == null) {
 			throw new RuntimeException("Could not find bone: " + boneName);
 		}
 		return bone;

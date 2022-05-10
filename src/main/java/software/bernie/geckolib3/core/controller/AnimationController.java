@@ -17,10 +17,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.tuple.Pair;
+
 import com.eliotlash.mclib.math.IValue;
 import com.eliotlash.molang.MolangParser;
-
-import org.apache.commons.lang3.tuple.Pair;
 
 import software.bernie.geckolib3.core.AnimationState;
 import software.bernie.geckolib3.core.ConstantValue;
@@ -612,13 +612,14 @@ public class AnimationController<T extends IAnimatable> {
 					SoundKeyframeEvent<T> event = new SoundKeyframeEvent<>(this.animatable, tick,
 							soundKeyFrame.getEventData(), this);
 					soundListener.playSound(event);
-					
+
 					this.executedKeyFrames.add(soundKeyFrame);
 				}
 			}
 
 			for (ParticleEventKeyFrame particleEventKeyFrame : currentAnimation.particleKeyFrames) {
-				if (!this.executedKeyFrames.contains(particleEventKeyFrame) && tick >= particleEventKeyFrame.getStartTick()) {
+				if (!this.executedKeyFrames.contains(particleEventKeyFrame)
+						&& tick >= particleEventKeyFrame.getStartTick()) {
 					ParticleKeyFrameEvent<T> event = new ParticleKeyFrameEvent<>(this.animatable, tick,
 							particleEventKeyFrame.effect, particleEventKeyFrame.locator, particleEventKeyFrame.script,
 							this);
@@ -629,11 +630,12 @@ public class AnimationController<T extends IAnimatable> {
 			}
 
 			for (EventKeyFrame<String> customInstructionKeyFrame : currentAnimation.customInstructionKeyframes) {
-				if (!this.executedKeyFrames.contains(customInstructionKeyFrame) && tick >= customInstructionKeyFrame.getStartTick()) {
+				if (!this.executedKeyFrames.contains(customInstructionKeyFrame)
+						&& tick >= customInstructionKeyFrame.getStartTick()) {
 					CustomInstructionKeyframeEvent<T> event = new CustomInstructionKeyframeEvent<>(this.animatable,
 							tick, customInstructionKeyFrame.getEventData(), this);
 					customInstructionListener.executeInstruction(event);
-					
+
 					this.executedKeyFrames.add(customInstructionKeyFrame);
 				}
 			}

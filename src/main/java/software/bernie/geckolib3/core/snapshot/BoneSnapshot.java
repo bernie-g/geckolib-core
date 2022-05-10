@@ -7,12 +7,8 @@ package software.bernie.geckolib3.core.snapshot;
 
 import software.bernie.geckolib3.core.processor.IBone;
 
-import java.util.Objects;
-
-public class BoneSnapshot
-{
-	public BoneSnapshot(IBone modelRenderer)
-	{
+public class BoneSnapshot {
+	public BoneSnapshot(IBone modelRenderer) {
 		rotationValueX = modelRenderer.getRotationX();
 		rotationValueY = modelRenderer.getRotationY();
 		rotationValueZ = modelRenderer.getRotationZ();
@@ -29,10 +25,8 @@ public class BoneSnapshot
 		this.name = modelRenderer.getName();
 	}
 
-	public BoneSnapshot(IBone modelRenderer, boolean dontSaveRotations)
-	{
-		if(dontSaveRotations)
-		{
+	public BoneSnapshot(IBone modelRenderer, boolean dontSaveRotations) {
+		if (dontSaveRotations) {
 			rotationValueX = 0;
 			rotationValueY = 0;
 			rotationValueZ = 0;
@@ -54,8 +48,7 @@ public class BoneSnapshot
 		this.name = modelRenderer.getName();
 	}
 
-	public BoneSnapshot(BoneSnapshot snapshot)
-	{
+	public BoneSnapshot(BoneSnapshot snapshot) {
 		scaleValueX = snapshot.scaleValueX;
 		scaleValueY = snapshot.scaleValueY;
 		scaleValueZ = snapshot.scaleValueZ;
@@ -70,7 +63,6 @@ public class BoneSnapshot
 		this.modelRenderer = snapshot.modelRenderer;
 		this.name = snapshot.name;
 	}
-
 
 	public String name;
 	private IBone modelRenderer;
@@ -96,14 +88,11 @@ public class BoneSnapshot
 	public boolean isCurrentlyRunningScaleAnimation = true;
 
 	@Override
-	public boolean equals(Object o)
-	{
-		if (this == o)
-		{
+	public boolean equals(Object o) {
+		if (this == o) {
 			return true;
 		}
-		if (o == null || getClass() != o.getClass())
-		{
+		if (o == null || getClass() != o.getClass()) {
 			return false;
 		}
 		BoneSnapshot that = (BoneSnapshot) o;
@@ -111,8 +100,7 @@ public class BoneSnapshot
 	}
 
 	@Override
-	public int hashCode()
-	{
+	public int hashCode() {
 		return name.hashCode();
 	}
 }

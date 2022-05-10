@@ -1,6 +1,5 @@
 package software.bernie.geckolib3.core.util;
 
-public enum Axis
-{
+public enum Axis {
 	X, Y, Z
 }

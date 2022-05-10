@@ -7,9 +7,7 @@ package software.bernie.geckolib3.core.keyframe;
 
 import com.eliotlash.mclib.math.IValue;
 
-
-public class AnimationPoint
-{
+public class AnimationPoint {
 	/**
 	 * The current tick in the animation to lerp from
 	 */
@@ -33,8 +31,8 @@ public class AnimationPoint
 
 	public final KeyFrame<IValue> keyframe;
 
-	public AnimationPoint( KeyFrame<IValue> keyframe, Double currentTick, Double animationEndTick, Double animationStartValue, Double animationEndValue)
-	{
+	public AnimationPoint(KeyFrame<IValue> keyframe, Double currentTick, Double animationEndTick,
+			Double animationStartValue, Double animationEndValue) {
 		this.keyframe = keyframe;
 		this.currentTick = currentTick;
 		this.animationEndTick = animationEndTick;
@@ -42,8 +40,8 @@ public class AnimationPoint
 		this.animationEndValue = animationEndValue;
 	}
 
-	public AnimationPoint(KeyFrame<IValue> keyframe, double tick, double animationEndTick, float animationStartValue, double animationEndValue)
-	{
+	public AnimationPoint(KeyFrame<IValue> keyframe, double tick, double animationEndTick, float animationStartValue,
+			double animationEndValue) {
 		this.keyframe = keyframe;
 		this.currentTick = tick;
 		this.animationEndTick = animationEndTick;
@@ -52,8 +50,8 @@ public class AnimationPoint
 	}
 
 	@Override
-	public String toString()
-	{
-		return "Tick: " + currentTick + " | End Tick: " + animationEndTick + " | Start Value: " + animationStartValue + " | End Value: " + animationEndValue;
+	public String toString() {
+		return "Tick: " + currentTick + " | End Tick: " + animationEndTick + " | Start Value: " + animationStartValue
+				+ " | End Value: " + animationEndValue;
 	}
 }

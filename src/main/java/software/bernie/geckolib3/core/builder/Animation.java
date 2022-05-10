@@ -5,18 +5,17 @@
 
 package software.bernie.geckolib3.core.builder;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import software.bernie.geckolib3.core.keyframe.BoneAnimation;
 import software.bernie.geckolib3.core.keyframe.EventKeyFrame;
 import software.bernie.geckolib3.core.keyframe.ParticleEventKeyFrame;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * A specific animation instance
  */
-public class Animation
-{
+public class Animation {
 	public String animationName;
 	public Double animationLength;
 	public boolean loop = true;

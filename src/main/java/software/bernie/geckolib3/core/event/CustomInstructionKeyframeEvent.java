@@ -7,6 +7,7 @@ package software.bernie.geckolib3.core.event;
 
 import software.bernie.geckolib3.core.controller.AnimationController;
 
+@SuppressWarnings({ "rawtypes" })
 public class CustomInstructionKeyframeEvent<T> extends KeyframeEvent<T>
 {
 	public final String instructions;
