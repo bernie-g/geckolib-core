@@ -26,8 +26,6 @@ public interface IBone extends ImmutableBone {
 
 	void setPivotZ(float value);
 
-	void setHidden(boolean hidden);
-
 	/**
 	 * Get the reference bone that this animatable bone is based on.
 	 *

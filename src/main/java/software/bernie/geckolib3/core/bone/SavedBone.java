@@ -3,7 +3,9 @@ package software.bernie.geckolib3.core.bone;
 public class SavedBone implements ImmutableBone {
 
 	private final String name;
-	private final boolean isHidden;
+	private boolean isHidden;
+	public boolean areCubesHidden = false;
+	public boolean hideChildBonesToo;
 	private final float rotationX;
 	private final float rotationY;
 	private final float rotationZ;
@@ -103,5 +105,31 @@ public class SavedBone implements ImmutableBone {
 	@Override
 	public String getName() {
 		return this.name;
+	}
+
+	@Override
+	public boolean cubesAreHidden() {
+		return areCubesHidden;
+	}
+
+	@Override
+	public boolean childBonesAreHiddenToo() {
+		return hideChildBonesToo;
+	}
+
+	@Override
+	public void setCubesHidden(boolean hidden) {
+		this.areCubesHidden = hidden;
+	}
+
+	@Override
+	public void setHidden(boolean selfHidden, boolean skipChildRendering) {
+		this.isHidden = selfHidden;
+		this.hideChildBonesToo = skipChildRendering;
+	}
+
+	@Override
+	public void setHidden(boolean hidden) {
+		this.setHidden(hidden, hidden);
 	}
 }

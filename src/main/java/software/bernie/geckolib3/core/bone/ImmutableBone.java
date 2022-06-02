@@ -29,6 +29,12 @@ public interface ImmutableBone {
 	float getPivotZ();
 
 	boolean isHidden();
+	boolean cubesAreHidden();
+	boolean childBonesAreHiddenToo();
+	void setCubesHidden(boolean hidden);
+	void setHidden(boolean selfHidden, boolean skipChildRendering);
+
+	void setHidden(boolean hidden);
 
 	String getName();
 
