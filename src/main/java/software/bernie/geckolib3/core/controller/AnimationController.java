@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.Set;
@@ -96,6 +97,11 @@ public class AnimationController<T extends IAnimatable> {
 
 	public static void addModelFetcher(ModelFetcher<?> fetcher) {
 		modelFetchers.add(fetcher);
+	}
+	
+	public static void removeModelFetcher(ModelFetcher<?> fetcher) {
+		Objects.requireNonNull(fetcher);
+		modelFetchers.remove(fetcher);
 	}
 
 	/**
