@@ -586,11 +586,11 @@ public class AnimationController<T extends IAnimatable> {
 
 			if (!rotationKeyFrames.xKeyFrames.isEmpty()) {
 				boneAnimationQueue.rotationXQueue
-						.add(getAnimationPointAtTick(rotationKeyFrames.xKeyFrames, tick, false, Axis.X));
+						.add(getAnimationPointAtTick(rotationKeyFrames.xKeyFrames, tick, true, Axis.X));
 				boneAnimationQueue.rotationYQueue
-						.add(getAnimationPointAtTick(rotationKeyFrames.yKeyFrames, tick, false, Axis.Y));
+						.add(getAnimationPointAtTick(rotationKeyFrames.yKeyFrames, tick, true, Axis.Y));
 				boneAnimationQueue.rotationZQueue
-						.add(getAnimationPointAtTick(rotationKeyFrames.zKeyFrames, tick, false, Axis.Z));
+						.add(getAnimationPointAtTick(rotationKeyFrames.zKeyFrames, tick, true, Axis.Z));
 			}
 
 			if (!positionKeyFrames.xKeyFrames.isEmpty()) {
