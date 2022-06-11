@@ -685,20 +685,20 @@ public class AnimationController<T extends IAnimatable> {
 		double startValue = currentFrame.getStartValue().get();
 		double endValue = currentFrame.getEndValue().get();
 
-//		if (isRotation) {
-//			if (!(currentFrame.getStartValue() instanceof ConstantValue)) {
-//				startValue = Math.toRadians(startValue);
-//				if (axis == Axis.X || axis == Axis.Y) {
-//					startValue *= -1;
-//				}
-//			}
-//			if (!(currentFrame.getEndValue() instanceof ConstantValue)) {
-//				endValue = Math.toRadians(endValue);
-//				if (axis == Axis.X || axis == Axis.Y) {
-//					endValue *= -1;
-//				}
-//			}
-//		}
+		if (isRotation) {
+			if (!(currentFrame.getStartValue() instanceof ConstantValue)) {
+				startValue = Math.toRadians(startValue);
+				if (axis == Axis.X || axis == Axis.Y) {
+					startValue *= -1;
+				}
+			}
+			if (!(currentFrame.getEndValue() instanceof ConstantValue)) {
+				endValue = Math.toRadians(endValue);
+				if (axis == Axis.X || axis == Axis.Y) {
+					//endValue *= -1;
+				}
+			}
+		}
 
 		return new AnimationPoint(currentFrame, location.currentTick, currentFrame.getLength(), startValue, endValue);
 	}
