@@ -586,11 +586,11 @@ public class AnimationController<T extends IAnimatable> {
 
 			if (!rotationKeyFrames.xKeyFrames.isEmpty()) {
 				boneAnimationQueue.rotationXQueue
-						.add(getAnimationPointAtTick(rotationKeyFrames.xKeyFrames, tick, true, Axis.X));
+						.add(getAnimationPointAtTick(rotationKeyFrames.xKeyFrames, tick, false, Axis.X));
 				boneAnimationQueue.rotationYQueue
-						.add(getAnimationPointAtTick(rotationKeyFrames.yKeyFrames, tick, true, Axis.Y));
+						.add(getAnimationPointAtTick(rotationKeyFrames.yKeyFrames, tick, false, Axis.Y));
 				boneAnimationQueue.rotationZQueue
-						.add(getAnimationPointAtTick(rotationKeyFrames.zKeyFrames, tick, true, Axis.Z));
+						.add(getAnimationPointAtTick(rotationKeyFrames.zKeyFrames, tick, false, Axis.Z));
 			}
 
 			if (!positionKeyFrames.xKeyFrames.isEmpty()) {
@@ -695,7 +695,7 @@ public class AnimationController<T extends IAnimatable> {
 			if (!(currentFrame.getEndValue() instanceof ConstantValue)) {
 				endValue = Math.toRadians(endValue);
 				if (axis == Axis.X || axis == Axis.Y) {
-					//endValue *= -1;
+					endValue *= -1;
 				}
 			}
 		}
