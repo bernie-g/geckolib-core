@@ -373,6 +373,7 @@ public class AnimationController<T extends IAnimatable> {
 	public void process(double tick, AnimationEvent<T> event, List<IBone> modelRendererList,
 			HashMap<String, Pair<IBone, BoneSnapshot>> boneSnapshotCollection, MolangParser parser,
 			boolean crashWhenCantFindBone) {
+		parser.setValue("query.life_time", tick / 20);
 		if (currentAnimation != null) {
 			IAnimatableModel<T> model = getModel(this.animatable);
 			if (model != null) {
@@ -470,9 +471,9 @@ public class AnimationController<T extends IAnimatable> {
 					}
 
 					if (!positionKeyFrames.xKeyFrames.isEmpty()) {
-						AnimationPoint xPoint = getAnimationPointAtTick(positionKeyFrames.xKeyFrames, 0, true, Axis.X);
-						AnimationPoint yPoint = getAnimationPointAtTick(positionKeyFrames.yKeyFrames, 0, true, Axis.Y);
-						AnimationPoint zPoint = getAnimationPointAtTick(positionKeyFrames.zKeyFrames, 0, true, Axis.Z);
+						AnimationPoint xPoint = getAnimationPointAtTick(positionKeyFrames.xKeyFrames, 0, false, Axis.X);
+						AnimationPoint yPoint = getAnimationPointAtTick(positionKeyFrames.yKeyFrames, 0, false, Axis.Y);
+						AnimationPoint zPoint = getAnimationPointAtTick(positionKeyFrames.zKeyFrames, 0, false, Axis.Z);
 						boneAnimationQueue.positionXQueue.add(new AnimationPoint(null, tick, transitionLengthTicks,
 								boneSnapshot.positionOffsetX, xPoint.animationStartValue));
 						boneAnimationQueue.positionYQueue.add(new AnimationPoint(null, tick, transitionLengthTicks,
@@ -482,9 +483,9 @@ public class AnimationController<T extends IAnimatable> {
 					}
 
 					if (!scaleKeyFrames.xKeyFrames.isEmpty()) {
-						AnimationPoint xPoint = getAnimationPointAtTick(scaleKeyFrames.xKeyFrames, 0, true, Axis.X);
-						AnimationPoint yPoint = getAnimationPointAtTick(scaleKeyFrames.yKeyFrames, 0, true, Axis.Y);
-						AnimationPoint zPoint = getAnimationPointAtTick(scaleKeyFrames.zKeyFrames, 0, true, Axis.Z);
+						AnimationPoint xPoint = getAnimationPointAtTick(scaleKeyFrames.xKeyFrames, 0, false, Axis.X);
+						AnimationPoint yPoint = getAnimationPointAtTick(scaleKeyFrames.yKeyFrames, 0, false, Axis.Y);
+						AnimationPoint zPoint = getAnimationPointAtTick(scaleKeyFrames.zKeyFrames, 0, false, Axis.Z);
 						boneAnimationQueue.scaleXQueue.add(new AnimationPoint(null, tick, transitionLengthTicks,
 								boneSnapshot.scaleValueX, xPoint.animationStartValue));
 						boneAnimationQueue.scaleYQueue.add(new AnimationPoint(null, tick, transitionLengthTicks,
@@ -502,7 +503,6 @@ public class AnimationController<T extends IAnimatable> {
 
 	private void setAnimTime(MolangParser parser, double tick) {
 		parser.setValue("query.anim_time", tick / 20);
-		parser.setValue("query.life_time", tick / 20);
 	}
 
 	@SuppressWarnings("unchecked")
