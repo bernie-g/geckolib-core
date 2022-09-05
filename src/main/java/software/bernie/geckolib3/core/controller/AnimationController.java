@@ -505,7 +505,6 @@ public class AnimationController<T extends IAnimatable> {
 		parser.setValue("query.anim_time", tick / 20);
 	}
 
-	@SuppressWarnings("unchecked")
 	private IAnimatableModel<T> getModel(T animatable) {
 		for (ModelFetcher<?> modelFetcher : modelFetchers) {
 			IAnimatableModel<T> model = (IAnimatableModel<T>) modelFetcher.apply(animatable);
