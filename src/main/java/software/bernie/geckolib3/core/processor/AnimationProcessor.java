@@ -22,7 +22,6 @@ import software.bernie.geckolib3.core.snapshot.BoneSnapshot;
 import software.bernie.geckolib3.core.snapshot.DirtyTracker;
 import software.bernie.geckolib3.core.util.MathUtil;
 
-@SuppressWarnings({ "rawtypes", "unchecked" })
 public class AnimationProcessor<T extends IAnimatable> {
 	public boolean reloadAnimations = false;
 	private List<IBone> modelRendererList = new ArrayList();

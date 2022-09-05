@@ -13,7 +13,6 @@ import software.bernie.geckolib3.core.controller.AnimationController;
 import software.bernie.geckolib3.core.processor.IBone;
 import software.bernie.geckolib3.core.snapshot.BoneSnapshot;
 
-@SuppressWarnings({ "rawtypes" })
 public class AnimationData {
 	private HashMap<String, Pair<IBone, BoneSnapshot>> boneSnapshotCollection;
 	private HashMap<String, AnimationController> animationControllers = new HashMap<>();

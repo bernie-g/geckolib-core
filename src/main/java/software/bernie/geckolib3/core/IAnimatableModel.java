@@ -5,7 +5,6 @@ import software.bernie.geckolib3.core.event.predicate.AnimationEvent;
 import software.bernie.geckolib3.core.processor.AnimationProcessor;
 import software.bernie.geckolib3.core.processor.IBone;
 
-@SuppressWarnings("rawtypes")
 public interface IAnimatableModel<E> {
 	default double getCurrentTick() {
 		return (System.nanoTime() / 1000000L / 50.0);

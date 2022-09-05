@@ -6,7 +6,6 @@ import java.util.stream.Collectors;
 import software.bernie.geckolib3.core.IAnimatable;
 import software.bernie.geckolib3.core.controller.AnimationController;
 
-@SuppressWarnings({ "rawtypes" })
 public class AnimationEvent<T extends IAnimatable> {
 	private final T animatable;
 	public double animationTick;

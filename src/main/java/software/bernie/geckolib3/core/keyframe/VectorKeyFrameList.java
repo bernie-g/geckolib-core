@@ -14,7 +14,6 @@ import java.util.List;
  *
  * @param <T> the type parameter
  */
-@SuppressWarnings({ "rawtypes" })
 public class VectorKeyFrameList<T extends KeyFrame> {
 	/**
 	 * The X key frames.

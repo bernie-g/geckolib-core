@@ -508,7 +508,6 @@ public class AnimationController<T extends IAnimatable> {
 	@SuppressWarnings("unchecked")
 	private IAnimatableModel<T> getModel(T animatable) {
 		for (ModelFetcher<?> modelFetcher : modelFetchers) {
-			// TODO: what the hell? - leocth
 			IAnimatableModel<T> model = (IAnimatableModel<T>) modelFetcher.apply(animatable);
 			if (model != null) {
 				return model;

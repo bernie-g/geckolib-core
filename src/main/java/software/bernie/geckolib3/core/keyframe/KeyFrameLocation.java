@@ -10,7 +10,6 @@ package software.bernie.geckolib3.core.keyframe;
  * should be executed.
  *
  */
-@SuppressWarnings({ "rawtypes" })
 public class KeyFrameLocation<T extends KeyFrame> {
 	/**
 	 * The curent frame.
