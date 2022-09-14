@@ -60,7 +60,7 @@ public class AnimationBuilder {
 	public AnimationBuilder addRepeatingAnimation(String animationName, int timesToRepeat) {
 		assert timesToRepeat > 0;
 		for (int i = 0; i < timesToRepeat; i++) {
-			addAnimation(animationName, false);
+			addAnimation(animationName, EDefaultLoopTypes.PLAY_ONCE);
 		}
 		return this;
 	}
