@@ -32,6 +32,10 @@ public class AnimationBuilder {
 	}
 	
 	@Deprecated
+	/*
+	 * Deprecated, use the overload addAnimation(String anim, ILoopType loopType).
+	 * You could also use the specialized methods playOnce, addRepeatingAnimation and loop.
+	 */
 	public AnimationBuilder addAnimation(String animationName, Boolean shouldLoop) {
 		animationList.add(new RawAnimation(animationName, shouldLoop));
 		return this;
