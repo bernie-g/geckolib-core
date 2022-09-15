@@ -31,6 +31,9 @@ public class RawAnimation {
 	}
 	
 	@Deprecated
+	/*
+	 * Deprecated, use overload RawAnimation(String anim, ILoopType loop) instead
+	 */
 	public RawAnimation(String animationName, boolean loop) {
 		this(animationName, loop ? EDefaultLoopTypes.LOOP : EDefaultLoopTypes.PLAY_ONCE);
 	}
