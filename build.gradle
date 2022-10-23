@@ -20,7 +20,7 @@ repositories {
 }
 
 dependencies {
-    implementation 'com.eliotlash.molang:molang:21'
+    implementation 'com.eliotlash.molang:molang:19'
     implementation 'com.eliotlash.mclib:mclib:19'
     implementation 'it.unimi.dsi:fastutil:8.4.0'
     implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.11'
