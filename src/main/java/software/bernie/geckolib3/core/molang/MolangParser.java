@@ -22,7 +22,7 @@ import software.bernie.geckolib3.core.molang.functions.SinDegrees;
  *
  * This bad boy parses Molang expressions
  *
- * @link https://bedrock.dev/docs/1.19.0.0/1.19.30.23/Molang#Math%20Functions
+ * https://bedrock.dev/docs/1.19.0.0/1.19.30.23/Molang#Math%20Functions
  */
 public class MolangParser extends MathBuilder {
 	public static final MolangExpression ZERO = new MolangValue(null, new Constant(0));

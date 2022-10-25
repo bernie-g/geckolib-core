@@ -11,7 +11,7 @@ apply plugin: 'maven-publish'
 
 group project.group
 def snapshotVersion = System.getenv("GITHUB_RUN_NUMBER")
-version = snapshotVersion == null ? project.version : "SNAPSHOT-" + snapshotVersion
+version = project.version
 archivesBaseName = project.archivesBaseName
 
 repositories {
