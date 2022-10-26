@@ -17,11 +17,30 @@ public class AnimationFactory {
 
 	/**
 	 * Deprecated, use {@code GeckolibUtil#createFactory(IAnimatable)}
+	 * 
 	 * @param animatable The animatable object the factory is for
 	 */
 	@Deprecated
 	public AnimationFactory(IAnimatable animatable) {
 		this.animatable = animatable;
+	}
+
+	/**
+	 * Set for removal when 1.16 support is dropped, if using 1.18 or higher, switch
+	 * to {@link AnimationFactory#getOrCreateAnimationData(int)}
+	 * 
+	 * @param uniqueID A unique integer ID. For every ID the same animation manager
+	 *                 will be returned.
+	 * @return the animatable manager
+	 */
+	@Deprecated
+	public AnimationData getOrCreateAnimationData(Integer uniqueID) {
+		if (!animationDataMap.containsKey(uniqueID)) {
+			AnimationData data = new AnimationData();
+			animatable.registerControllers(data);
+			animationDataMap.put(uniqueID, data);
+		}
+		return animationDataMap.get(uniqueID);
 	}
 
 	/**
