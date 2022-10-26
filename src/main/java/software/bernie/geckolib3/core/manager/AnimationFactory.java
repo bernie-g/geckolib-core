@@ -26,19 +26,6 @@ public class AnimationFactory {
 	}
 
 	/**
-	 * Set for removal when 1.16 support is dropped, if using 1.18 or higher, switch
-	 * to {@link AnimationFactory#getOrCreateAnimationData(int)}
-	 * 
-	 * @param uniqueID A unique integer ID. For every ID the same animation manager
-	 *                 will be returned.
-	 * @return the animatable manager
-	 */
-	@Deprecated
-	public AnimationData getOrCreateAnimationData(Integer uniqueID) {
-		return this.getOrCreateAnimationData(uniqueID.intValue());
-	}
-
-	/**
 	 * This creates or gets the cached animation manager for any unique ID. For
 	 * itemstacks, this is typically a hashcode of their nbt. For entities it should
 	 * be their unique uuid. For tile entities you can use nbt or just one constant
