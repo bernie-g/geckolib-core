@@ -35,12 +35,7 @@ public class AnimationFactory {
 	 */
 	@Deprecated
 	public AnimationData getOrCreateAnimationData(Integer uniqueID) {
-		if (!animationDataMap.containsKey(uniqueID)) {
-			AnimationData data = new AnimationData();
-			animatable.registerControllers(data);
-			animationDataMap.put(uniqueID, data);
-		}
-		return animationDataMap.get(uniqueID);
+		return this.getOrCreateAnimationData(uniqueID.intValue());
 	}
 
 	/**
