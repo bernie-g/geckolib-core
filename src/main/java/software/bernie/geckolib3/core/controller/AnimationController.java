@@ -379,6 +379,7 @@ public class AnimationController<T extends IAnimatable> {
 		if (animationState == AnimationState.Transitioning && adjustedTick >= this.transitionLengthTicks) {
 			this.shouldResetTick = true;
 			this.animationState = AnimationState.Running;
+			adjustedTick = adjustTick(tick);
 		}
 
 		assert adjustedTick >= 0 : "GeckoLib: Tick was less than zero";
