@@ -33,7 +33,7 @@ public class RawAnimation {
 	/**
 	 * Use {@link ILoopType} constructor
 	 */
-	@Deprecated(forRemoval = true)
+	@Deprecated
 	public RawAnimation(String animationName, boolean loop) {
 		this(animationName, loop ? EDefaultLoopTypes.LOOP : EDefaultLoopTypes.PLAY_ONCE);
 	}

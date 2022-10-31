@@ -20,7 +20,7 @@ public class AnimationFactory {
 	 * 
 	 * @param animatable The animatable object the factory is for
 	 */
-	@Deprecated(forRemoval = true)
+	@Deprecated
 	public AnimationFactory(IAnimatable animatable) {
 		this.animatable = animatable;
 	}
@@ -49,7 +49,7 @@ public class AnimationFactory {
 	/**
 	 * Use {@link AnimationFactory#getOrCreateAnimationData(int)}
 	 */
-	@Deprecated(forRemoval = true)
+	@Deprecated
 	public AnimationData getOrCreateAnimationData(Integer uniqueID) {
 		return getOrCreateAnimationData((int)uniqueID);
 	}

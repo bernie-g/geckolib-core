@@ -34,7 +34,7 @@ public class AnimationBuilder {
 	/**
 	 * Use {@link AnimationBuilder#addAnimation(String, ILoopType)}
 	 */
-	@Deprecated(forRemoval = true)
+	@Deprecated
 	public AnimationBuilder addAnimation(String animationName, Boolean shouldLoop) {
 		animationList.add(new RawAnimation(animationName, shouldLoop));
 		return this;

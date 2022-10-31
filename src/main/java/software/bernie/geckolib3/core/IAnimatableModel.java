@@ -42,7 +42,7 @@ public interface IAnimatableModel<E> {
 	 * Use {@link IAnimatableModel#setCustomAnimations(Object, int)}<br>
 	 * Remove in 1.20+
 	 */
-	@Deprecated(forRemoval = true)
+	@Deprecated
 	default void setLivingAnimations(E animatable, Integer instanceId) {
 		setCustomAnimations(animatable, instanceId);
 	}
@@ -51,7 +51,7 @@ public interface IAnimatableModel<E> {
 	 * Use {@link IAnimatableModel#setCustomAnimations(Object, int, AnimationEvent)}<br>
 	 * Remove in 1.20+
 	 */
-	@Deprecated(forRemoval = true)
+	@Deprecated
 	default void setLivingAnimations(E animatable, Integer instanceId, AnimationEvent animationEvent) {
 		setCustomAnimations(animatable, instanceId, animationEvent);
 	}
