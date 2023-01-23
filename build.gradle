@@ -25,6 +25,12 @@ tasks.withType(JavaCompile).configureEach {
 }
 
 sourcesJar {
+    //Include the license into the sourcesJar
+    from(rootProject.file("LICENSE"))
+}
+
+javadocJar {
+    //Include the license into the sourcesJar
     from(rootProject.file("LICENSE"))
 }
 
@@ -55,10 +61,7 @@ jar {
 publishing {
     publications {
         mavenJava(MavenPublication) {
-            artifact jar
-            artifact sourcesJar
-            artifact javadocJar
-            artifactId = project.archivesBaseName
+            from components.java
         }
     }
     repositories {
@@ -78,6 +81,6 @@ publishing {
         //Commented out, but uncomment and run geckolib-core:publishMavenJavaPublicationToMavenLocalRepository
         //to see how the published artifact looks, artifact id, group, version metadata...
         //Result is in your maven local, %USER_DIR%/.m2 usually.
-        //mavenLocal()
+        mavenLocal()
     }
 }
