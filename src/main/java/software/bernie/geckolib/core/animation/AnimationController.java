@@ -54,6 +54,7 @@ public class AnimationController<T extends GeoAnimatable> {
 
 	protected final Map<String, RawAnimation> triggerableAnimations = new Object2ObjectOpenHashMap<>(0);
 	protected RawAnimation triggeredAnimation = null;
+	protected boolean handlingTriggeredAnimations = false;
 
 	protected double transitionLength;
 	protected RawAnimation currentRawAnimation;
@@ -201,6 +202,19 @@ public class AnimationController<T extends GeoAnimatable> {
 	}
 
 	/**
+	 * Tells the AnimationController that you want to receive the {@link AnimationController.AnimationStateHandler}
+	 * while a triggered animation is playing.<br>
+	 * <br>
+	 * This has no effect if no triggered animation has been registered, or one isn't currently playing.<br>
+	 * If a triggered animation is playing, it can be checked in your AnimationStateHandler via {@link AnimationController#isPlayingTriggeredAnimation()}
+	 */
+	public AnimationController<T> receiveTriggeredAnimations() {
+		this.handlingTriggeredAnimations = true;
+
+		return this;
+	}
+
+	/**
 	 * Gets the controller's name.
 	 * @return The name
 	 */
@@ -278,6 +292,23 @@ public class AnimationController<T extends GeoAnimatable> {
 	}
 
 	/**
+	 * Returns the currently cached {@link RawAnimation}.<br>
+	 * This animation may or may not still be playing, but it is the last one to be set in {@link AnimationController#setAnimation}
+	 */
+	public RawAnimation getCurrentRawAnimation() {
+		return this.currentRawAnimation;
+	}
+
+	/**
+	 * Returns whether the controller is currently playing a triggered animation registered in
+	 * {@link AnimationController#triggerableAnim}<br>
+	 * Used for custom handling if {@link AnimationController#receiveTriggeredAnimations()} was marked
+	 */
+	public boolean isPlayingTriggeredAnimation() {
+		return this.triggeredAnimation != null && !hasAnimationFinished();
+	}
+
+	/**
 	 * Sets the currently loaded animation to the one provided.<br>
 	 * This method may be safely called every render frame, as passing the same builder that is already loaded will do nothing.<br>
 	 * Pass null to this method to tell the controller to stop.<br>
@@ -333,23 +364,23 @@ public class AnimationController<T extends GeoAnimatable> {
 	}
 
 	/**
-	 * Handle a given AnimationEvent, alongside the current triggered animation if applicable
+	 * Handle a given AnimationState, alongside the current triggered animation if applicable
 	 */
-	protected PlayState handleAnimationEvent(AnimationEvent<T> event) {
+	protected PlayState handleAnimationState(AnimationState<T> state) {
 		if (this.triggeredAnimation != null) {
 			if (this.currentRawAnimation != this.triggeredAnimation)
 				this.currentAnimation = null;
 
 			setAnimation(this.triggeredAnimation);
 
-			if (!hasAnimationFinished())
+			if (!hasAnimationFinished() && (!this.handlingTriggeredAnimations || this.stateHandler.handle(state) == PlayState.CONTINUE))
 				return PlayState.CONTINUE;
 
 			this.triggeredAnimation = null;
 			this.needsAnimationReload = true;
 		}
 
-		return this.stateHandler.handle(event);
+		return this.stateHandler.handle(state);
 	}
 
 	/**
@@ -357,13 +388,13 @@ public class AnimationController<T extends GeoAnimatable> {
 	 * queues, and process animation state logic.
 	 *
 	 * @param model					The model currently being processed
-	 * @param event                 The animation test event
+	 * @param state                 The animation test state
 	 * @param bones                 The registered {@link CoreGeoBone bones} for this model
 	 * @param snapshots             The {@link BoneSnapshot} map
 	 * @param seekTime              The current tick + partial tick
 	 * @param crashWhenCantFindBone Whether to hard-fail when a bone can't be found, or to continue with the remaining bones
 	 */
-	public void process(CoreGeoModel<T> model, AnimationEvent<T> event, Map<String, CoreGeoBone> bones, Map<String, BoneSnapshot> snapshots, final double seekTime, boolean crashWhenCantFindBone) {
+	public void process(CoreGeoModel<T> model, AnimationState<T> state, Map<String, CoreGeoBone> bones, Map<String, BoneSnapshot> snapshots, final double seekTime, boolean crashWhenCantFindBone) {
 		double adjustedTick = adjustTick(seekTime);
 		this.lastModel = model;
 
@@ -373,7 +404,7 @@ public class AnimationController<T extends GeoAnimatable> {
 			adjustedTick = adjustTick(seekTime);
 		}
 
-		PlayState playState = handleAnimationEvent(event);
+		PlayState playState = handleAnimationState(state);
 
 		if (playState == PlayState.STOP || (this.currentAnimation == null && this.animationQueue.isEmpty())) {
 			this.animationState = State.STOPPED;
@@ -495,7 +526,7 @@ public class AnimationController<T extends GeoAnimatable> {
 
 		final double finalAdjustedTick = adjustedTick;
 
-		MolangParser.INSTANCE.setValue(MolangQueries.ANIM_TIME, () -> finalAdjustedTick / 20d);
+		MolangParser.INSTANCE.setMemoizedValue(MolangQueries.ANIM_TIME, () -> finalAdjustedTick / 20d);
 
 		for (BoneAnimation boneAnimation : this.currentAnimation.animation().boneAnimations()) {
 			BoneAnimationQueue boneAnimationQueue = this.boneAnimationQueues.get(boneAnimation.boneName());
@@ -686,12 +717,12 @@ public class AnimationController<T extends GeoAnimatable> {
 	 * This handler defines which animation should be currently playing, and returning a {@link PlayState} to tell the controller what to do next.<br>
 	 * Example Usage:<br>
 	 * <pre>{@code
-	 * AnimationFrameHandler myIdleWalkHandler = event -> {
-	 *	if (event.isMoving()) {
-	 *		event.getController().setAnimation(myWalkAnimation);
+	 * AnimationFrameHandler myIdleWalkHandler = state -> {
+	 *	if (state.isMoving()) {
+	 *		state.getController().setAnimation(myWalkAnimation);
 	 *	}
 	 *	else {
-	 *		event.getController().setAnimation(myIdleAnimation);
+	 *		state.getController().setAnimation(myIdleAnimation);
 	 *	}
 	 *
 	 *	return PlayState.CONTINUE;
@@ -704,7 +735,7 @@ public class AnimationController<T extends GeoAnimatable> {
 		 * Return {@link PlayState#CONTINUE} to tell the controller to continue animating,
 		 * or return {@link PlayState#STOP} to tell it to stop playing all animations and wait for the next {@code PlayState.CONTINUE} return.
 		 */
-		PlayState handle(AnimationEvent<A> event);
+		PlayState handle(AnimationState<A> state);
 	}
 
 	/**
